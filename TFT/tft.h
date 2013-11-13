@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "ili9341.h"
 
-class tfthw : public ili9341
+class tfthw: public ili9341
 {
 public:
 	tfthw(void);
