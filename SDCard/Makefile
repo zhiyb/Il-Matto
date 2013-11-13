@@ -1,7 +1,7 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= Graphics
+PRG	= SDCard
 OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o ascii.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os

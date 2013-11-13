@@ -1,5 +1,5 @@
-#ifndef _ILI9341_H
-#define _ILI9341_H
+#ifndef ILI9341_H
+#define ILI9341_H
 
 // 8-bit parallel interface I
 

@@ -1,5 +1,5 @@
-#ifndef _TFT_H
-#define _TFT_H
+#ifndef TFT_H
+#define TFT_H
 
 #include <stdio.h>
 #include "ili9341.h"
