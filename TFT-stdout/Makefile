@@ -137,7 +137,6 @@ archive: hex ehex
 # by the casual user.
 
 FIG2DEV	= fig2dev
-EXTRA_CLEAN_FILES	+= *.hex *.bin *.srec
 
 dox: eps png pdf
 
