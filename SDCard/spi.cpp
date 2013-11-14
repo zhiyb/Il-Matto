@@ -1,10 +1,14 @@
+#include <avr/io.h>
 #include "spi.h"
 
 void spi::init(void)
 {
-	DDRB = (1 << 4) | (1 << 5) | (1 << 7);
-	// F_SCK = F_CPU / 16 = 750 kHz
-	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);
+	DDRB |= SPI_SS | SPI_MOSI | SPI_SCK;
+	DDRB &= ~SPI_MISO;
+	PORTB &= ~(SPI_SS | SPI_MOSI | SPI_MISO | SPI_SCK);
+	// F_SCK = F_CPU / 64 = 187.5 kHz
+	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1);
+	SPSR &= ~(1 << SPI2X);
 }
 
 void spi::send(uint8_t d)
