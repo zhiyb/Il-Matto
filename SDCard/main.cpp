@@ -3,7 +3,11 @@
 #include <stdio.h>
 #include "tft.h"
 #include "sd.h"
+#include "disk.h"
 #include "fat32.h"
+
+class disk mmc;
+class fat32 fs;
 
 void init(void)
 {
@@ -48,20 +52,25 @@ start:
 	printf("Size: %luMB\n", sd.size() / 1024);
 
 	_delay_ms(3000);
-	tft *= 1;
+	tft *= 2;
 	tft.clean();
-	uint8_t block[512];
-	res = sd.readBlock(0, block);
-	if (res) {
-		printf("Read block failed eith %02X\n", res);
+	mmc.init();
+	if (mmc.status() != mmc.SUCCEED) {
+		printf("Disk read failed with %u\n", mmc.status());
 		goto finished;
 	}
-	for (uint16_t i = 0; i < 512; i++) {
-		printf("%02X", block[i]);
-		if ((i + 1) % 18)
-			putchar(' ');
+	puts("Disk structure read.");
+	if (mmc.part(0).type() != 0x0B && mmc.part(0).type() != 0x0C) {
+		puts("Partition 1 is not FAT32");
+		goto finished;
 	}
-	putchar('\n');
+	puts("Partition 1 is FAT32");
+	printf("Start at sector %lu\n", mmc.part(0).begin());
+	fs.init(mmc.part(0));
+	if (fs.status() != fs.OK) {
+		printf("Read FAT32 failed with %d\n", fs.status());
+		goto finished;
+	}
 finished:
 	printf("Remove SD to run again...");
 	while (sd.detect());

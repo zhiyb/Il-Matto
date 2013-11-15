@@ -72,7 +72,9 @@ uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
 	uint8_t res = recv(1);
 	if (res)
 		return res;
-	recv(1);
+	do
+		spi::send(0xFF);
+	while (spi::recv() != 0xFE);
 	for (uint16_t i = 0; i < 512; i++) {
 		spi::send(0xFF);
 		buff[i] = spi::recv();
@@ -104,6 +106,7 @@ sdhw::sdhw(void)
 	spi::init();
 	SD_DDR &= ~(SD_CD | SD_WP);
 	SD_PORT |= SD_CD | SD_WP;
+	_ver = 0;
 }
 
 uint8_t sdhw::init(void)

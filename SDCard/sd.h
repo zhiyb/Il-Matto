@@ -62,7 +62,7 @@ public:
 	uint8_t CRC:7;
 };
 
-class sdhw: public spi
+class sdhw
 {
 public:
 	sdhw(void);
