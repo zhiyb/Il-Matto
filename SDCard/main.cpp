@@ -8,6 +8,7 @@ void init(void)
 {
 	tft.init();
 	tft /= tft.FlipLandscape;
+	tft *= 2;
 	tft.clean();
 	stdout = tftout();
 	tft++;
@@ -32,23 +33,21 @@ start:
 		printf("Initialise failed with %d!\n", res);
 		goto finished;
 	}
-	puts("Initialise succeed!");
 	printf("SD Card version: %d\n", sd.version() & 0x0F);
 	printf("Address: %s\n", (sd.version() & 0xF0) ? \
 			"Block address" : "Byte address");
-	{
-		class cidReg cid = sd.cid();
-		printf("Manufacture ID: %u\n", cid.mid);
-		printf("OEM/Application ID: %u\n", cid.oid);
-		printf("Product name: %s\n", cid.pnm);
-		printf("Product revision: %u\n", cid.prv);
-		printf("Product serial number: %lu\n", cid.psn);
-		printf("Maufacturing date: 20%02d-0%01d\n", \
-				cid.mdt >> 4, cid.mdt & 0x0F);
-		printf("CRC7 checksum: 0x%02X\n", cid.crc);
-	}
+
+	printf("Manufacture ID: %u\n", sd.cid().MID);
+	printf("OEM/Application ID: %u\n", sd.cid().OID);
+	printf("Product name: %.5s\n", sd.cid().PNM);
+	printf("Serial number: %lu\n", sd.cid().PSN);
+	printf("Maufacture date: 20%02u-0%01u\n", \
+			sd.cid().MDT >> 4, sd.cid().MDT & 0x0F);
+
+	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
+	printf("Size: %luMB\n", sd.size() / 1024);
 finished:
-	puts("Remove SD to run again...");
+	printf("Remove SD to run again...");
 	while (sd.detect());
 	goto start;
 
