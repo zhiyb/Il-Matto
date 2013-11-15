@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include "tft.h"
 #include "sd.h"
+#include "fat32.h"
 
 void init(void)
 {
 	tft.init();
 	tft /= tft.FlipLandscape;
-	tft *= 2;
-	tft.clean();
 	stdout = tftout();
 	tft++;
 }
@@ -19,6 +18,7 @@ int main(void)
 	init();
 
 start:
+	tft *= 2;
 	tft.clean();
 	puts("*** SD library test ***");
 	puts("Waiting for SD insert...");
@@ -46,6 +46,22 @@ start:
 
 	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
 	printf("Size: %luMB\n", sd.size() / 1024);
+
+	_delay_ms(3000);
+	tft *= 1;
+	tft.clean();
+	uint8_t block[512];
+	res = sd.readBlock(0, block);
+	if (res) {
+		printf("Read block failed eith %02X\n", res);
+		goto finished;
+	}
+	for (uint16_t i = 0; i < 512; i++) {
+		printf("%02X", block[i]);
+		if ((i + 1) % 18)
+			putchar(' ');
+	}
+	putchar('\n');
 finished:
 	printf("Remove SD to run again...");
 	while (sd.detect());

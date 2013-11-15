@@ -66,6 +66,21 @@ cidReg::cidReg(uint8_t dat[16])
 	return;
 }
 
+uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
+{
+	cmd(17, addr, 0xFF);			// Read block
+	uint8_t res = recv(1);
+	if (res)
+		return res;
+	recv(1);
+	for (uint16_t i = 0; i < 512; i++) {
+		spi::send(0xFF);
+		buff[i] = spi::recv();
+	}
+	wait();
+	return 0;
+}
+
 void sdhw::acmd(uint8_t index, uint32_t arg, uint8_t crc)
 {
 	cmd(55, 0, 0xFF);			// Lead cmd(55)
@@ -173,12 +188,13 @@ void sdhw::wait(void)
 
 uint8_t sdhw::recv(uint8_t n)
 {
+	n = n > 5 ? 5 : n;
 	for (uint8_t r = 0; r < n; r++) {
-		uint8_t i = 50;
+		uint8_t i = 100;
 		do {
 			spi::send(0xFF);
 			i--;
-		} while ((_res[r] = spi::recv()) == 0xFF && i != 0);
+		} while (((_res[r] = spi::recv()) == 0xFF) && (i != 0));
 	}
 	return _res[0];
 }
@@ -186,7 +202,7 @@ uint8_t sdhw::recv(uint8_t n)
 uint8_t sdhw::recv(void)
 {
 	for (uint8_t r = 0; r < 5; r++) {
-		uint8_t i = 50;
+		uint8_t i = 100;
 		do {
 			spi::send(0xFF);
 			i--;

@@ -2,6 +2,8 @@
 #define SPI_H
 
 #define SPI_PORT PORTB
+#define SPI_PIN PINB
+#define SPI_DDR DDRB
 #define SPI_SS (1 << 4)
 #define SPI_MOSI (1 << 5)
 #define SPI_MISO (1 << 6)

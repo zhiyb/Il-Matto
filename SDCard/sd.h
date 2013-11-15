@@ -73,6 +73,7 @@ public:
 	virtual struct cidReg& cid(void) {return _cid;}
 	virtual struct csdReg& csd(void) {return _csd;}
 	virtual uint32_t size(void) const;
+	virtual uint8_t readBlock(uint32_t addr, uint8_t buff[512]);
 
 protected:
 	virtual void cmd(uint8_t index, uint32_t arg, uint8_t crc);
@@ -81,6 +82,7 @@ protected:
 	virtual uint8_t recv(uint8_t n);
 	virtual void wait(void);
 
+public:
 	class cidReg _cid;
 	class csdReg _csd;
 	uint8_t _res[5], _ver;
