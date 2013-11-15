@@ -6,14 +6,14 @@
 class partition
 {
 public:
-	partition(void) {}
-	partition(uint8_t dat[16]);
-	uint8_t type(void) const {return _type;}
-	uint32_t begin(void) const {return _begin;}
+	inline partition(void) {}
+	inline partition(uint8_t dat[16]);
+	inline uint8_t type(void) const {return _type;}
+	inline uint32_t start(void) const {return _start;}
 
 private:
 	uint8_t _type;
-	uint32_t _begin;
+	uint32_t _start;
 };
 
 class disk
@@ -21,14 +21,42 @@ class disk
 public:
 	enum error {SUCCEED = 0, NOT_INIT = 1, MBR_SIG_FAILED = 2};
 
-	disk(void) {init();}
-	void init(void);
-	uint8_t status(void) const {return _status;}
-	class partition& part(uint8_t i) {return _part[i];}
+	inline disk(void) {init();}
+	inline void init(void);
+	inline uint8_t status(void) const {return _status;}
+	inline class partition& part(uint8_t i) {return _part[i];}
 
 private:
 	uint8_t _status;
 	class partition _part[4];
 };
+
+// Defined as inline to execute faster
+
+inline partition::partition(uint8_t dat[16])
+{
+	_type = dat[4];
+	for (uint8_t i = 0; i < 4; i++) {
+		_start <<= 8;
+		_start |= dat[8 + (3 - i)];
+	}
+}
+
+inline void disk::init(void)
+{
+	if (sd.version() == 0) {
+		_status = NOT_INIT;
+		return;
+	}
+	_status = SUCCEED;
+	uint8_t block[512];
+	sd.readBlock(0, block);
+	if (block[510] != 0x55 || block[511] != 0xAA) {
+		_status = MBR_SIG_FAILED;
+		return;
+	}
+	for (uint8_t i = 0; i < 3; i++)
+		_part[i] = partition(&block[446 + 16 * i]);
+}
 
 #endif

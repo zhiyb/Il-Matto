@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= SDCard
-OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o ascii.o spi.o sd.o disk.o fat32.o
+OBJ	= main.o ili9341.o ascii.o tft.o ascii.o sd.o fat32.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1

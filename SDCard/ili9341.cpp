@@ -10,24 +10,6 @@
 	TFT_WDATA = 0xFF; \
 }
 
-void ili9341::_setOrient(uint8_t o)
-{
-	send(1, 0x36);			// Memory Access Control
-	switch (o) {
-	case Landscape:
-		send(0, 0x28);		// Column Adress Order, BGR
-		break;
-	case Portrait:
-		send(0, 0x48);		// Column Adress Order, BGR
-		break;
-	case FlipLandscape:
-		send(0, 0xE8);		// Column Adress Order, BGR
-		break;
-	case FlipPortrait:
-		send(0, 0x88);		// Column Adress Order, BGR
-	}
-}
-
 void ili9341::init(void)
 {
 	uint8_t c;
@@ -67,34 +49,4 @@ void ili9341::init(void)
 			send(0, 0x00);
 		}
 	send(1, 0x29);		// Display On
-}
-
-void ili9341::send(bool cmd, unsigned char dat)
-{
-	SEND();
-	if (cmd)
-		LOW(TFT_RS);
-	TFT_WDATA = dat;
-	LOW(TFT_WR);
-	HIGH(TFT_WR);
-	HIGH(TFT_RS);
-}
-
-unsigned char ili9341::recv(void)
-{
-	unsigned char dat;
-	RECV();
-	LOW(TFT_RD);
-	_delay_us(1);
-	dat = TFT_RDATA;
-	HIGH(TFT_RD);
-	return dat;
-}
-
-void ili9341::_setBGLight(bool ctrl)
-{
-	if (ctrl)
-		TFT_WCTRL |= TFT_BLC;
-	else
-		TFT_WCTRL &= ~TFT_BLC;
 }

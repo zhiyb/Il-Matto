@@ -48,12 +48,11 @@ start:
 	printf("Maufacture date: 20%02u-0%01u\n", \
 			sd.cid().MDT >> 4, sd.cid().MDT & 0x0F);
 
-	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
-	printf("Size: %luMB\n", sd.size() / 1024);
-
 	_delay_ms(3000);
 	tft *= 2;
 	tft.clean();
+	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
+	printf("SD Size: %luMB\n", sd.size() / 1024);
 	mmc.init();
 	if (mmc.status() != mmc.SUCCEED) {
 		printf("Disk read failed with %u\n", mmc.status());
@@ -65,7 +64,7 @@ start:
 		goto finished;
 	}
 	puts("Partition 1 is FAT32");
-	printf("Start at sector %lu\n", mmc.part(0).begin());
+	printf("Start at sector %lu\n", mmc.part(0).start());
 	fs.init(mmc.part(0));
 	if (fs.status() != fs.OK) {
 		printf("Read FAT32 failed with %d\n", fs.status());
