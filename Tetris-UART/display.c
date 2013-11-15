@@ -85,11 +85,11 @@ void Print_saveload(uint8_t index)
 	TFT_putbigs(XSL_SCORE, YSL_SCORE, 2, "Score ", \
 			Colour_Text_SLScore, Colour_Text_SLScore_BG);
 	if (Tetris_getsavevalid())
-		TFT_putbigint16(XSL_SCORE + WCB * 6, YSL_SCORE, 2,\
+		TFT_putbigint16(XSL_SCORE + WCB * 6, YSL_SCORE, 2, \
 				Tetris_getsavescore(), \
 				Colour_Text_SLScore, Colour_Text_SLScore_BG);
 	else
-		TFT_putbigs(XSL_SCORE + WCB * 6, 2, YSL_SCORE, "<N/A>",
+		TFT_putbigs(XSL_SCORE + WCB * 6, YSL_SCORE, 2, "<N/A>",
 				Colour_Text_SLScore, Colour_Text_SLScore_BG);
 select:
 	// Text: Save

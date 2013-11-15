@@ -57,7 +57,7 @@ uint16_t Tetris_getsavescore(void)
 {
 	uint8_t *p = (uint8_t *)EE_TETRIS_SAVE;
 	p += 2 + (Tetris_H * Tetris_W) * 2 + \
-	     ((uint8_t *)&object.score - (uint8_t *)&object);
+	     (uint8_t *)&object.score - (uint8_t *)&object;
 	return eeprom_read_word((uint16_t *)p);
 }
 
