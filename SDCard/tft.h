@@ -124,6 +124,26 @@ inline class tfthw& tfthw::operator<<(const uint16_t i)
 	return *this;
 }
 
+inline class tfthw& tfthw::operator<<(const char c)
+{
+	if (c == '\n')
+		newline();
+	else {
+		putch(c);
+		next();
+	}
+	return *this;
+}
+
+inline class tfthw& tfthw::operator<<(const char *str)
+{
+	while (*str) {
+		*this << *str;
+		str++;
+	}
+	return *this;
+}
+
 inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
 {
 	area(x, y, 1, 1);
