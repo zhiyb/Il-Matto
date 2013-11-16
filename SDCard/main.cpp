@@ -71,7 +71,7 @@ start:
 	}
 	{	// Read directory
 		tft *= 1;
-		char path[12] = "KO/subdir~1";
+		char path[12] = "";
 		DIR *dir = fs.opendir(path);
 		if (dir == NULL) {
 			printf("Error open dir with %02X\n", fs.errno());
