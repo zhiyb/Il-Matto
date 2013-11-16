@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ili9341.h"
+#include "ascii.h"
 
 class tfthw: public ili9341
 {

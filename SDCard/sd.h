@@ -71,7 +71,7 @@ public:
 	bool detect(void);
 	inline bool writeProtected(void);
 	inline uint8_t version(void) const {return _ver;}
-	inline struct cidReg& cid(void) {return _cid;}
+	//inline struct cidReg& cid(void) {return _cid;}
 	inline struct csdReg& csd(void) {return _csd;}
 	inline uint32_t size(void) const;
 	inline uint8_t readBlock(uint32_t addr, uint8_t buff[512]);
@@ -83,7 +83,7 @@ protected:
 	inline uint8_t recv(uint8_t n);
 	inline void wait(void);
 
-	class cidReg _cid;
+	//class cidReg _cid;
 	class csdReg _csd;
 	uint8_t _res[5], _ver;
 };

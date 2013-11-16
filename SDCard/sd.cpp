@@ -114,13 +114,13 @@ bsize:
 info:						// Get SD Card info
 	uint8_t res;
 	uint8_t dat[16];
-	cmd(10, 0, 0xFF);			// Send card identification
+/*	cmd(10, 0, 0xFF);			// Send card identification
 	if ((res = recv(2)) != 0)
 		return 0;
 	for (res = 0; res < 16; res++)
 		dat[res] = recv(1);
 	_cid = cidReg(dat);
-	cmd(9, 0, 0xFF);			// Send card-specific data
+*/	cmd(9, 0, 0xFF);			// Send card-specific data
 	if ((res = recv(2)) != 0)
 		return 0;
 	for (res = 0; res < 16; res++)

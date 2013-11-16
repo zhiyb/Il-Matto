@@ -9,17 +9,17 @@ public:
 	inline partition(void) {}
 	inline partition(uint8_t dat[16]);
 	inline uint8_t type(void) const {return _type;}
-	inline uint32_t start(void) const {return _start;}
+	inline uint32_t begin(void) const {return _begin;}
 
 private:
 	uint8_t _type;
-	uint32_t _start;
+	uint32_t _begin;
 };
 
 class disk
 {
 public:
-	enum error {SUCCEED = 0, NOT_INIT = 1, MBR_SIG_FAILED = 2};
+	enum error {SUCCEED = 0, NOT_INIT, SIG_ERROR};
 
 	inline disk(void) {init();}
 	inline void init(void);
@@ -37,8 +37,8 @@ inline partition::partition(uint8_t dat[16])
 {
 	_type = dat[4];
 	for (uint8_t i = 0; i < 4; i++) {
-		_start <<= 8;
-		_start |= dat[8 + (3 - i)];
+		_begin <<= 8;
+		_begin |= dat[8 + (3 - i)];
 	}
 }
 
@@ -52,7 +52,7 @@ inline void disk::init(void)
 	uint8_t block[512];
 	sd.readBlock(0, block);
 	if (block[510] != 0x55 || block[511] != 0xAA) {
-		_status = MBR_SIG_FAILED;
+		_status = SIG_ERROR;
 		return;
 	}
 	for (uint8_t i = 0; i < 3; i++)

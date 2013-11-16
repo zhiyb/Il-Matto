@@ -109,3 +109,34 @@ void tfthw::putch(char ch)
 		}
 	}
 }
+
+int tftputch(const char c, FILE *stream)
+{
+	tft << c;
+	return 0;
+}
+
+FILE *tftout(void)
+{
+	static FILE *out = NULL;
+	if (out == NULL)
+		out = fdevopen(tftputch, NULL);
+	return out;
+}
+
+void tfthw::setOrient(uint8_t o)
+{
+	_setOrient(o);
+	switch (o) {
+	case Landscape:
+	case FlipLandscape:
+		w = SIZE_H;
+		h = SIZE_W;
+		break;
+	case Portrait:
+	case FlipPortrait:
+		w = SIZE_W;
+		h = SIZE_H;
+	}
+	orient = o;
+}
