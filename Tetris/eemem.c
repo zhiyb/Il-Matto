@@ -2,7 +2,7 @@
 #include <avr/eeprom.h>
 #include "eemem.h"
 
-#define SPEC 0x55			// First run sign
+#define SPEC 0xAA			// First run sign
 uint8_t first = 5;
 
 uint8_t EEPROM_first(void)
