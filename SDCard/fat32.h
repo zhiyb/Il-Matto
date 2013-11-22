@@ -9,6 +9,7 @@ class fat32
 public:
 	enum Status {OK = 0, NOT_INIT, TYPE_ERROR, SIG_ERROR, FORMAT_ERROR};
 
+	void test(void);
 	inline fat32(void) {_status = NOT_INIT;}
 	inline fat32(const class partition& p) {init(p);}
 	void init(const class partition& p);
@@ -17,6 +18,7 @@ public:
 	DIR *opendir(char *path);
 	uint8_t closedir(DIR *dir);
 	struct dirent *readdir(DIR *dir);
+	FILE *fopen_read(char *path);
 
 private:
 	uint32_t fatLookup(uint32_t cluster);

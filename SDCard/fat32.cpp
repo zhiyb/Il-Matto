@@ -1,20 +1,61 @@
 #include <string.h>
+#include <stdio.h>
 #include "fat32.h"
+#include "conv.h"
 
 #define DELIM "/\\"
 #define CLUS2OFF(c) (_cluster + (c - 2) * _secPerClus)
 
-#include <stdio.h>
+using namespace conv;
+
+#include "tft.h"
+void fat32::test(void)
+{
+	char path[] = "";
+	DIR *d = opendir(path);
+	struct dirent *dir;
+	while (strcmp((dir = readdir(d))->d_name, "TFT     BMP") != 0);
+	uint8_t block[512];
+	sd.readBlock(CLUS2OFF(dir->d_off), block);
+	uint16_t offset = uint32(&block[10]);
+	uint16_t x, y, b = 1;
+	for (y = 240; y > 0; y--)
+		for (x = 0; x < 320; x++) {
+			uint32_t c = 0;
+			if (offset + 3 > 512) {
+				uint8_t ext = offset + 3 - 512;
+				while (ext != 3) {
+					c >>= 8;
+					c |= block[512 - 3 + ext++] * \
+					     0x00010000;
+				}
+				sd.readBlock(CLUS2OFF(dir->d_off) + b++, \
+						block);
+				offset = offset + 3 - 512;
+				for (ext = 0; ext < offset; ext++) {
+					c >>= 8;
+					c |= block[ext] * 0x00010000;
+				}
+			} else {
+				c = uint24(&block[offset]);
+				offset += 3;
+			}
+			tft.point(x, y - 1, c32to16(c));
+		}
+}
+
+FILE *fat32::fopen_read(char *path)
+{
+	return NULL;
+}
+
 uint32_t fat32::fatLookup(uint32_t cluster)
 {
 	uint8_t block[512];
 	uint32_t off = cluster * 4 / 512;
 	sd.readBlock(_fat + off, block);
 	off = cluster * 4 - off * 512;
-	return (uint32_t)block[off] + \
-		(uint32_t)block[off + 1] * 0x0100 + \
-		(uint32_t)block[off + 2] * 0x010000 + \
-		(uint32_t)block[off + 3] * 0x01000000;
+	return uint32(&block[off]);
 }
 
 struct dirent *fat32::readdir(DIR *dir)
@@ -61,8 +102,7 @@ init:
 			    block[index + 0x1A] + \
 			    block[index + 0x1B] * 0x0100;
 	_dirent_[i].d_type = block[index + 0x0B];
-	strncpy(_dirent_[i].d_name, \
-			(char *)&block[index], 11);
+	strncpy(_dirent_[i].d_name, (char *)&block[index], 11);
 	// Count up
 	dir->offset++;
 	if (dir->offset == _secPerClus * 16) {		// Last sector
@@ -155,19 +195,11 @@ void fat32::init(const class partition& p)
 	// Sectors per cluster
 	_secPerClus = block[0x0D];
 	// Root directory cluster
-	_root = 0;
-	for (uint8_t i = 0; i < 4; i++) {
-		_root <<= 8;
-		_root |= block[0x2C + (3 - i)];
-	}
+	_root = uint32(&block[0x2C]);
 	// Basic offset + Reserved sectors
 	_fat = p.begin() + block[0x0E] + block[0x0F] * 0x0100;
 	// Sectors per FAT
-	_fatsize = 0;
-	for (uint8_t i = 0; i < 4; i++) {
-		_fatsize <<= 8;
-		_fatsize |= block[0x24 + (3 - i)];
-	}
+	_fatsize = uint32(&block[0x24]);
 	// FAT offset + FAT size
 	_cluster = _fat + (2 * _fatsize);
 }

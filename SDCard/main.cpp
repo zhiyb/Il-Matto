@@ -49,7 +49,7 @@ start:
 			sd.cid().MDT >> 4, sd.cid().MDT & 0x0F);*/
 	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
 
-	_delay_ms(3000);
+	//_delay_ms(3000);
 	tft *= 2;
 	tft.clean();
 	printf("SD Size: %luMB\n", sd.size() / 1024);
@@ -83,6 +83,9 @@ start:
 			printf(", type: 0x%02X\n", d->d_type);
 		}
 		fs.closedir(dir);
+		fs.test();
+		while (sd.detect());
+		goto start;
 	}
 finished:
 	printf("Remove SD to run again...");
