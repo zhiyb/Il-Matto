@@ -66,6 +66,7 @@ cidReg::cidReg(uint8_t dat[16])
 	return;
 }
 
+#include <stdio.h>
 uint8_t sdhw::init(void)
 {
 	_ver = 0;
@@ -74,7 +75,9 @@ uint8_t sdhw::init(void)
 	for (uint8_t i = 0; i < 10; i++)	// Apply 74(80) clock pulses
 		spi::send(0xFF);
 	SPI_PORT &= ~SPI_SS;
+	puts("STOPED?");
 	cmd(0, 0, 0x4A);			// GO_IDLE_STATE / SW Reset
+	puts("JUMP OVER!");
 	if (recv() != 0x01)
 		return 0x01;			// Failed
 	cmd(8, 0x000001AA, 0x43);		// CHK voltage range & version
