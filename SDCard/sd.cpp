@@ -112,6 +112,9 @@ notver1:
 bsize:
 	cmd(16, 0x00000200, 0xFF);		// Force block size 512 bytes
 info:						// Get SD Card info
+	// F_SCK = F_CPU / 2 = 6 MHz		// Fast SPI speed
+	SPCR = (1 << SPE) | (1 << MSTR);
+	SPSR |= 1 << SPI2X;
 	uint8_t res;
 	uint8_t dat[16];
 /*	cmd(10, 0, 0xFF);			// Send card identification

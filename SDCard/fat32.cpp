@@ -19,6 +19,9 @@ void fat32::test(void)
 	sd.readBlock(CLUS2OFF(dir->d_off), block);
 	uint16_t offset = uint32(&block[10]);
 	uint16_t x, y, b = 1;
+	tft.bmp(true);
+	tft.all();
+	tft.start();
 	for (y = 240; y > 0; y--)
 		for (x = 0; x < 320; x++) {
 			uint32_t c = 0;
@@ -40,8 +43,10 @@ void fat32::test(void)
 				c = uint24(&block[offset]);
 				offset += 3;
 			}
-			tft.point(x, y - 1, c32to16(c));
+			//tft.point(x, y - 1, c32to16(c));
+			tft.write(c32to16(c));
 		}
+	tft.bmp(false);
 }
 
 FILE *fat32::fopen_read(char *path)

@@ -25,7 +25,8 @@
 class ili9341
 {
 public:
-	enum Orientation {Landscape, Portrait, FlipLandscape, FlipPortrait};
+	enum Orientation {Landscape, Portrait, FlipLandscape, FlipPortrait, \
+				BMP, FlipBMP};
 
 	static void init(void);
 
@@ -51,16 +52,22 @@ inline void ili9341::_setOrient(uint8_t o)
 	send(1, 0x36);			// Memory Access Control
 	switch (o) {
 	case Landscape:
-		send(0, 0x28);		// Column Adress Order, BGR
+		send(0, 0x28);		// Column Address Order, BGR
 		break;
 	case Portrait:
-		send(0, 0x48);		// Column Adress Order, BGR
+		send(0, 0x48);		// Column Address Order, BGR
 		break;
 	case FlipLandscape:
-		send(0, 0xE8);		// Column Adress Order, BGR
+		send(0, 0xE8);		// Column Address Order, BGR
 		break;
 	case FlipPortrait:
-		send(0, 0x88);		// Column Adress Order, BGR
+		send(0, 0x88);		// Column Address Order, BGR
+		break;
+	case BMP:
+		send(0, 0x68);		// Column Address Order, BGR
+		break;
+	case FlipBMP:
+		send(0, 0xA8);		// Column Address Order, BGR
 	}
 }
 

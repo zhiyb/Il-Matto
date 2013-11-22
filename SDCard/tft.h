@@ -47,9 +47,13 @@ public:
 		uint16_t c);
 	inline void point(uint16_t x, uint16_t y, uint16_t c);
 
-protected:
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-	inline void all();
+	inline void all(void);
+	inline void write(uint32_t c);
+	inline void start(void);
+	inline void bmp(bool e);
+
+protected:
 	inline void newline(void);
 	inline void next(void);
 
@@ -79,6 +83,17 @@ inline class tfthw& tfthw::operator/=(uint8_t o)
 {
 	setOrient(o);
 	return *this;
+}
+
+inline void tfthw::bmp(bool e)
+{
+	if (e)
+		if (orient == Landscape || orient ==  Portrait)
+			_setOrient(BMP);
+		else
+			_setOrient(FlipBMP);
+	else
+		_setOrient(orient);
 }
 
 inline class tfthw& tfthw::operator*=(uint8_t z)
@@ -153,6 +168,17 @@ inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
 	send(0, c % 0x0100);
 }
 
+inline void tfthw::start(void)
+{
+	send(1, 0x2C);			// Memory Write
+}
+
+inline void tfthw::write(uint32_t c)
+{
+	send(0, c / 0x0100);
+	send(0, c % 0x0100);
+}
+
 inline void tfthw::newline(void)
 {
 	x = 0;
@@ -189,7 +215,7 @@ inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 	send(0, (y + h - 1) % 0x0100);
 }
 
-inline void tfthw::all()
+inline void tfthw::all(void)
 {
 	send(1, 0x2A);			// Column Address Set
 	send(0, 0x00);			// x
