@@ -6,6 +6,9 @@
 #include "disk.h"
 #include "fat32.h"
 
+void melody_main(void);
+void melody_init(void);
+
 class disk mmc;
 class fat32 fs;
 
@@ -14,6 +17,7 @@ void init(void)
 	tft.init();
 	tft /= tft.FlipLandscape;
 	stdout = tftout();
+	melody_init();
 	tft++;
 }
 
@@ -84,7 +88,8 @@ start:
 		}
 		fs.closedir(dir);
 		fs.test();
-		while (sd.detect());
+		while (!(SD_PIN & SD_CD))
+			melody_main();
 		goto start;
 	}
 finished:
