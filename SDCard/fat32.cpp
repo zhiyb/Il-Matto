@@ -16,7 +16,6 @@ void fat32::test(void)
 	DIR *d = opendir(path);
 	struct dirent *dir;
 	while (strcmp((dir = readdir(d))->d_name, "TFT     BMP") != 0);
-	//uint8_t block[512];
 	sd.readBlockStart(CLUS2OFF(dir->d_off));
 	for (uint8_t i = 0; i < 10; i++)
 		spi::trans();
@@ -49,7 +48,9 @@ void fat32::test(void)
 			//tft.point(x, y - 1, c32to16(c));
 			tft.write(c32to16(c));
 		}
-	while (spi::trans() != 0xFF);
+	while (offset++ < 512)
+		spi::trans();
+	//while (spi::trans() != 0xFF);
 	tft.bmp(false);
 }
 
@@ -182,24 +183,43 @@ void fat32::init(const class partition& p)
 		_status = TYPE_ERROR;
 		return;
 	}
-	uint8_t block[512];
-	sd.readBlock(p.begin(), block);
-	if (block[510] != 0x55 || block[511] != 0xAA) {
-		_status = SIG_ERROR;
+	sd.readBlockStart(p.begin());
+	for (uint8_t i = 0; i < 0x0B; i++)
+		spi::trans();
+	if (spi::trans() != 0) {			// 0x0B
+		_status = FORMAT_ERROR;
 		return;
 	}
-	if (block[0x0B] != 0 || block[0x0C] != 0x02 || block[0x10] != 2) {
+	if (spi::trans() != 0x02) {			// 0x0C
 		_status = FORMAT_ERROR;
 		return;
 	}
 	// Sectors per cluster
-	_secPerClus = block[0x0D];
-	// Root directory cluster
-	_root = uint32(&block[0x2C]);
+	_secPerClus = spi::trans();			// 0x0D
 	// Basic offset + Reserved sectors
-	_fat = p.begin() + block[0x0E] + block[0x0F] * 0x0100;
+	_fat = p.begin() + spi::trans16();		// 0x0E, 0x0F
+	if (spi::trans() != 2) {			// 0x10
+		_status = FORMAT_ERROR;
+		return;
+	}
 	// Sectors per FAT
-	_fatsize = uint32(&block[0x24]);
+	for (uint8_t i = 0x11; i < 0x24; i++)
+		spi::trans();
+	_fatsize = spi::trans32();			// 0x24 - 0x27
+	// Root directory cluster
+	for (uint8_t i = 0x28; i < 0x2C; i++)
+		spi::trans();
+	_root = spi::trans32();				// 0x2C - 0x2F
 	// FAT offset + FAT size
+	for (uint16_t i = 0x30; i < 510; i++)
+		spi::trans();
+	if (spi::trans() != 0x55) {
+		_status = SIG_ERROR;
+		return;
+	}
+	if (spi::trans() != 0xAA) {
+		_status = SIG_ERROR;
+		return;
+	}
 	_cluster = _fat + (2 * _fatsize);
 }

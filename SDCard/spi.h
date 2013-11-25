@@ -20,6 +20,8 @@ protected:
 	static inline void fast(void);
 	static inline uint8_t trans(void);
 	static inline uint8_t trans(uint8_t d);
+	static inline uint8_t trans8(void) {return trans();}
+	static inline uint16_t trans16(void);
 	static inline uint32_t trans24(void);
 	static inline uint32_t trans32(void);
 };
@@ -59,6 +61,12 @@ inline uint8_t spi::trans(uint8_t d)
 	SPDR = d;
 	while(!(SPSR & (1 << SPIF)));
 	return SPDR;
+}
+
+inline uint16_t spi::trans16(void)
+{
+	return (uint32_t)spi::trans() | \
+		((uint32_t)spi::trans() * 0x0100);
 }
 
 inline uint32_t spi::trans24(void)
