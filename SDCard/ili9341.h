@@ -26,9 +26,9 @@ class ili9341
 {
 public:
 	enum Orientation {Landscape, Portrait, FlipLandscape, FlipPortrait, \
-				BMP, FlipBMP};
+		BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait};
 
-	static void init(void);
+	static inline void init(void);
 
 protected:
 	static inline void send(bool cmd, unsigned char dat);
@@ -63,23 +63,31 @@ inline void ili9341::_setOrient(uint8_t o)
 	case FlipPortrait:
 		send(0, 0x88);		// Column Address Order, BGR
 		break;
-	case BMP:
+	case BMPLandscape:
 		send(0, 0x68);		// Column Address Order, BGR
 		break;
-	case FlipBMP:
+	case BMPFlipLandscape:
 		send(0, 0xA8);		// Column Address Order, BGR
+		break;
+	case BMPPortrait:
+		send(0, 0xD8);		// Column Address Order, BGR
+		break;
+	case BMPFlipPortrait:
+		send(0, 0x18);		// Column Address Order, BGR
+		break;
 	}
 }
 
 inline void ili9341::send(bool cmd, unsigned char dat)
 {
-	SEND();
+	//SEND();
 	if (cmd)
 		LOW(TFT_RS);
 	TFT_WDATA = dat;
 	LOW(TFT_WR);
 	HIGH(TFT_WR);
-	HIGH(TFT_RS);
+	if (cmd)
+		HIGH(TFT_RS);
 }
 
 inline unsigned char ili9341::recv(void)
@@ -90,6 +98,7 @@ inline unsigned char ili9341::recv(void)
 	_delay_us(1);
 	dat = TFT_RDATA;
 	HIGH(TFT_RD);
+	SEND();
 	return dat;
 }
 
@@ -99,6 +108,48 @@ inline void ili9341::_setBGLight(bool ctrl)
 		TFT_WCTRL |= TFT_BLC;
 	else
 		TFT_WCTRL &= ~TFT_BLC;
+}
+
+inline void ili9341::init(void)
+{
+	uint8_t c;
+	uint16_t r;
+
+	MCUCR |= 0x80;			// Disable JTAG
+	MCUCR |= 0x80;			// Thanks to someone point that out
+
+	TFT_PCTRL = 0xFF & ~TFT_FMK;
+	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light
+	RECV();
+	LOW(TFT_RST);			// Hardware reset
+	LOW(TFT_CS);
+	HIGH(TFT_WR);
+	HIGH(TFT_RD);
+	HIGH(TFT_RS);
+	HIGH(TFT_VSY);
+	_delay_us(10);			// Min: 10us
+	HIGH(TFT_RST);
+	_delay_ms(120);
+	SEND();
+	send(1, 0x28);		// Display OFF
+	send(1, 0x11);		// Sleep Out
+	_delay_ms(120);
+	send(1, 0x34);		// Tearing Effect Line OFF
+	send(1, 0x38);		// Idle Mode OFF
+	send(1, 0x13);		// Normal Display Mode ON
+	send(1, 0x20);		// Display Inversion OFF
+	send(1, 0x3A);		// COLMOD: Pixel Format Set
+	send(0, 0x55);		// 16 bits/pixel
+	send(1, 0x36);		// Memory Access Control
+	send(0, 0x48);		// Column Adress Order, BGR
+	send(1, 0x2C);		// Memory Write
+	for (r = 0; r < 320; r++)	// Black screen
+		for (c = 0; c < 240; c++) {
+			send(0, 0x00);
+			send(0, 0x00);
+			send(0, 0x00);
+		}
+	send(1, 0x29);		// Display On
 }
 
 #undef LOW

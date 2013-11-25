@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "fat32.h"
 #include "conv.h"
+#include "spi.h"
 
 #define DELIM "/\\"
 #define CLUS2OFF(c) (_cluster + (c - 2) * _secPerClus)
@@ -15,9 +16,13 @@ void fat32::test(void)
 	DIR *d = opendir(path);
 	struct dirent *dir;
 	while (strcmp((dir = readdir(d))->d_name, "TFT     BMP") != 0);
-	uint8_t block[512];
-	sd.readBlock(CLUS2OFF(dir->d_off), block);
-	uint16_t offset = uint32(&block[10]);
+	//uint8_t block[512];
+	sd.readBlockStart(CLUS2OFF(dir->d_off));
+	for (uint8_t i = 0; i < 10; i++)
+		spi::trans();
+	uint16_t offset = spi::trans32();
+	for (uint8_t i = 10 + 4; i < offset; i++)
+		spi::trans();
 	uint16_t x, y, b = 1;
 	tft.bmp(true);
 	tft.all();
@@ -27,40 +32,30 @@ void fat32::test(void)
 			uint32_t c = 0;
 			if (offset + 3 > 512) {
 				uint8_t ext = offset + 3 - 512;
-				while (ext != 3) {
+				while (ext++ != 3) {
 					c >>= 8;
-					c |= block[512 - 3 + ext++] * \
-					     0x00010000;
+					c |= spi::trans() * 0x00010000;
 				}
-				sd.readBlock(CLUS2OFF(dir->d_off) + b++, \
-						block);
+				sd.readBlockStart(CLUS2OFF(dir->d_off) + b++);
 				offset = offset + 3 - 512;
 				for (ext = 0; ext < offset; ext++) {
 					c >>= 8;
-					c |= block[ext] * 0x00010000;
+					c |= spi::trans() * 0x00010000;
 				}
 			} else {
-				c = uint24(&block[offset]);
+				c = spi::trans24();
 				offset += 3;
 			}
 			//tft.point(x, y - 1, c32to16(c));
 			tft.write(c32to16(c));
 		}
+	while (spi::trans() != 0xFF);
 	tft.bmp(false);
 }
 
 FILE *fat32::fopen_read(char *path)
 {
 	return NULL;
-}
-
-uint32_t fat32::fatLookup(uint32_t cluster)
-{
-	uint8_t block[512];
-	uint32_t off = cluster * 4 / 512;
-	sd.readBlock(_fat + off, block);
-	off = cluster * 4 - off * 512;
-	return uint32(&block[off]);
 }
 
 struct dirent *fat32::readdir(DIR *dir)

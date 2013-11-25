@@ -70,15 +70,17 @@ uint8_t sdhw::init(void)
 {
 	_ver = 0;
 	_delay_ms(1);				// Wait for 1 ms
+	spi::slow();
 	SPI_PORT |= SPI_SS;
 	for (uint8_t i = 0; i < 10; i++)	// Apply 74(80) clock pulses
-		spi::send(0xFF);
+		spi::trans();
 	SPI_PORT &= ~SPI_SS;
+	wait();
 	cmd(0, 0, 0x4A);			// GO_IDLE_STATE / SW Reset
 	if (recv() != 0x01)
 		return 0x01;			// Failed
 	cmd(8, 0x000001AA, 0x43);		// CHK voltage range & version
-	if (recv() != 0x01)
+	if (recv(5) != 0x01)
 		goto notver2;			// Not support, not ver2
 	if (_res[3] != 0x01 || _res[4] != 0xAA)
 		return 0x02;			// Not match, failed
@@ -87,7 +89,7 @@ wakeup:
 	if (recv() == 0x01)
 		goto wakeup;			// Retry wakeup
 	cmd(58, 0, 0xFF);			// Read OCR
-	recv();
+	recv(5);
 	if (_res[1] & 0x40) {
 		_ver = 0x12;
 		goto info;
@@ -112,9 +114,7 @@ notver1:
 bsize:
 	cmd(16, 0x00000200, 0xFF);		// Force block size 512 bytes
 info:						// Get SD Card info
-	// F_SCK = F_CPU / 2 = 6 MHz		// Fast SPI speed
-	SPCR = (1 << SPE) | (1 << MSTR);
-	SPSR |= 1 << SPI2X;
+	spi::fast();
 	uint8_t res;
 	uint8_t dat[16];
 /*	cmd(10, 0, 0xFF);			// Send card identification
@@ -139,7 +139,7 @@ bool sdhw::detect(void)
 		_ver = 0xFF;		// Indicate new card need to init
 		return false;
 	}
-	_delay_ms(500);
+	_delay_ms(200);
 loop:
 	wp = writeProtected();
 	_delay_ms(100);

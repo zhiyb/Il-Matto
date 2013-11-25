@@ -3,8 +3,9 @@
 
 #include "disk.h"
 #include "dir.h"
+#include "conv.h"
 
-class fat32
+class fat32: public sdhw
 {
 public:
 	enum Status {OK = 0, NOT_INIT, TYPE_ERROR, SIG_ERROR, FORMAT_ERROR};
@@ -19,9 +20,7 @@ public:
 	uint8_t closedir(DIR *dir);
 	struct dirent *readdir(DIR *dir);
 	FILE *fopen_read(char *path);
-
-private:
-	uint32_t fatLookup(uint32_t cluster);
+	inline uint32_t fatLookup(uint32_t cluster);
 
 	uint8_t _status, _errno;
 	uint32_t _cluster;
@@ -30,5 +29,16 @@ private:
 	uint32_t _fatsize;
 	uint8_t _secPerClus;
 };
+
+// Inline functions
+
+inline uint32_t fat32::fatLookup(uint32_t cluster)
+{
+	uint8_t block[512];
+	uint32_t off = cluster * 4 / 512;
+	sd.readBlock(_fat + off, block);
+	off = cluster * 4 - off * 512;
+	return conv::uint32(&block[off]);
+}
 
 #endif

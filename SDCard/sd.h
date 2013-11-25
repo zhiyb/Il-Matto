@@ -69,19 +69,20 @@ public:
 	inline sdhw(void);
 	uint8_t init(void);
 	bool detect(void);
-	inline bool writeProtected(void);
+	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
 	inline uint8_t version(void) const {return _ver;}
 	//inline struct cidReg& cid(void) {return _cid;}
 	inline struct csdReg& csd(void) {return _csd;}
 	inline uint32_t size(void) const;
 	inline uint8_t readBlock(uint32_t addr, uint8_t buff[512]);
+	inline uint8_t readBlockStart(uint32_t addr);
 
 protected:
 	inline void cmd(uint8_t index, uint32_t arg, uint8_t crc);
 	inline void acmd(uint8_t index, uint32_t arg, uint8_t crc);
 	inline uint8_t recv(void);
 	inline uint8_t recv(uint8_t n);
-	inline void wait(void);
+	inline void wait(void) {while (spi::trans() != 0xFF);}
 
 	//class cidReg _cid;
 	class csdReg _csd;
@@ -100,27 +101,19 @@ inline sdhw::sdhw(void)
 	_ver = 0;
 }
 
-inline uint8_t sdhw::recv(uint8_t n)
+inline uint8_t sdhw::recv(void)
 {
-	n = n > 5 ? 5 : n;
-	for (uint8_t r = 0; r < n; r++) {
-		uint8_t i = 100;
-		do {
-			spi::send(0xFF);
-			i--;
-		} while (((_res[r] = spi::recv()) == 0xFF) && (i != 0));
-	}
+	uint8_t i = 100;
+	while (((_res[0] = spi::trans()) == 0xFF) && (i-- != 0));
 	return _res[0];
 }
 
-inline uint8_t sdhw::recv(void)
+inline uint8_t sdhw::recv(uint8_t n)
 {
-	for (uint8_t r = 0; r < 5; r++) {
+	//n = n > 5 ? 5 : n;
+	for (uint8_t r = 0; r < n; r++) {
 		uint8_t i = 100;
-		do {
-			spi::send(0xFF);
-			i--;
-		} while ((_res[r] = spi::recv()) == 0xFF && i != 0);
+		while (((_res[r] = spi::trans()) == 0xFF) && (i-- != 0));
 	}
 	return _res[0];
 }
@@ -128,31 +121,20 @@ inline uint8_t sdhw::recv(void)
 inline void sdhw::acmd(uint8_t index, uint32_t arg, uint8_t crc)
 {
 	cmd(55, 0, 0xFF);			// Lead cmd(55)
+	wait();
 	cmd(index, arg, crc);
 }
 
+#include <stdio.h>
 inline void sdhw::cmd(uint8_t index, uint32_t arg, uint8_t crc)
 {
 	wait();
-	wait();
-	spi::send(index | (1 << 6));
-	spi::send(arg >> 24);
-	spi::send(arg >> 16);
-	spi::send(arg >> 8);
-	spi::send(arg);
-	spi::send((crc << 1) | 1);
-}
-
-inline void sdhw::wait(void)
-{
-	do
-		spi::send(0xFF);
-	while (spi::recv() != 0xFF);
-}
-
-inline bool sdhw::writeProtected(void)
-{
-	return SD_PIN & SD_WP;
+	spi::trans(index | (1 << 6));
+	spi::trans(arg >> 24);
+	spi::trans(arg >> 16);
+	spi::trans(arg >> 8);
+	spi::trans(arg);
+	spi::trans((crc << 1) | 1);
 }
 
 inline uint32_t sdhw::size(void) const
@@ -168,17 +150,20 @@ inline uint32_t sdhw::size(void) const
 inline uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
 {
 	cmd(17, addr, 0xFF);			// Read block
-	uint8_t res = recv(1);
-	if (res)
-		return res;
-	do
-		spi::send(0xFF);
-	while (spi::recv() != 0xFE);
-	for (uint16_t i = 0; i < 512; i++) {
-		spi::send(0xFF);
-		buff[i] = spi::recv();
-	}
-	wait();
+	if (recv())
+		return _res[0];
+	while (spi::trans() != 0xFE);
+	for (uint16_t i = 0; i < 512; i++)
+		buff[i] = spi::trans();
+	return 0;
+}
+
+inline uint8_t sdhw::readBlockStart(uint32_t addr)
+{
+	cmd(17, addr, 0xFF);			// Read block
+	if (recv())
+		return _res[0];
+	while (spi::trans() != 0xFE);
 	return 0;
 }
 

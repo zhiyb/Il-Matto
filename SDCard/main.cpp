@@ -15,7 +15,6 @@ class fat32 fs;
 void init(void)
 {
 	tft.init();
-	tft /= tft.FlipLandscape;
 	stdout = tftout();
 	melody_init();
 	tft++;
@@ -27,6 +26,7 @@ int main(void)
 
 start:
 	tft *= 2;
+	tft /= tft.FlipLandscape;
 	tft.clean();
 	puts("*** SD library test ***");
 	puts("Waiting for SD insert...");
@@ -41,21 +41,21 @@ start:
 		printf("Initialise failed with %02X!\n", res);
 		goto finished;
 	}
-	printf("SD Card version: %u\n", sd.version() & 0x0F);
+	/*printf("SD Card version: %u\n", sd.version() & 0x0F);
 	printf("Address: %s\n", (sd.version() & 0xF0) ? \
 			"Block address" : "Byte address");
 
-	/*printf("Manufacture ID: %u\n", sd.cid().MID);
+	printf("Manufacture ID: %u\n", sd.cid().MID);
 	printf("OEM/Application ID: %u\n", sd.cid().OID);
 	printf("Product name: %.5s\n", sd.cid().PNM);
 	printf("Serial number: %lu\n", sd.cid().PSN);
 	printf("Maufacture date: 20%02u-0%01u\n", \
-			sd.cid().MDT >> 4, sd.cid().MDT & 0x0F);*/
+			sd.cid().MDT >> 4, sd.cid().MDT & 0x0F);
 	printf("CSD register version: %u\n", sd.csd().CSD_STRUCTURE + 1);
 
-	//_delay_ms(3000);
+	_delay_ms(3000);
 	tft *= 2;
-	tft.clean();
+	tft.clean();*/
 	printf("SD Size: %luMB\n", sd.size() / 1024);
 	mmc.init();
 	if (mmc.status() != mmc.SUCCEED) {
@@ -87,6 +87,7 @@ start:
 			printf(", type: 0x%02X\n", d->d_type);
 		}
 		fs.closedir(dir);
+		//tft /= tft.Portrait;
 		fs.test();
 		while (!(SD_PIN & SD_CD))
 			melody_main();

@@ -20,18 +20,6 @@
 
 class tfthw tft;
 
-tfthw::tfthw(void)
-{
-	x = 0;
-	y = 0;
-	zoom = 1;
-	orient = Portrait;
-	w = SIZE_W;
-	h = SIZE_H;
-	fgc = DEF_FGC;
-	bgc = DEF_BGC;
-}
-
 void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint8_t s, uint16_t c)
 {
@@ -110,7 +98,7 @@ void tfthw::putch(char ch)
 	}
 }
 
-int tftputch(const char c, FILE *stream)
+inline int tftputch(const char c, FILE *stream)
 {
 	tft << c;
 	return 0;
@@ -122,21 +110,4 @@ FILE *tftout(void)
 	if (out == NULL)
 		out = fdevopen(tftputch, NULL);
 	return out;
-}
-
-void tfthw::setOrient(uint8_t o)
-{
-	_setOrient(o);
-	switch (o) {
-	case Landscape:
-	case FlipLandscape:
-		w = SIZE_H;
-		h = SIZE_W;
-		break;
-	case Portrait:
-	case FlipPortrait:
-		w = SIZE_W;
-		h = SIZE_H;
-	}
-	orient = o;
 }

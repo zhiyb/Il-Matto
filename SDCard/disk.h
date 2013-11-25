@@ -42,6 +42,7 @@ inline partition::partition(uint8_t dat[16])
 	}
 }
 
+#include <stdio.h>
 inline void disk::init(void)
 {
 	if (sd.version() == 0) {

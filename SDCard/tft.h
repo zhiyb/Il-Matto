@@ -11,7 +11,7 @@
 class tfthw: public ili9341
 {
 public:
-	tfthw(void);
+	inline tfthw(void);
 
 	inline class tfthw& operator<<(const char c);
 	inline class tfthw& operator<<(const char *str);
@@ -33,7 +33,7 @@ public:
 	inline void setBackground(uint16_t c) {bgc = c;}
 	inline uint8_t getForeground(void) {return fgc;}
 	inline uint8_t getBackground(void) {return bgc;}
-	void setOrient(uint8_t o);
+	inline void setOrient(uint8_t o);
 	inline uint8_t getOrient(void) {return orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void clean(void) {fill(bgc); x = 0; y = 0;}
@@ -79,6 +79,18 @@ extern class tfthw tft;
 	(x) = (x) ^ (y); \
 }
 
+inline tfthw::tfthw(void)
+{
+	x = 0;
+	y = 0;
+	zoom = 1;
+	orient = Portrait;
+	w = SIZE_W;
+	h = SIZE_H;
+	fgc = DEF_FGC;
+	bgc = DEF_BGC;
+}
+
 inline class tfthw& tfthw::operator/=(uint8_t o)
 {
 	setOrient(o);
@@ -87,13 +99,23 @@ inline class tfthw& tfthw::operator/=(uint8_t o)
 
 inline void tfthw::bmp(bool e)
 {
-	if (e)
-		if (orient == Landscape || orient ==  Portrait)
-			_setOrient(BMP);
-		else
-			_setOrient(FlipBMP);
-	else
+	if (!e) {
 		_setOrient(orient);
+		return;
+	}
+	switch (orient) {
+	case Landscape:
+		_setOrient(BMPLandscape);
+		break;
+	case Portrait:
+		_setOrient(BMPPortrait);
+		break;
+	case FlipLandscape:
+		_setOrient(BMPFlipLandscape);
+		break;
+	case FlipPortrait:
+		_setOrient(BMPFlipPortrait);
+	}
 }
 
 inline class tfthw& tfthw::operator*=(uint8_t z)
@@ -234,6 +256,25 @@ inline void tfthw::next(void)
 	x += WIDTH * zoom;
 	if (x + WIDTH * zoom > w)
 		newline();
+}
+
+inline void tfthw::setOrient(uint8_t o)
+{
+	_setOrient(o);
+	switch (o) {
+	case Landscape:
+	case FlipLandscape:
+		w = SIZE_H;
+		h = SIZE_W;
+		break;
+	case Portrait:
+	case FlipPortrait:
+		w = SIZE_W;
+		h = SIZE_H;
+	}
+	orient = o;
+	x = 0;
+	y = 0;
 }
 
 #undef WIDTH
