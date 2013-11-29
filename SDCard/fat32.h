@@ -17,9 +17,10 @@ public:
 	inline uint8_t status(void) const {return _status;}
 	inline uint8_t errno(void) const {return _errno;}
 	DIR *opendir(char *path);
-	uint8_t closedir(DIR *dir);
+	inline void closedir(DIR *dir) {dir->close();}
 	struct dirent *readdir(DIR *dir);
-	FILE *fopen_read(char *path);
+	struct dirent *fopen(char *path);
+	inline void fclose(struct dirent *d) {((DIR *)d)->close();}
 	inline uint32_t fatLookup(uint32_t cluster);
 
 	uint8_t _status, _errno;

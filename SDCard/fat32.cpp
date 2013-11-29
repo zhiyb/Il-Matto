@@ -7,16 +7,16 @@
 #define DELIM "/\\"
 #define CLUS2OFF(c) (_cluster + (c - 2) * _secPerClus)
 
-using namespace conv;
-
 #include "tft.h"
 void fat32::test(void)
 {
-	char path[] = "";
-	DIR *d = opendir(path);
-	struct dirent *dir;
-	while (strcmp((dir = readdir(d))->d_name, "TFT     BMP") != 0);
-	sd.readBlockStart(CLUS2OFF(dir->d_off));
+	char path[] = "/ILMATT~1/IMAGE/STARTUP BMP";
+	struct dirent *d = fopen(path);
+	if (d == NULL) {
+		puts("Read bmp failed!");
+		return;
+	}
+	sd.readBlockStart(CLUS2OFF(d->d_off));
 	for (uint8_t i = 0; i < 10; i++)
 		spi::trans();
 	uint16_t offset = spi::trans32();
@@ -35,7 +35,7 @@ void fat32::test(void)
 					c >>= 8;
 					c |= spi::trans() * 0x00010000;
 				}
-				sd.readBlockStart(CLUS2OFF(dir->d_off) + b++);
+				sd.readBlockStart(CLUS2OFF(d->d_off) + b++);
 				offset = offset + 3 - 512;
 				for (ext = 0; ext < offset; ext++) {
 					c >>= 8;
@@ -45,24 +45,37 @@ void fat32::test(void)
 				c = spi::trans24();
 				offset += 3;
 			}
-			//tft.point(x, y - 1, c32to16(c));
-			tft.write(c32to16(c));
+			tft.write(conv::c32to16(c));
 		}
 	while (offset++ < 512)
 		spi::trans();
-	//while (spi::trans() != 0xFF);
 	tft.bmp(false);
+	fclose(d);
 }
 
-FILE *fat32::fopen_read(char *path)
+struct dirent *fat32::fopen(char *path)
 {
-	return NULL;
+	char p[strlen(path)];
+	char *str = strrchr(path, '/');
+	strncpy(p, path, str - path);
+	p[str - path] = '\0';
+	DIR *dir = opendir(p);
+	if (dir == NULL)
+		return NULL;
+	struct dirent *d;
+	do {
+		d = readdir(dir);
+		if (d == NULL) {
+			closedir(dir);
+			return NULL;
+		}
+	} while (strncmp(d->d_name, str + 1, 11) != 0);
+	return d;
 }
 
 struct dirent *fat32::readdir(DIR *dir)
 {
-	uint8_t i = DIRindex(dir);
-	if (i == 0xFF) {
+	if (!dir->opened()) {
 		_errno = EBADF;
 		return NULL;
 	}
@@ -98,12 +111,12 @@ init:
 			goto next;
 		}
 	}
-	_dirent_[i].d_off = block[index + 0x14] * 0x00010000 + \
+	dir->d_off = block[index + 0x14] * 0x00010000 + \
 			    block[index + 0x15] * 0x01000000 + \
 			    block[index + 0x1A] + \
 			    block[index + 0x1B] * 0x0100;
-	_dirent_[i].d_type = block[index + 0x0B];
-	strncpy(_dirent_[i].d_name, (char *)&block[index], 11);
+	dir->d_type = block[index + 0x0B];
+	strncpy(dir->d_name, (char *)&block[index], 11);
 	// Count up
 	dir->offset++;
 	if (dir->offset == _secPerClus * 16) {		// Last sector
@@ -114,18 +127,7 @@ init:
 			return NULL;
 		}
 	}
-	return &_dirent_[i];
-}
-
-uint8_t fat32::closedir(DIR *dir)
-{
-	uint8_t i = DIRindex(dir);
-	if (i == 0xFF) {
-		_errno = EBADF;
-		return 1;
-	}
-	_dir_use_ &= ~(1 << i);
-	return 0;
+	return dir;
 }
 
 DIR *fat32::opendir(char *path)
@@ -134,41 +136,38 @@ DIR *fat32::opendir(char *path)
 		_errno = ENOENT;
 		return NULL;
 	}
-	DIR *dir = NULL;
+	DIR *dir;
 	uint8_t d;
 	for (d = 0; d < MAX_DIR_OPEN; d++)
-		if (!(_dir_use_ & (1 << d))) {
+		if (!_dir_[d].opened()) {
 			dir = &_dir_[d];
+			dir->open(d);
 			break;
 		}
-	if (dir == NULL) {
+	if (d == MAX_DIR_OPEN) {
 		_errno = ENOMEM;
 		return NULL;
 	}
 	dir->cluster = _root;
 	dir->offset = 0;
 	char *name = strtok(path, DELIM);
-	if (name == NULL) {
-		_dir_use_ |= d;
+	if (name == NULL)
 		return dir;
-	}
 	struct dirent *dent;
 loop:
-	while ((dent = readdir(dir)) != NULL) {
+	while ((dent = readdir(dir)) != NULL)
 		if (strncasecmp(dent->d_name, name, strlen(name)) == 0) {
 			for (uint8_t i = strlen(name); i < 11; i++)
 				if (*(dent->d_name + i) != ' ')
 					goto loop;
 			dir->cluster = dent->d_off;
 			dir->offset = 0;
-			if ((name = strtok(NULL, DELIM)) == NULL) {
-				_dir_use_ |= d;
+			if ((name = strtok(NULL, DELIM)) == NULL)
 				return dir;
-			}
 			goto loop;
 		}
-	}
 	_errno = ENOENT;
+	dir->close();
 	return NULL;
 }
 
