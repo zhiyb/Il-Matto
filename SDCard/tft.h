@@ -197,9 +197,9 @@ inline class tfthw& tfthw::operator<<(const char *str)
 inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
 {
 	area(x, y, 1, 1);
-	send(1, 0x2C);			// Memory Write
-	send(0, c / 0x0100);
-	send(0, c % 0x0100);
+	cmd(0x2C);			// Memory Write
+	data(c / 0x0100);
+	data(c % 0x0100);
 }
 
 inline void tfthw::newline(void)
@@ -229,30 +229,30 @@ inline void tfthw::fill(uint16_t clr)
 
 inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
-	send(1, 0x2A);			// Column Address Set
-	send(0, x / 0x0100);
-	send(0, x % 0x0100);
-	send(0, (x + w - 1) / 0x0100);
-	send(0, (x + w - 1) % 0x0100);
-	send(1, 0x2B);			// Page Address Set
-	send(0, y / 0x0100);
-	send(0, y % 0x0100);
-	send(0, (y + h - 1) / 0x0100);
-	send(0, (y + h - 1) % 0x0100);
+	cmd(0x2A);			// Column Address Set
+	data(x / 0x0100);
+	data(x % 0x0100);
+	data((x + w - 1) / 0x0100);
+	data((x + w - 1) % 0x0100);
+	cmd(0x2B);			// Page Address Set
+	data(y / 0x0100);
+	data(y % 0x0100);
+	data((y + h - 1) / 0x0100);
+	data((y + h - 1) % 0x0100);
 }
 
 inline void tfthw::all(void)
 {
-	send(1, 0x2A);			// Column Address Set
-	send(0, 0x00);			// x
-	send(0, 0x00);
-	send(0, (w - 1) / 0x0100);	// w
-	send(0, (w - 1) % 0x0100);
-	send(1, 0x2B);			// Page Address Set
-	send(0, 0x00);			// y
-	send(0, 0x00);
-	send(0, (h - 1) / 0x0100);	// h
-	send(0, (h - 1) % 0x0100);
+	cmd(0x2A);			// Column Address Set
+	data(0x00);			// x
+	data(0x00);
+	data((w - 1) / 0x0100);	// w
+	data((w - 1) % 0x0100);
+	cmd(0x2B);			// Page Address Set
+	data(0x00);			// y
+	data(0x00);
+	data((h - 1) / 0x0100);	// h
+	data((h - 1) % 0x0100);
 }
 
 inline void tfthw::next(void)

@@ -68,28 +68,28 @@ void tfthw::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint16_t c)
 {
 	area(x, y, w, h);
-	send(1, 0x2C);			// Memory Write
+	cmd(0x2C);			// Memory Write
 	while (w--)
 		for (y = 0; y < h; y++) {
-			send(0, c / 0x0100);
-			send(0, c % 0x0100);
+			data(c / 0x0100);
+			data(c % 0x0100);
 		}
 }
 
 void tfthw::putch(char ch)
 {
 	area(x, y, WIDTH * zoom, HEIGHT * zoom);
-	send(1, 0x2C);			// Memory Write
+	cmd(0x2C);			// Memory Write
 	for (uint8_t i = 0; i < HEIGHT * zoom; i++) {
 		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom]));
 		for (uint8_t j = 0; j < WIDTH * zoom; j++) {
 			if (c & 0x80) {
-				send(0, fgc / 0x0100);
-				send(0, fgc % 0x0100);
+				data(fgc / 0x0100);
+				data(fgc % 0x0100);
 			} else {
-				send(0, bgc / 0x0100);
-				send(0, bgc % 0x0100);
+				data(bgc / 0x0100);
+				data(bgc % 0x0100);
 			}
 			if (j % zoom == zoom - 1)
 				c <<= 1;

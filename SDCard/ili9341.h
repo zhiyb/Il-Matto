@@ -29,9 +29,11 @@ public:
 		BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait};
 
 	static inline void init(void);
-	static inline void sleep(bool e);
+	static inline void idle(bool e) {cmd(0x38 + e);}
+	static inline void sleep(bool e) {cmd(0x10 + e);}
+	static inline void inversion(bool e) {cmd(0x20 + e);}
 
-protected:
+//protected:
 	static inline void cmd(uint8_t dat);
 	static inline void data(uint8_t dat);
 	static inline void send(bool c, uint8_t dat);
@@ -50,38 +52,33 @@ protected:
 	TFT_WDATA = 0xFF; \
 }
 
-inline void ili9341::sleep(bool e)
-{
-	send(1, e ? 0x10 : 0x11);
-}
-
 inline void ili9341::_setOrient(uint8_t o)
 {
-	send(1, 0x36);			// Memory Access Control
+	cmd(0x36);			// Memory Access Control
 	switch (o) {
 	case Landscape:
-		send(0, 0x28);		// Column Address Order, BGR
+		data(0x28);		// Column Address Order, BGR
 		break;
 	case Portrait:
-		send(0, 0x48);		// Column Address Order, BGR
+		data(0x48);		// Column Address Order, BGR
 		break;
 	case FlipLandscape:
-		send(0, 0xE8);		// Column Address Order, BGR
+		data(0xE8);		// Column Address Order, BGR
 		break;
 	case FlipPortrait:
-		send(0, 0x88);		// Column Address Order, BGR
+		data(0x88);		// Column Address Order, BGR
 		break;
 	case BMPLandscape:
-		send(0, 0x68);		// Column Address Order, BGR
+		data(0x68);		// Column Address Order, BGR
 		break;
 	case BMPFlipLandscape:
-		send(0, 0xA8);		// Column Address Order, BGR
+		data(0xA8);		// Column Address Order, BGR
 		break;
 	case BMPPortrait:
-		send(0, 0xD8);		// Column Address Order, BGR
+		data(0xD8);		// Column Address Order, BGR
 		break;
 	case BMPFlipPortrait:
-		send(0, 0x18);		// Column Address Order, BGR
+		data(0x18);		// Column Address Order, BGR
 		break;
 	}
 }
@@ -152,25 +149,31 @@ inline void ili9341::init(void)
 	HIGH(TFT_RST);
 	_delay_ms(120);
 	SEND();
-	send(1, 0x28);		// Display OFF
-	send(1, 0x11);		// Sleep Out
+	cmd(0x28);		// Display OFF
+	cmd(0x11);		// Sleep Out
 	_delay_ms(120);
-	send(1, 0x34);		// Tearing Effect Line OFF
-	send(1, 0x38);		// Idle Mode OFF
-	send(1, 0x13);		// Normal Display Mode ON
-	send(1, 0x20);		// Display Inversion OFF
-	send(1, 0x3A);		// COLMOD: Pixel Format Set
-	send(0, 0x55);		// 16 bits/pixel
-	send(1, 0x36);		// Memory Access Control
-	send(0, 0x48);		// Column Adress Order, BGR
-	send(1, 0x2C);		// Memory Write
+	cmd(0x34);		// Tearing Effect Line OFF
+	cmd(0x38);		// Idle Mode OFF
+	cmd(0x13);		// Normal Display Mode ON
+	cmd(0x20);		// Display Inversion OFF
+	cmd(0x3A);		// COLMOD: Pixel Format Set
+	data(0x55);		// 16 bits/pixel
+	cmd(0x36);		// Memory Access Control
+	data(0x48);		// Column Adress Order, BGR
+	cmd(0x2C);		// Memory Write
 	for (r = 0; r < 320; r++)	// Black screen
 		for (c = 0; c < 240; c++) {
-			send(0, 0x00);
-			send(0, 0x00);
-			send(0, 0x00);
+			data(0x00);
+			data(0x00);
+			data(0x00);
 		}
-	send(1, 0x29);		// Display On
+	cmd(0xB1);		// Frame Rate control, normal
+	data(0x00);		// Faster
+	data(0x18);
+	cmd(0xB3);		// Frame Rate control, partial
+	data(0x00);		// Faster
+	data(0x18);
+	cmd(0x29);		// Display On
 }
 
 #undef LOW

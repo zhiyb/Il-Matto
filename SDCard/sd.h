@@ -78,6 +78,8 @@ public:
 	inline uint8_t readBlockStart(uint32_t addr);
 
 protected:
+	inline void cmd(uint8_t index, uint32_t arg);
+	inline void acmd(uint8_t index, uint32_t arg);
 	inline void cmd(uint8_t index, uint32_t arg, uint8_t crc);
 	inline void acmd(uint8_t index, uint32_t arg, uint8_t crc);
 	inline uint8_t recv(void);
@@ -118,14 +120,31 @@ inline uint8_t sdhw::recv(uint8_t n)
 	return _res[0];
 }
 
+inline void sdhw::acmd(uint8_t index, uint32_t arg)
+{
+	cmd(55, 0);				// Lead cmd(55)
+	wait();
+	cmd(index, arg);
+}
+
 inline void sdhw::acmd(uint8_t index, uint32_t arg, uint8_t crc)
 {
-	cmd(55, 0, 0xFF);			// Lead cmd(55)
+	cmd(55, 0);				// Lead cmd(55)
 	wait();
 	cmd(index, arg, crc);
 }
 
-#include <stdio.h>
+inline void sdhw::cmd(uint8_t index, uint32_t arg)
+{
+	wait();
+	spi::trans(index | (1 << 6));
+	spi::trans(arg >> 24);
+	spi::trans(arg >> 16);
+	spi::trans(arg >> 8);
+	spi::trans(arg);
+	spi::trans();
+}
+
 inline void sdhw::cmd(uint8_t index, uint32_t arg, uint8_t crc)
 {
 	wait();
@@ -149,7 +168,7 @@ inline uint32_t sdhw::size(void) const
 
 inline uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
 {
-	cmd(17, addr, 0xFF);			// Read block
+	cmd(17, addr);				// Read block
 	if (recv())
 		return _res[0];
 	while (spi::trans() != 0xFE);
@@ -160,7 +179,7 @@ inline uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
 
 inline uint8_t sdhw::readBlockStart(uint32_t addr)
 {
-	cmd(17, addr, 0xFF);			// Read block
+	cmd(17, addr);				// Read block
 	if (recv())
 		return _res[0];
 	while (spi::trans() != 0xFE);
