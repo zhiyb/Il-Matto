@@ -88,7 +88,7 @@ start:
 		}
 		fs.closedir(dir);
 		//tft /= tft.Portrait;
-#if 1
+#if 0
 		fs.test();
 		while (sd.detect());
 		goto start;
