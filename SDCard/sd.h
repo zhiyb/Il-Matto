@@ -11,7 +11,7 @@
 #include <avr/io.h>
 #include "spi.h"
 
-class cidReg
+/*class cidReg
 {
 public:
 	inline cidReg(void) {}
@@ -24,7 +24,7 @@ public:
 	uint32_t PSN;		// Product serial number
 	uint16_t MDT:12;	// Manufacturing date
 	uint8_t CRC:7;		// CRC7 checksum
-};
+};*/
 
 class csdReg
 {
@@ -63,7 +63,7 @@ public:
 	uint8_t CRC:7;
 };
 
-class sdhw: public spi
+class sdhw
 {
 public:
 	inline sdhw(void);

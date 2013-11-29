@@ -16,7 +16,7 @@ void init(void)
 {
 	tft.init();
 	stdout = tftout();
-	melody_init();
+	//melody_init();
 	tft++;
 }
 
@@ -69,8 +69,8 @@ start:
 	puts("Partition 1 is FAT32");
 	printf("Start at sector %lu\n", mmc.part(0).begin());
 	fs.init(mmc.part(0));
-	if (fs.status() != fs.OK) {
-		printf("Read FAT32 failed with %02X\n", fs.status());
+	if (fs.status != fs.OK) {
+		printf("Read FAT32 failed with %02X\n", fs.status);
 		goto finished;
 	}
 	{	// Read directory
@@ -78,7 +78,7 @@ start:
 		char path[] = "";
 		DIR *dir = fs.opendir(path);
 		if (dir == NULL) {
-			printf("Error open dir with %02X\n", fs.errno());
+			printf("Error open dir with %02X\n", fs.errno);
 			goto finished;
 		}
 		struct dirent *d;
@@ -88,10 +88,27 @@ start:
 		}
 		fs.closedir(dir);
 		//tft /= tft.Portrait;
+#if 1
 		fs.test();
-		while (!(SD_PIN & SD_CD))
-			melody_main();
+		while (sd.detect());
 		goto start;
+#else
+		char txt[] = "ILMATT~1/TXT/TEST    TXT";
+		class fat32_file *stream = fs.fopen(txt);
+		if (stream == NULL) {
+			puts("File open filed!");
+			goto finished;
+		}
+		printf("File size: %ld\n", stream->size);
+		_delay_ms(200);
+		tft.clean();
+		char _c;
+		while ((_c = stream->getc()) != EOF) {
+			putchar(_c);
+			//_delay_ms(5);
+		}
+		fs.fclose(stream);
+#endif
 	}
 finished:
 	printf("Remove SD to run again...");

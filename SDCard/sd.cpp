@@ -49,7 +49,7 @@ csdReg::csdReg(uint8_t dat[16])
 	CRC = dat[15] >> 1;
 }
 
-cidReg::cidReg(uint8_t dat[16])
+/*cidReg::cidReg(uint8_t dat[16])
 {
 	MID = dat[0];
 	OID = dat[2] * 0x0100 + dat[1];
@@ -64,7 +64,7 @@ cidReg::cidReg(uint8_t dat[16])
 	MDT = dat[13] * 0x0100 + dat[14];
 	CRC = dat[15] >> 1;
 	return;
-}
+}*/
 
 uint8_t sdhw::init(void)
 {

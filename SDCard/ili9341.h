@@ -29,10 +29,13 @@ public:
 		BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait};
 
 	static inline void init(void);
+	static inline void sleep(bool e);
 
 protected:
-	static inline void send(bool cmd, unsigned char dat);
-	static inline unsigned char recv(void);
+	static inline void cmd(uint8_t dat);
+	static inline void data(uint8_t dat);
+	static inline void send(bool c, uint8_t dat);
+	static inline uint8_t recv(void);
 	static inline void _setBGLight(bool ctrl);
 	static inline void _setOrient(uint8_t o);
 };
@@ -45,6 +48,11 @@ protected:
 #define RECV() { \
 	TFT_PDATA = 0x00; \
 	TFT_WDATA = 0xFF; \
+}
+
+inline void ili9341::sleep(bool e)
+{
+	send(1, e ? 0x10 : 0x11);
 }
 
 inline void ili9341::_setOrient(uint8_t o)
@@ -78,24 +86,37 @@ inline void ili9341::_setOrient(uint8_t o)
 	}
 }
 
-inline void ili9341::send(bool cmd, unsigned char dat)
+inline void ili9341::cmd(uint8_t dat)
 {
-	//SEND();
-	if (cmd)
-		LOW(TFT_RS);
+	LOW(TFT_RS);
 	TFT_WDATA = dat;
 	LOW(TFT_WR);
 	HIGH(TFT_WR);
-	if (cmd)
-		HIGH(TFT_RS);
+	HIGH(TFT_RS);
 }
 
-inline unsigned char ili9341::recv(void)
+inline void ili9341::data(uint8_t dat)
+{
+	TFT_WDATA = dat;
+	LOW(TFT_WR);
+	HIGH(TFT_WR);
+}
+
+inline void ili9341::send(bool c, uint8_t dat)
+{
+	//SEND();
+	if (c)
+		cmd(dat);
+	else
+		data(dat);
+}
+
+inline uint8_t ili9341::recv(void)
 {
 	unsigned char dat;
 	RECV();
 	LOW(TFT_RD);
-	_delay_us(1);
+	//_delay_us(1);
 	dat = TFT_RDATA;
 	HIGH(TFT_RD);
 	SEND();

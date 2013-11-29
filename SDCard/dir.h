@@ -1,8 +1,8 @@
 #ifndef DIR_H
 #define DIR_H
 
-#define MAX_DIR_OPEN 4
-#define MAX_FILE_OPEN 8
+#define MAX_DIR_OPEN 2
+#define MAX_FILE_OPEN 1
 
 #include <inttypes.h>
 
@@ -12,7 +12,7 @@ struct dirent
 {
 public:
 	uint8_t d_type;
-	uint32_t d_off;
+	uint32_t d_off, d_size;
 	char d_name[11];
 };
 

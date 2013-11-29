@@ -2,7 +2,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= SDCard
-OBJ	= main.o ascii.o tft.o ascii.o sd.o fat32.o dir.o scale.o pan.o melody.o
+OBJ	= main.o ascii.o tft.o ascii.o sd.o fat32.o dir.o
+#scale.o pan.o melody.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
@@ -67,6 +68,9 @@ lst: $(PRG).lst
 # Only hex is needed; Others: bin, srec
 text: hex
 
+EXTRA_CLEAN_FILES	+= *.hex
+EXTRA_CLEAN_FILES	+= *.bin
+EXTRA_CLEAN_FILES	+= *.srec
 hex: $(PRG).hex
 bin: $(PRG).bin
 srec: $(PRG).srec

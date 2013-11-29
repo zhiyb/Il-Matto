@@ -1,5 +1,5 @@
 #include <avr/io.h>
-#include <stdlib.h>
+#include <ctype.h>
 #include "ascii.h"
 #include "ili9341.h"
 #include "tft.h"
@@ -78,13 +78,12 @@ void tfthw::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 
 void tfthw::putch(char ch)
 {
-	unsigned char c;
-	uint8_t i, j;
 	area(x, y, WIDTH * zoom, HEIGHT * zoom);
 	send(1, 0x2C);			// Memory Write
-	for (i = 0; i < HEIGHT * zoom; i++) {
+	for (uint8_t i = 0; i < HEIGHT * zoom; i++) {
+		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom]));
-		for (j = 0; j < WIDTH * zoom; j++) {
+		for (uint8_t j = 0; j < WIDTH * zoom; j++) {
 			if (c & 0x80) {
 				send(0, fgc / 0x0100);
 				send(0, fgc % 0x0100);

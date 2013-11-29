@@ -36,6 +36,8 @@ public:
 	inline void setOrient(uint8_t o);
 	inline uint8_t getOrient(void) {return orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
+	inline void setTabSize(uint8_t t) {tabSize = t;}
+	inline uint8_t getTabSize(void) {return tabSize;}
 	inline void clean(void) {fill(bgc); x = 0; y = 0;}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c);
@@ -49,15 +51,17 @@ public:
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void);
-	inline void write(uint32_t c);
-	inline void start(void);
 	inline void bmp(bool e);
+	static inline void start(void) {cmd(0x2C);}
+	static inline void write(uint16_t c)
+		{data(c / 0x0100); data(c % 0x0100);}
 
 protected:
 	inline void newline(void);
 	inline void next(void);
+	inline void tab(void);
 
-	uint8_t zoom, orient;
+	uint8_t zoom, orient, tabSize;
 	uint16_t x, y, w, h, fgc, bgc;
 };
 
@@ -85,6 +89,7 @@ inline tfthw::tfthw(void)
 	y = 0;
 	zoom = 1;
 	orient = Portrait;
+	tabSize = 4;
 	w = SIZE_W;
 	h = SIZE_H;
 	fgc = DEF_FGC;
@@ -164,9 +169,16 @@ inline class tfthw& tfthw::operator<<(const uint16_t i)
 
 inline class tfthw& tfthw::operator<<(const char c)
 {
-	if (c == '\n')
+	switch (c) {
+	case '\n':
 		newline();
-	else {
+		break;
+	case '\t':
+		tab();
+		break;
+	default:
+		if ((unsigned)c < ' ' || (unsigned)c > 127)
+			break;
 		putch(c);
 		next();
 	}
@@ -190,17 +202,6 @@ inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
 	send(0, c % 0x0100);
 }
 
-inline void tfthw::start(void)
-{
-	send(1, 0x2C);			// Memory Write
-}
-
-inline void tfthw::write(uint32_t c)
-{
-	send(0, c / 0x0100);
-	send(0, c % 0x0100);
-}
-
 inline void tfthw::newline(void)
 {
 	x = 0;
@@ -213,14 +214,17 @@ inline void tfthw::newline(void)
 
 inline void tfthw::fill(uint16_t clr)
 {
-	uint16_t x, y;
+	uint8_t ch = clr / 0x0100, cl = clr % 0x0100;
+	uint16_t x = w, y;
 	all();
-	send(1, 0x2C);			// Memory Write
-	for (x = 0; x < w; x++)
-		for (y = 0; y < h; y++) {
-			send(0, clr / 0x0100);
-			send(0, clr % 0x0100);
+	cmd(0x2C);			// Memory Write
+	while (x--) {
+		y = h;
+		while (y--) {
+			data(ch);
+			data(cl);
 		}
+	}
 }
 
 inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
@@ -256,6 +260,15 @@ inline void tfthw::next(void)
 	x += WIDTH * zoom;
 	if (x + WIDTH * zoom > w)
 		newline();
+}
+
+inline void tfthw::tab(void)
+{
+	if (x % (WIDTH * zoom))
+		x -= x % (WIDTH * zoom);
+	do
+		next();
+	while ((x / (WIDTH * zoom)) % tabSize);
 }
 
 inline void tfthw::setOrient(uint8_t o)

@@ -12,9 +12,8 @@
 #include <avr/io.h>
 #include <inttypes.h>
 
-class spi
+namespace spi
 {
-protected:
 	static inline void init(void);
 	static inline void slow(void);
 	static inline void fast(void);
@@ -52,36 +51,39 @@ inline void spi::fast(void)
 inline uint8_t spi::trans(void)
 {
 	SPDR = 0xFF;
-	while(!(SPSR & (1 << SPIF)));
+	while(!(SPSR & _BV(SPIF)));
 	return SPDR;
 }
 
 inline uint8_t spi::trans(uint8_t d)
 {
 	SPDR = d;
-	while(!(SPSR & (1 << SPIF)));
+	while(!(SPSR & _BV(SPIF)));
 	return SPDR;
 }
 
 inline uint16_t spi::trans16(void)
 {
-	return (uint32_t)spi::trans() | \
-		((uint32_t)spi::trans() * 0x0100);
+	uint16_t res = spi::trans();
+	res |= (uint16_t)spi::trans() << 8;
+	return res;
 }
 
 inline uint32_t spi::trans24(void)
 {
-	return (uint32_t)spi::trans() | \
-		((uint32_t)spi::trans() * 0x0100) | \
-		((uint32_t)spi::trans() * 0x00010000);
+	uint32_t res = spi::trans();
+	res |= (uint32_t)spi::trans() << 8;
+	res |= (uint32_t)spi::trans() << 16;
+	return res;
 }
 
 inline uint32_t spi::trans32(void)
 {
-	return (uint32_t)spi::trans() | \
-		((uint32_t)spi::trans() * 0x0100) | \
-		((uint32_t)spi::trans() * 0x00010000) | \
-		((uint32_t)spi::trans() * 0x01000000);
+	uint32_t res = spi::trans();
+	res |= (uint32_t)spi::trans() << 8;
+	res |= (uint32_t)spi::trans() << 16;
+	res |= (uint32_t)spi::trans() << 24;
+	return res;
 }
 
 #endif
