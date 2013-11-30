@@ -65,7 +65,7 @@ inline uint32_t fat32::fatLookup(uint32_t clus)
 	uint32_t off = clus * 4 / 512;
 	sd.readBlockStart(fat + off);
 	off = clus * 4 - off * 512;
-	for (uint8_t i = 0; i < off; i++)
+	for (uint16_t i = 0; i < off; i++)
 		spi::trans();
 	uint32_t offset = spi::trans32();
 	for (off += 4; off < 512; off++)
