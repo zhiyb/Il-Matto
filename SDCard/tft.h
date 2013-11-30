@@ -1,6 +1,10 @@
 #ifndef TFT_H
 #define TFT_H
 
+#define FONT_WIDTH 6
+#define FONT_HEIGHT 8
+//#define TFT_SCROLL
+
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
@@ -23,6 +27,7 @@ public:
 	inline class tfthw& operator--(int x);
 	inline class tfthw& operator*=(uint8_t z);
 	inline class tfthw& operator/=(uint8_t o);
+	inline class tfthw& operator^=(uint16_t l);
 
 	inline void setX(uint16_t n) {x = n;}
 	inline void setY(uint16_t n) {y = n;}
@@ -71,8 +76,8 @@ extern class tfthw tft;
 
 // Defined as inline to execute faster
 
-#define WIDTH 6
-#define HEIGHT 8
+#define WIDTH FONT_WIDTH
+#define HEIGHT FONT_HEIGHT
 #define SIZE_H 320
 #define SIZE_W 240
 #define DEF_FGC 0xFFFF
@@ -96,12 +101,6 @@ inline tfthw::tfthw(void)
 	bgc = DEF_BGC;
 }
 
-inline class tfthw& tfthw::operator/=(uint8_t o)
-{
-	setOrient(o);
-	return *this;
-}
-
 inline void tfthw::bmp(bool e)
 {
 	if (!e) {
@@ -121,6 +120,69 @@ inline void tfthw::bmp(bool e)
 	case FlipPortrait:
 		_setOrient(BMPFlipPortrait);
 	}
+}
+
+inline class tfthw& tfthw::operator^=(uint16_t l)
+{
+	// 0x2C Write, 0x2E Read, 0x3C / 0x3E Continue, 0x00 NOP
+	uint8_t buff[w * 2];
+	uint16_t r;
+	cmd(0x2A);			// Column Address Set
+	data(0x00);
+	data(0x00);
+	data((w - 1) / 0x0100);
+	data((w - 1) % 0x0100);
+	for (r = 0; r < h - l; r++) {
+		uint16_t b = w * 2;
+		//area(0, r + l, w, 1);
+		cmd(0x2B);		// Page Address Set
+		data((r + l) / 0x0100);
+		data((r + l) % 0x0100);
+		data((r + l) / 0x0100);
+		data((r + l) % 0x0100);
+		cmd(0x2E);		// Read
+		mode(true);		// Read mode
+		recv();
+		while (b--) {
+			buff[b] = recv() & 0xF8;
+			uint8_t g = recv();
+			buff[b--] |= g >> 5;
+			buff[b] = (g << 3) & 0xE0;
+			buff[b] |= recv() >> 3;
+		}
+		mode(false);		// Write mode
+
+		b = w * 2;
+		//area(0, r, w, 1);
+		cmd(0x2B);		// Page Address Set
+		data(r / 0x0100);
+		data(r % 0x0100);
+		data(r / 0x0100);
+		data(r % 0x0100);
+		cmd(0x2C);		// Write
+		while (b--)
+			data(buff[b]);
+	}
+	//area(0, h - l, w, l);
+	cmd(0x2B);		// Page Address Set
+	data((h - l) / 0x0100);
+	data((h - l) % 0x0100);
+	data((h - 1) / 0x0100);
+	data((h - 1) % 0x0100);
+	cmd(0x2C);
+	while (r++ < h) {
+		for (uint16_t c = w; c; c--) {
+			data(bgc / 0x0100);
+			data(bgc % 0x0100);
+		}
+	}
+	return *this;
+}
+
+inline class tfthw& tfthw::operator/=(uint8_t o)
+{
+	setOrient(o);
+	return *this;
 }
 
 inline class tfthw& tfthw::operator*=(uint8_t z)
@@ -207,8 +269,13 @@ inline void tfthw::newline(void)
 	x = 0;
 	y += HEIGHT * zoom;
 	if (y + HEIGHT * zoom > h) {
+#ifdef TFT_SCROLL
+		*this ^= HEIGHT * zoom;
+		y -= HEIGHT * zoom;
+#else
 		fill(bgc);
 		y = 0;
+#endif
 	}
 }
 

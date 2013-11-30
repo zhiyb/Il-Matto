@@ -4,8 +4,8 @@
 #include "ili9341.h"
 #include "tft.h"
 
-#define WIDTH 6
-#define HEIGHT 8
+#define WIDTH FONT_WIDTH
+#define HEIGHT FONT_HEIGHT
 #define SIZE_H 320
 #define SIZE_W 240
 #define DEF_FGC 0xFFFF

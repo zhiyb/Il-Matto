@@ -20,6 +20,7 @@
 #define TFT_FMK	(1 << 7)	// Frame mark
 
 #include <avr/io.h>
+#include <avr/cpufunc.h>
 #include <util/delay.h>
 
 class ili9341
@@ -38,6 +39,7 @@ public:
 	static inline void data(uint8_t dat);
 	static inline void send(bool c, uint8_t dat);
 	static inline uint8_t recv(void);
+	static inline void mode(bool _recv);
 	static inline void _setBGLight(bool ctrl);
 	static inline void _setOrient(uint8_t o);
 };
@@ -47,10 +49,10 @@ public:
 #define LOW(b)	TFT_WCTRL &= ~(b)
 #define HIGH(b)	TFT_WCTRL |= (b)
 #define SEND() TFT_PDATA = 0xFF
-#define RECV() { \
+#define RECV() do { \
 	TFT_PDATA = 0x00; \
 	TFT_WDATA = 0xFF; \
-}
+} while(0)
 
 inline void ili9341::_setOrient(uint8_t o)
 {
@@ -99,9 +101,16 @@ inline void ili9341::data(uint8_t dat)
 	HIGH(TFT_WR);
 }
 
+inline void ili9341::mode(bool _recv)
+{
+	if (_recv)
+		RECV();
+	else
+		SEND();
+}
+
 inline void ili9341::send(bool c, uint8_t dat)
 {
-	//SEND();
 	if (c)
 		cmd(dat);
 	else
@@ -111,12 +120,10 @@ inline void ili9341::send(bool c, uint8_t dat)
 inline uint8_t ili9341::recv(void)
 {
 	unsigned char dat;
-	RECV();
 	LOW(TFT_RD);
-	//_delay_us(1);
+	_NOP();
 	dat = TFT_RDATA;
 	HIGH(TFT_RD);
-	SEND();
 	return dat;
 }
 

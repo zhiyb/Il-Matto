@@ -90,6 +90,12 @@ start:
 		//tft /= tft.Portrait;
 #if 0
 		fs.test();
+		//tft.fill(conv::c32to16(0x0000FF));
+		while (sd.detect()) {
+			tft ^= 1;
+			_delay_ms(10);
+		}
+		goto start;
 		while (sd.detect());
 		goto start;
 #else
@@ -105,7 +111,7 @@ start:
 		char _c;
 		while ((_c = stream->getc()) != EOF) {
 			putchar(_c);
-			//_delay_ms(5);
+			//_delay_ms(2);
 		}
 		fs.fclose(stream);
 #endif
