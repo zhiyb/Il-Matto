@@ -76,6 +76,8 @@ public:
 	inline uint32_t size(void) const;
 	inline uint8_t readBlock(uint32_t addr, uint8_t buff[512]);
 	inline uint8_t readBlockStart(uint32_t addr);
+	inline uint8_t readMultiBlockStart(uint32_t addr);
+	inline void stop(void) {cmd(12, 0x0000);}
 
 protected:
 	inline void cmd(uint8_t index, uint32_t arg);
@@ -180,6 +182,15 @@ inline uint8_t sdhw::readBlock(uint32_t addr, uint8_t buff[512])
 inline uint8_t sdhw::readBlockStart(uint32_t addr)
 {
 	cmd(17, addr);				// Read block
+	if (recv())
+		return _res[0];
+	while (spi::trans() != 0xFE);
+	return 0;
+}
+
+inline uint8_t sdhw::readMultiBlockStart(uint32_t addr)
+{
+	cmd(18, addr);				// Read block
 	if (recv())
 		return _res[0];
 	while (spi::trans() != 0xFE);

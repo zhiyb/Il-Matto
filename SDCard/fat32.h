@@ -11,13 +11,19 @@ class fat32_file
 public:
 	fat32_file(void) {index = 255;}
 	bool open(class fat32 *f, uint8_t i, char *path);
+	bool sopen(class fat32 *f, uint8_t i, char *path);
 	inline bool opened(void) {return index != 255;}
 	inline void close(void) {index = 255;}
 	int getc(void);
+	inline unsigned char sgetc(void);
 	inline int getc(FILE *stream) {return getc();}
 	inline uint32_t eof(void) {return remain;}
+	inline void stop(void) {sd.stop();}
 
 	class fat32 *fs;
+	uint8_t secPerClus;
+	uint32_t Cluster;
+	
 	uint8_t index;
 	uint8_t buff[512];
 
@@ -43,6 +49,7 @@ public:
 	inline void closedir(DIR *dir) {dir->close();}
 	struct dirent *readdir(DIR *dir);
 	class fat32_file *fopen(char *path);
+	class fat32_file *sfopen(char *path);
 	struct dirent *_fopen(char *path);
 	inline void _fclose(struct dirent *d) {((DIR *)d)->close();}
 	inline void fclose(class fat32_file *f) {f->close();}
@@ -59,6 +66,25 @@ public:
 FILE *fat32_filedev(class fat32_file *f);
 
 // Inline functions
+
+#define CLUS2OFF(c) (Cluster + (c - 2) * secPerClus)
+
+inline unsigned char fat32_file::sgetc(void)
+{
+	if (offset == 512) {				// Sector end
+		offset = 0;
+		if (++sector == secPerClus) {		// Cluster end
+			sector = 0;
+			cluster = fs->fatLookup(cluster);
+		}
+		sd.readBlockStart(CLUS2OFF(cluster) + sector);
+	}
+	offset++;
+	remain--;
+	return spi::trans();
+}
+
+#undef CLUS2OFF
 
 inline uint32_t fat32::fatLookup(uint32_t clus)
 {

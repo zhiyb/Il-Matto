@@ -2,7 +2,7 @@
 #define DIR_H
 
 #define MAX_DIR_OPEN 2
-#define MAX_FILE_OPEN 1
+#define MAX_FILE_OPEN 2
 
 #include <inttypes.h>
 

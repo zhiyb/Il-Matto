@@ -5,6 +5,8 @@
 #include "sd.h"
 #include "disk.h"
 #include "fat32.h"
+#include "pwm.h"
+#include "timer.h"
 
 void melody_main(void);
 void melody_init(void);
@@ -17,6 +19,8 @@ void init(void)
 	tft.init();
 	stdout = tftout();
 	//melody_init();
+	pwm::init();
+	timer0::init();
 	tft++;
 }
 
@@ -88,7 +92,31 @@ start:
 		}
 		fs.closedir(dir);
 		//tft /= tft.Portrait;
-#if 0
+#define FUNC 2
+#if (FUNC == 2)
+		timer0::set(8000);
+		char wav[] = "ILMATT~1/WAV/TEST    WAV";
+		class fat32_file *stream;
+play:
+		stream = fs.sfopen(wav);
+		if (stream == NULL) {
+			puts("File open filed!");
+			goto finished;
+		}
+		printf("File size: %ld\n", stream->size);
+		while (stream->remain) {
+			uint8_t s = stream->sgetc();
+			pwm::set(s, s);
+			/*if (timer0::flag()) {
+				_delay_ms(10);
+				timer0::flag();
+				continue;
+			}*/
+			while (!timer0::flag());
+		}
+		fs.fclose(stream);
+		goto play;
+#elif (FUNC == 1)
 		fs.test();
 		//tft.fill(conv::c32to16(0x0000FF));
 		while (sd.detect()) {

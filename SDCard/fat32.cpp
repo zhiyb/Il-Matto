@@ -24,6 +24,25 @@ bool fat32_file::open(class fat32 *f, uint8_t i, char *path)
 	return true;
 }
 
+bool fat32_file::sopen(class fat32 *f, uint8_t i, char *path)
+{
+	struct dirent *d = f->_fopen(path);
+	if (d == NULL)
+		return false;
+	cluster = position = d->d_off;
+	offset = 0;
+	sector = 0;
+	remain = size = d->d_size;
+	index = i;
+	fs = f;
+	secPerClus = f->secPerClus;
+	Cluster = f->cluster;
+	sd.readBlockStart(CLUS2OFF(cluster));
+	//sd.readMultiBlockStart(CLUS2OFF(cluster));
+	f->_fclose(d);
+	return true;
+}
+
 int fat32_file::getc(void)
 {
 	char c = buff[offset++];
@@ -74,10 +93,58 @@ class fat32_file *fat32::fopen(char *path)
 	return NULL;
 }
 
+class fat32_file *fat32::sfopen(char *path)
+{
+	for (uint8_t i = 0; i < MAX_FILE_OPEN; i++)
+		if (!_file_[i].opened()) {
+			if (_file_[i].sopen(this, i, path))
+				return &_file_[i];
+			else
+				return NULL;
+		}
+	return NULL;
+}
+
 #include "tft.h"
 void fat32::test(void)
 {
 #if 1
+	char path[] = "/ILMATT~1/WAV/TEST    WAV";
+	struct dirent *d = _fopen(path);
+	if (d == NULL) {
+		puts("Read wav failed!");
+		return;
+	}
+	sd.readBlockStart(CLUS2OFF(d->d_off));
+	for (uint8_t i = 0; i < 10; i++)
+		spi::trans();
+	uint16_t offset = spi::trans32();
+	for (uint8_t i = 10 + 4; i < offset; i++)
+		spi::trans();
+	uint16_t b = 1;
+	while (1) {
+			uint32_t c = 0;
+			if (offset > 512 - 3) {
+				uint8_t ext = offset + 3 - 512;
+				while (ext++ != 3) {
+					c >>= 8;
+					c |= (uint32_t)spi::trans() << 16;
+				}
+				sd.readBlockStart(CLUS2OFF(d->d_off) + b++);
+				offset = offset + 3 - 512;
+				for (ext = 0; ext < (uint8_t)offset; ext++) {
+					c >>= 8;
+					c |= (uint32_t)spi::trans() << 16;
+				}
+			} else {
+				c = spi::trans24();
+				offset += 3;
+			}
+		}
+	_fclose(d);
+	return;
+#endif
+#if 0
 	char path[] = "/ILMATT~1/IMAGE/STARTUP BMP";
 	struct dirent *d = _fopen(path);
 	if (d == NULL) {
@@ -120,7 +187,8 @@ void fat32::test(void)
 	tft.bmp(false);
 	_fclose(d);
 	return;
-#else
+#endif
+#if 0
 	char path[] = "/ILMATT~1/IMAGE/STARTUP BMP";
 	class fat32_file *file = fopen(path);
 	if (file == NULL) {
