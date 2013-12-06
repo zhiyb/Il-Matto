@@ -109,42 +109,6 @@ class fat32_file *fat32::sfopen(char *path)
 void fat32::test(void)
 {
 #if 1
-	char path[] = "/ILMATT~1/WAV/TEST    WAV";
-	struct dirent *d = _fopen(path);
-	if (d == NULL) {
-		puts("Read wav failed!");
-		return;
-	}
-	sd.readBlockStart(CLUS2OFF(d->d_off));
-	for (uint8_t i = 0; i < 10; i++)
-		spi::trans();
-	uint16_t offset = spi::trans32();
-	for (uint8_t i = 10 + 4; i < offset; i++)
-		spi::trans();
-	uint16_t b = 1;
-	while (1) {
-			uint32_t c = 0;
-			if (offset > 512 - 3) {
-				uint8_t ext = offset + 3 - 512;
-				while (ext++ != 3) {
-					c >>= 8;
-					c |= (uint32_t)spi::trans() << 16;
-				}
-				sd.readBlockStart(CLUS2OFF(d->d_off) + b++);
-				offset = offset + 3 - 512;
-				for (ext = 0; ext < (uint8_t)offset; ext++) {
-					c >>= 8;
-					c |= (uint32_t)spi::trans() << 16;
-				}
-			} else {
-				c = spi::trans24();
-				offset += 3;
-			}
-		}
-	_fclose(d);
-	return;
-#endif
-#if 0
 	char path[] = "/ILMATT~1/IMAGE/STARTUP BMP";
 	struct dirent *d = _fopen(path);
 	if (d == NULL) {

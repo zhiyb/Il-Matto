@@ -92,7 +92,7 @@ start:
 		}
 		fs.closedir(dir);
 		//tft /= tft.Portrait;
-#define FUNC 2
+#define FUNC 1
 #if (FUNC == 2)
 		timer0::set(8000);
 		char wav[] = "ILMATT~1/WAV/TEST    WAV";
