@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= TFT
-OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o ascii.o
+OBJ	= main.o ascii.o tft.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
