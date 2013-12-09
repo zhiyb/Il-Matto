@@ -1,4 +1,5 @@
 #include <avr/pgmspace.h>
+#include "ascii.h"
 
 const unsigned char ascii[96][8] PROGMEM = {
 	{0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, },

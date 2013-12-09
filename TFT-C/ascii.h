@@ -1,5 +1,5 @@
-#ifndef _ASCII_H
-#define _ASCII_H
+#ifndef ASCII_H
+#define ASCII_H
 
 #include <avr/pgmspace.h>
 
