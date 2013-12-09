@@ -186,11 +186,11 @@ static inline void ili9341_init(void)
 			ili9341_data(0x00);
 		}
 	ili9341_cmd(0xB1);		// Frame Rate control, normal
-	ili9341_data(0x00);		// Faster
-	ili9341_data(0x18);
+	ili9341_data(0x00);		// 70Hz
+	ili9341_data(0x1B);
 	ili9341_cmd(0xB3);		// Frame Rate control, partial
-	ili9341_data(0x00);		// Faster
-	ili9341_data(0x18);
+	ili9341_data(0x00);		// 70Hz
+	ili9341_data(0x1B);
 	ili9341_cmd(0x29);		// Display On
 }
 
