@@ -6,6 +6,7 @@ OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o ascii.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
+EXT = cpp
 
 DEFS	= -DF_CPU=12000000
 LIBS	=
@@ -23,7 +24,7 @@ ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 
 # You should not have to change anything below here.
 
-CC	= avr-g++
+CC	= avr-gcc
 
 # Override is only needed by avr-lib build system.
 
@@ -40,14 +41,14 @@ $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(SIZE) $@
 
-%.o: %.cpp
+%.o: %.$(EXT)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Dependency:
 
 -include $(OBJ:.o=.d)
 
-%.d: %.cpp
+%.d: %.$(EXT)
 	@set -e; rm -f $@; \
 	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
@@ -67,6 +68,8 @@ lst: $(PRG).lst
 # Only hex is needed; Others: bin, srec
 text: hex
 
+EXTRA_CLEAN_FILES	+= $(PRG).hex
+
 hex: $(PRG).hex
 bin: $(PRG).bin
 srec: $(PRG).srec
@@ -84,6 +87,8 @@ srec: $(PRG).srec
 
 # Only ehex is needed; Others: ebin, esrec
 eeprom:	ehex
+
+EXTRA_CLEAN_FILES	+= $(PRG)_eeprom.hex
 
 ehex: $(PRG)_eeprom.hex
 ebin: $(PRG)_eeprom.bin
@@ -104,17 +109,18 @@ esrec: $(PRG)_eeprom.srec
 # For program MCU with avrdude.
 
 AVRDUDE	= avrdude
+EEPFILE := $(PRG)_eeprom.hex
 
 flash: hex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(PRG).hex
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), flash, $(PWD), $(PRG).hex >> $(LOG)
 
 eep: ehex
-	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:w:$(PRG)_eeprom.hex
+	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:w:$(EEPFILE)
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), eep, $(PWD), $(PRG)_eeprom.hex >> $(LOG)
 
 readeep:
-	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:r:$(PRG)_eeprom.hex
+	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:r:$(EEPFILE)
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), readeep, $(PWD), $(PRG)_eeprom.hex >> $(LOG)
 
 fuse:
@@ -131,7 +137,7 @@ TAR	= tar
 EXTRA_CLEAN_FILES	+= $(ARCHIVE)
 
 archive: hex ehex
-	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.cpp) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
+	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.$(EXT)) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.
