@@ -108,17 +108,18 @@ esrec: $(PRG)_eeprom.srec
 # For program MCU with avrdude.
 
 AVRDUDE	= avrdude
+EEPFILE := $(PRG)_eeprom.hex
 
 flash: hex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(PRG).hex
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), flash, $(PWD), $(PRG).hex >> $(LOG)
 
 eep: ehex
-	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:w:$(PRG)_eeprom.hex
+	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:w:$(EEPFILE)
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), eep, $(PWD), $(PRG)_eeprom.hex >> $(LOG)
 
 readeep:
-	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:r:$(PRG)_eeprom.hex
+	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:r:$(EEPFILE)
 	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), readeep, $(PWD), $(PRG)_eeprom.hex >> $(LOG)
 
 fuse:
