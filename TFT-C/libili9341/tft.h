@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "ili9341.h"
 #include "ascii.h"
+#include "colour.h"
 
 extern struct tfthw {
 	uint8_t zoom, orient, tabSize;
