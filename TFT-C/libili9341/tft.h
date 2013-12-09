@@ -36,6 +36,7 @@ static inline void tft_setX(uint16_t n);
 static inline uint16_t tft_getX(void);
 static inline void tft_setY(uint16_t n);
 static inline uint16_t tft_getY(void);
+static inline void tft_setColour(uint16_t f, uint16_t b);
 static inline void tft_setForeground(uint16_t c);
 static inline uint8_t tft_getForeground(void);
 static inline void tft_setBackground(uint16_t c);
@@ -104,6 +105,12 @@ static inline uint16_t tft_getX(void)
 static inline uint16_t tft_getY(void)
 {
 	return tft.y;
+}
+
+static inline void tft_setColour(uint16_t f, uint16_t b)
+{
+	tft.fgc = f;
+	tft.bgc = b;
 }
 
 static inline void tft_setForeground(uint16_t c)
