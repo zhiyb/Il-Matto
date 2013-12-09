@@ -2,14 +2,15 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= TFT
-OBJ	= main.o ascii.o tft.o
+OBJ	= main.o
+SUBDIRS = libili9341
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	=
+LIBS	= libili9341.a
 
 PRGER	= usbasp
 
@@ -35,7 +36,7 @@ OBJCOPY	= avr-objcopy
 OBJDUMP	= avr-objdump
 SIZE	= avr-size
 
-all: $(PRG).elf lst text eeprom
+all: subdirs $(PRG).elf lst text eeprom
 
 $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -43,6 +44,15 @@ $(PRG).elf: $(OBJ)
 
 %.o: %.$(EXT)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Subdirectories
+
+.PHONY: subdirs $(SUBDIRS)
+
+subdirs: $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@
 
 # Dependency:
 
@@ -54,7 +64,12 @@ $(PRG).elf: $(OBJ)
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
+# Clean up
+
+.PHONY: clean
+
 clean:
+	for d in $(SUBDIRS); do (cd $$d; $(MAKE) clean); done
 	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf *.bak
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
@@ -110,6 +125,8 @@ esrec: $(PRG)_eeprom.srec
 
 AVRDUDE	= avrdude
 EEPFILE := $(PRG)_eeprom.hex
+
+.PHONY: readeep fuse knock
 
 flash: hex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(PRG).hex
