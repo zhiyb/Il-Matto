@@ -1,17 +1,17 @@
-#ifndef _ROTARY_H
-#define _ROTARY_H
+#ifndef ROTARY_H
+#define ROTARY_H
 
 #define ROE_DDR		DDRD
 #define ROE_PORT	PORTD
 #define ROE_PIN		PIND
 
-#define ROE_A1	(1 << 1)
+#define ROE_A1	(1 << 2)
 #define ROE_B1	(1 << 3)
-#define ROE_S1	(1 << 2)
+#define ROE_S1	(1 << 4)
 
-#define ROE_A2	(1 << 5)
+#define ROE_A2	(1 << 6)
 #define ROE_B2	(1 << 7)
-#define ROE_S2	(1 << 4)
+#define ROE_S2	(1 << 5)
 
 #define ROE_N		0
 

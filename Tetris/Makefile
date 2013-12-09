@@ -67,6 +67,8 @@ lst: $(PRG).lst
 # Only hex is needed; Others: bin, srec
 text: hex
 
+EXTRA_CLEAN_FILES	+= $(PRG).hex
+
 hex: $(PRG).hex
 bin: $(PRG).bin
 srec: $(PRG).srec
@@ -84,6 +86,8 @@ srec: $(PRG).srec
 
 # Only ehex is needed; Others: ebin, esrec
 eeprom:	ehex
+
+EXTRA_CLEAN_FILES	+= $(PRG)_eeprom.hex
 
 ehex: $(PRG)_eeprom.hex
 ebin: $(PRG)_eeprom.bin

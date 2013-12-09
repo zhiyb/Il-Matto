@@ -6,15 +6,15 @@
 
 #define ROE_1 (ROE_A1 | ROE_B1)
 #define ROE_2 (ROE_A2 | ROE_B2)
-#define delay() _delay_ms(5);
+#define delay() _delay_ms(3);
 
 uint8_t prev;
 
 void ROE_init(void)
 {
 	// Input port: Pull up
-	ROE_DDR = 0x00;
-	ROE_PORT = 0xFF;
+	ROE_DDR &= ROE_1 | ROE_2 | ROE_S1 | ROE_S2;
+	ROE_PORT |= ROE_1 | ROE_2 | ROE_S1 | ROE_S2;
 reget:
 	prev = ROE_PIN & ~ROE_S1 & ~ROE_S2;
 	delay();
