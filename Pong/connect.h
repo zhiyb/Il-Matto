@@ -11,7 +11,7 @@
 #define CONN_REPORT	'-'
 #define CONN_GAMEOVER	'g'
 
-#define CONN_WAIT	200
+#define CONN_WAIT	255
 
 #include <avr/io.h>
 #include <stdio.h>
@@ -31,14 +31,20 @@ static inline void connect_put(uint8_t c)
 	UDR0 = c;
 }
 
+static inline uint8_t connect_read(void)
+{
+	if (UCSR0A & _BV(RXC0))
+		return UDR0;
+	return CONN_NULL;
+}
+
 static inline uint8_t connect_get(void)
 {
 	uint8_t w = CONN_WAIT;
 	while(!(UCSR0A & _BV(RXC0)) && w--);
 	if (UCSR0A & _BV(RXC0))
 		return UDR0;
-	else
-		return CONN_NULL;
+	return CONN_NULL;
 }
 
 static inline uint8_t connect_detect(void)

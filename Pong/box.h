@@ -115,7 +115,7 @@ movex:
 				goto movex;
 			}
 		}
-		box.x += 1;
+		box.x++;
 	} else {	// Moving left
 		if (!box.e)
 			return 1;
@@ -159,21 +159,21 @@ movex:
 					goto movex;
 				}
 		}
-		box.x -= 1;
+		box.x--;
 	}
 movey:
-	if (box.dy) {	// Moving up
+	if (box.dy) {	// Moving down
 		if (box.y == tft.h - BOX_SIZE) {
 			box.dy = 0;
 			goto movey;
 		}
-		box.y += 1;
-	} else {	// Moving down
+		box.y++;
+	} else {	// Moving up
 		if (box.y == 0) {
 			box.dy = 1;
 			goto movey;
 		}
-		box.y -= 1;
+		box.y--;
 	}
 	box_show(BOX_FGC);
 	return 1;

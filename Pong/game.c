@@ -68,7 +68,7 @@ void game_mode(void)
 	game.score[0] = 0;
 	game.score[1] = 0;
 	tft_fill(GAME_BGC);
-	while (connect_get() != CONN_NULL);
+	while (connect_read() != CONN_NULL);
 
 init:
 	RECTANGLE(GAME_MODE);
@@ -249,7 +249,7 @@ get:
 		tft_setOrient(tft_getOrient() + 1);
 		goto init;
 	}
-	switch(connect_get()) {
+	switch (connect_read()) {
 	case CONN_LEFT:
 		connect_put(CONN_READY);
 		game.mode = 2;
@@ -489,7 +489,7 @@ get:
 				return;
 		}
 	}
-	switch (connect_get()) {
+	switch (connect_read()) {
 	case CONN_REPORT:
 		connect_put(CONN_READY);
 		box.x = connect_get();
@@ -547,7 +547,7 @@ get:
 				return;
 		}
 	}
-	switch (connect_get()) {
+	switch (connect_read()) {
 	case CONN_REPORT:
 		connect_put(CONN_READY);
 		box.x = connect_get();
