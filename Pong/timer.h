@@ -28,12 +28,32 @@ static inline void timer0_srand(void)
 	srand(TCNT0);
 }
 
+static inline void timer1_init(void)
+{
+	TCCR1A = 0;				// No output, CTC mode
+	TCCR1B = _BV(WGM12);			// CTC, Top: OCR1A
+	// Initial: disable timer1
+	//TCCR1B |= _BV(CS11) /*| _BV(CS10)*/;	// clk/8 prescaler
+	TCCR1C = 0;				// No force output
+	TIMSK1 = _BV(OCIE1A);			// Compare A interrupt
+}
+
+static inline void timer1_enable(void)
+{
+	TCCR1B |= _BV(CS11) /*| _BV(CS10)*/;	// clk/8 prescaler
+}
+
+static inline void timer1_disable(void)
+{
+	TCCR1B &= ~_BV(CS11) /*| _BV(CS10)*/;	// clk/8 prescaler
+}
+
 static inline void timer2_init(void)
 {
 	// For debouncing
 	TCCR2A = _BV(WGM21);			// No output, CTC mode
 	TCCR2B = 0;				// Disabled (clk / 256)
-	OCR2A = 250;				// Compare register A
+	OCR2A = 100;				// Compare register A
 	ASSR = 0;				// Async status register
 	TIFR2 |= _BV(OCF2A);			// Clear interrupt flag
 	TIMSK2 = _BV(OCIE2A);			// Compare match A interrupt

@@ -10,6 +10,7 @@
 #define CONN_START	's'
 #define CONN_REPORT	'-'
 #define CONN_GAMEOVER	'g'
+#define CONN_SOUND	'o'
 
 #define CONN_WAIT	255
 
@@ -31,6 +32,12 @@ static inline void connect_put(uint8_t c)
 	UDR0 = c;
 }
 
+static inline void connect_put16(uint16_t c)
+{
+	connect_put(c / 0x0100);
+	connect_put(c % 0x0100);
+}
+
 static inline uint8_t connect_read(void)
 {
 	if (UCSR0A & _BV(RXC0))
@@ -45,6 +52,13 @@ static inline uint8_t connect_get(void)
 	if (UCSR0A & _BV(RXC0))
 		return UDR0;
 	return CONN_NULL;
+}
+
+static inline uint16_t connect_get16(void)
+{
+	uint16_t res = (uint16_t)connect_get() << 8;
+	res |= connect_get();
+	return res;
 }
 
 static inline uint8_t connect_detect(void)

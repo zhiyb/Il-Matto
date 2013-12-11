@@ -5,6 +5,7 @@
 #include "game.h"
 #include "timer.h"
 #include "connect.h"
+#include "sound.h"
 
 #define BOX_SIZE 5
 #define BOX_INITX ((tft.w - BOX_SIZE) / 2)
@@ -71,6 +72,7 @@ movex:
 		switch (game.mode) {
 		case 0:
 			if (box.x == tft.w - BOX_SIZE) {
+				sound_freq(SOUND_EDGE);
 				box.dx = 0;
 				goto movex;
 			}
@@ -89,8 +91,7 @@ movex:
 				return 0;
 			}
 			connect_put(tft.w - box.x);
-			connect_put(box.y / 0x0100);
-			connect_put(box.y % 0x0100);
+			connect_put16(box.y);
 			connect_put(box.dy << 1 | box.dx);
 			if (connect_get() != CONN_READY) {
 				game_connFailed();
@@ -108,6 +109,11 @@ movex:
 				break;
 			if (box.y + BOX_SIZE >= bar[1].y && \
 					box.y <= bar[1].y + bar[1].h) {
+				sound_freq(SOUND_TOUCH);
+				if (game.mode == 3) {
+					connect_put(CONN_SOUND);
+					connect_put16(SOUND_TOUCH);
+				}
 				box.dx = 0;
 				box.x = bar[1].x - BOX_SIZE;
 				game.score[1]++;
@@ -129,8 +135,7 @@ movex:
 					return 0;
 				}
 				connect_put(1);
-				connect_put(box.y / 0x0100);
-				connect_put(box.y % 0x0100);
+				connect_put16(box.y);
 				connect_put(box.dy << 1 | box.dx);
 				if (connect_get() != CONN_READY) {
 					game_connFailed();
@@ -152,6 +157,11 @@ movex:
 			if (box.x >= bar[0].x)
 				if (box.y + BOX_SIZE >= bar[0].y && \
 				    box.y <= bar[0].y + bar[0].h) {
+					sound_freq(SOUND_TOUCH);
+					if (game.mode == 2) {
+						connect_put(CONN_SOUND);
+						connect_put16(SOUND_TOUCH);
+					}
 					box.dx = 1;
 					box.x = bar[0].x + bar[0].w;
 					game.score[0]++;
@@ -164,12 +174,22 @@ movex:
 movey:
 	if (box.dy) {	// Moving down
 		if (box.y == tft.h - BOX_SIZE) {
+			sound_freq(SOUND_EDGE);
+			if (game.mode == 3 || game.mode == 2) {
+				connect_put(CONN_SOUND);
+				connect_put16(SOUND_EDGE);
+			}
 			box.dy = 0;
 			goto movey;
 		}
 		box.y++;
 	} else {	// Moving up
 		if (box.y == 0) {
+			sound_freq(SOUND_EDGE);
+			if (game.mode == 3 || game.mode == 2) {
+				connect_put(CONN_SOUND);
+				connect_put16(SOUND_EDGE);
+			}
 			box.dy = 1;
 			goto movey;
 		}

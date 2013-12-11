@@ -5,6 +5,7 @@
 #include "bar.h"
 #include "box.h"
 #include "connect.h"
+#include "sound.h"
 
 static inline void init(void)
 {
@@ -15,6 +16,7 @@ static inline void init(void)
 	ROE_init();
 	timer0_init();
 	connect_init();
+	sound_init();
 	sei();
 	tft_setBGLight(1);
 }

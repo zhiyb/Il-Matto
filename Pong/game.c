@@ -5,6 +5,7 @@
 #include "rotary.h"
 #include "game.h"
 #include "connect.h"
+#include "sound.h"
 
 #define ENABLE_CHEAT
 
@@ -31,6 +32,11 @@ void game_init(void);
 	else \
 		tft_setColour(a ## _INACT_FGC, a ## _INACT_BGC); \
 	tft_print_string(s); \
+} while (0)
+#define SOUND(freq) do { \
+	sound_freq(freq); \
+	connect_put(CONN_SOUND); \
+	connect_put16(freq); \
 } while (0)
 
 #define GAME_MODE_X		(tft.w / 6)
@@ -84,10 +90,12 @@ get:
 	switch (ROE_get()) {
 	case ROE_SW1:
 	case ROE_SW2:
+		sound_freq(SOUND_CONF);
 		while (ROE_get() != ROE_N);
 		goto enter;
 	case ROE_CW1:
 	case ROE_CW2:
+		sound_freq(SOUND_SELECT);
 		if (index == 3)
 			index = 0;
 		else
@@ -95,6 +103,7 @@ get:
 		goto list;
 	case ROE_CCW1:
 	case ROE_CCW2:
+		sound_freq(SOUND_SELECT);
 		if (index == 0)
 			index = 3;
 		else
@@ -163,10 +172,12 @@ get:
 	switch (ROE_get()) {
 	case ROE_SW1:
 	case ROE_SW2:
+		SOUND(SOUND_CONF);
 		while (ROE_get() != ROE_N);
 		goto enter;
 	case ROE_CW1:
 	case ROE_CW2:
+		SOUND(SOUND_SELECT);
 		if (index == 2)
 			index = 0;
 		else
@@ -188,12 +199,15 @@ refresh:
 		goto list;
 	case ROE_CCW1:
 	case ROE_CCW2:
+		SOUND(SOUND_SELECT);
 		if (index == 0)
 			index = 2;
 		else
 			index--;
 		goto refresh;
 	}
+	if (connect_read() == CONN_SOUND)
+		sound_freq(connect_get16());
 	goto get;
 
 enter:
@@ -244,6 +258,7 @@ get:
 	switch (ROE_get()) {
 	case ROE_SW1:
 	case ROE_SW2:
+		SOUND(SOUND_CONF);
 		while (ROE_get() != ROE_N);
 		tft_setOrient(tft_getOrient() + 1);
 		goto init;
@@ -267,6 +282,8 @@ get:
 		RECTANGLE_CLEAN(GAME_S);
 		box_show(GAME_BGC);
 		return;
+	case CONN_SOUND:
+		sound_freq(connect_get16());
 	}
 	goto get;
 }
@@ -283,10 +300,12 @@ get:
 #define GAME_CONNF_STR_BGC	GAME_CONNF_BGC
 void game_connFailed(void)
 {
+	sound_freq(SOUND_FAILED);
 	RECTANGLE(GAME_CONNF);
 	tft_setZoom(2);
 	STRING(GAME_CONNF_STR);
 	while (ROE_get() == ROE_N);
+	sound_freq(SOUND_CONF);
 	while (ROE_get() != ROE_N);
 	RECTANGLE_CLEAN(GAME_CONNF);
 }
@@ -318,6 +337,7 @@ void game_over(uint8_t i)
 			return;
 		}
 	}
+	sound_freq(SOUND_FAILED);
 	RECTANGLE(GAME_OVER);
 	tft_setZoom(2);
 	STRING(GAME_OVER_STR);
@@ -326,14 +346,9 @@ void game_over(uint8_t i)
 	tft_print_string("Player");
 	tft_print_uint16(i + 1);
 	tft_print_string(" LOST");
-get:
-	switch (ROE_get()) {
-	case ROE_SW1:
-	case ROE_SW2:
-		while (ROE_get() != ROE_N);
-		return;
-	}
-	goto get;
+	while (ROE_get() == ROE_N);
+	sound_freq(SOUND_CONF);
+	while (ROE_get() != ROE_N);
 }
 
 #define GAME_SCORE0_X	20
@@ -492,8 +507,7 @@ get:
 	case CONN_REPORT:
 		connect_put(CONN_READY);
 		box.x = connect_get();
-		box.y = (uint16_t)connect_get() << 8;
-		box.y |= connect_get();
+		box.y = connect_get16();
 		box.dx = connect_get();
 		connect_put(CONN_READY);
 		box.x = tft.w - box.x;
@@ -509,6 +523,8 @@ get:
 		game.mode = 1;		// Disable game_over() send function
 		game_over(cheat);
 		return;
+	case CONN_SOUND:
+		sound_freq(connect_get16());
 	}
 	goto get;
 }
@@ -550,8 +566,7 @@ get:
 	case CONN_REPORT:
 		connect_put(CONN_READY);
 		box.x = connect_get();
-		box.y = (uint16_t)connect_get() << 8;
-		box.y |= connect_get();
+		box.y = connect_get16();
 		box.dx = connect_get();
 		connect_put(CONN_READY);
 		if (box.y + BOX_SIZE > tft.h)
@@ -567,6 +582,8 @@ get:
 		game.mode = 1;		// Disable game_over() send function
 		game_over(cheat);
 		return;
+	case CONN_SOUND:
+		sound_freq(connect_get16());
 	}
 	goto get;
 }
