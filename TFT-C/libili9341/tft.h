@@ -399,7 +399,7 @@ static inline void tft_point(uint16_t x, uint16_t y, uint16_t c)
 
 static inline void tft_setOrient(uint8_t o)
 {
-	ili9341_setOrient(o);
+start:
 	switch (o) {
 	case Landscape:
 	case FlipLandscape:
@@ -410,7 +410,12 @@ static inline void tft_setOrient(uint8_t o)
 	case FlipPortrait:
 		tft.w = SIZE_W;
 		tft.h = SIZE_H;
+		break;
+	default:
+		o = 0;
+		goto start;
 	}
+	ili9341_setOrient(o);
 	tft.orient = o;
 	tft.x = 0;
 	tft.y = 0;
