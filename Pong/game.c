@@ -1,4 +1,3 @@
-#include <util/delay.h>
 #include "libili9341/tft.h"
 #include "bar.h"
 #include "box.h"
