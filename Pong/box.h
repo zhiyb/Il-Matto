@@ -123,8 +123,6 @@ movex:
 		}
 		box.x++;
 	} else {	// Moving left
-		if (!box.e)
-			return 1;
 		if (game.mode == 3) {
 			if (box.x == 0 || (box.n == 1 && box.e)) {
 				box.n = 1;
@@ -134,7 +132,7 @@ movex:
 					game_connFailed();
 					return 0;
 				}
-				connect_put(1);
+				connect_put(box.x + 1);
 				connect_put16(box.y);
 				connect_put(box.dy << 1 | box.dx);
 				if (connect_get() != CONN_READY) {
