@@ -12,7 +12,7 @@
 #define CONN_GAMEOVER	'g'
 #define CONN_SOUND	'o'
 
-#define CONN_WAIT	20000
+#define CONN_WAIT	255
 
 #include <avr/io.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@ static inline uint8_t connect_read(void)
 
 static inline uint8_t connect_get(void)
 {
-	uint16_t w = CONN_WAIT;
+	uint8_t w = CONN_WAIT;
 	while(!(UCSR0A & _BV(RXC0)) && w--);
 	if (UCSR0A & _BV(RXC0))
 		return UDR0;
