@@ -1,3 +1,4 @@
+#include <avr/eeprom.h>
 #include "libili9341/tft.h"
 #include "bar.h"
 #include "box.h"
@@ -6,6 +7,7 @@
 #include "game.h"
 #include "connect.h"
 #include "sound.h"
+#include "eemem.h"
 
 #define ENABLE_CHEAT
 
@@ -310,23 +312,69 @@ void game_connFailed(void)
 	RECTANGLE_CLEAN(GAME_CONNF);
 }
 
-#define GAME_OVER_W		200
-#define GAME_OVER_H		100
+static inline void game_record(uint8_t i)
+{
+	static uint8_t first = 1;
+	if ((first && EEPROM_first()) || i == 2) {
+		first = 0;
+		eeprom_update_word(EE_PONG_SCORE0, game.score[0]);
+		eeprom_update_word(EE_PONG_SCORE1, game.score[1]);
+		if (i == 0) {
+			eeprom_update_word(EE_PONG_OVERREC0, 1);
+			eeprom_update_word(EE_PONG_OVERREC1, 0);
+		} else if (i == 1) {
+			eeprom_update_word(EE_PONG_OVERREC0, 0);
+			eeprom_update_word(EE_PONG_OVERREC1, 1);
+		} else if (i == 2) {
+			eeprom_update_word(EE_PONG_OVERREC0, 0);
+			eeprom_update_word(EE_PONG_OVERREC1, 0);
+		}
+	} else {
+		if (eeprom_read_word(EE_PONG_SCORE0) < game.score[0])
+			eeprom_update_word(EE_PONG_SCORE0, game.score[0]);
+		if (eeprom_read_word(EE_PONG_SCORE1) < game.score[1])
+			eeprom_update_word(EE_PONG_SCORE1, game.score[1]);
+		if (i == 0)
+			eeprom_update_word(EE_PONG_OVERREC0, \
+				eeprom_read_word(EE_PONG_OVERREC0) + 1);
+		else
+			eeprom_update_word(EE_PONG_OVERREC1, \
+				eeprom_read_word(EE_PONG_OVERREC1) + 1);
+	};
+}
+
+#define GAME_OVER_W		(FONT_WIDTH * 2 * 12 + FONT_WIDTH * 2 * 2)
+#define GAME_OVER_H		(FONT_HEIGHT * 2 * 5 + FONT_HEIGHT * 2 * 2)
 #define GAME_OVER_X		((tft.w - GAME_OVER_W) / 2)
 #define GAME_OVER_Y		((tft.h - GAME_OVER_H) / 2)
 #define GAME_OVER_BGC		LTY
 #define GAME_OVER_STR		"GAME OVER!"
 #define GAME_OVER_STR_X		(GAME_OVER_X + \
 		(GAME_OVER_W - FONT_WIDTH * 2 * 10) / 2)
-#define GAME_OVER_STR_Y		(GAME_OVER_Y + \
-		(GAME_OVER_H - FONT_HEIGHT * 2 * 2) / 2)
-#define GAME_OVER_STR_FGC	0xF800
+#define GAME_OVER_STR_Y		(GAME_OVER_Y + FONT_HEIGHT * 2)
+#define GAME_OVER_STR_FGC	RED
 #define GAME_OVER_STR_BGC	GAME_OVER_BGC
 #define GAME_OVER_LOST_X	(GAME_OVER_X + \
 		(GAME_OVER_W - FONT_WIDTH * 2 * 12) / 2)
 #define GAME_OVER_LOST_Y	(GAME_OVER_STR_Y + FONT_HEIGHT * 2)
 #define GAME_OVER_LOST_FGC	BLACK
 #define GAME_OVER_LOST_BGC	GAME_OVER_BGC
+#define GAME_OVER_HIGH_X	(GAME_OVER_X + \
+		(GAME_OVER_W - FONT_WIDTH * 2 * 11) / 2)
+#define GAME_OVER_HIGH_Y	(GAME_OVER_LOST_Y + FONT_HEIGHT * 2)
+#define GAME_OVER_HIGH_FGC	GREEN
+#define GAME_OVER_HIGH_BGC	GAME_OVER_BGC
+#define GAME_OVER_REC_X		(GAME_OVER_X + \
+		(GAME_OVER_W - FONT_WIDTH * 2 * 11) / 2)
+#define GAME_OVER_REC_Y		(GAME_OVER_HIGH_Y + FONT_HEIGHT * 2)
+#define GAME_OVER_REC_FGC	BLUE
+#define GAME_OVER_REC_BGC	GAME_OVER_BGC
+#define GAME_OVER_CLN		"Clean record"
+#define GAME_OVER_CLN_X		(GAME_OVER_X + \
+		(GAME_OVER_W - FONT_WIDTH * 2 * 12) / 2)
+#define GAME_OVER_CLN_Y		(GAME_OVER_REC_Y + FONT_HEIGHT * 2)
+#define GAME_OVER_CLN_FGC	BLACK
+#define GAME_OVER_CLN_BGC	YELLOW
 void game_over(uint8_t i)
 {
 	if (game.mode == 2 || game.mode == 3) {
@@ -338,6 +386,7 @@ void game_over(uint8_t i)
 		}
 	}
 	sound_freq(SOUND_FAILED);
+	game_record(i);
 	RECTANGLE(GAME_OVER);
 	tft_setZoom(2);
 	STRING(GAME_OVER_STR);
@@ -346,8 +395,28 @@ void game_over(uint8_t i)
 	tft_print_string("Player");
 	tft_print_uint16(i + 1);
 	tft_print_string(" LOST");
-	while (ROE_get() == ROE_N);
-	sound_freq(SOUND_CONF);
+	tft_setXY(GAME_OVER_HIGH_X, GAME_OVER_HIGH_Y);
+	tft_setColour(GAME_OVER_HIGH_FGC, GAME_OVER_HIGH_BGC);
+	tft_print_uint16(eeprom_read_word(EE_PONG_SCORE0));
+	tft_print_string("/");
+	tft_print_uint16(eeprom_read_word(EE_PONG_SCORE1));
+	tft_setXY(GAME_OVER_REC_X, GAME_OVER_REC_Y);
+	tft_setColour(GAME_OVER_REC_FGC, GAME_OVER_REC_BGC);
+	tft_print_uint16(eeprom_read_word(EE_PONG_OVERREC0));
+	tft_print_string("/");
+	tft_print_uint16(eeprom_read_word(EE_PONG_OVERREC1));
+	STRING(GAME_OVER_CLN);
+get:
+	switch (ROE_get()) {
+	case ROE_SW2:
+	case ROE_SW1:
+		game_record(2);
+		sound_freq(SOUND_CONF);
+		break;
+	case ROE_N:
+		goto get;
+	}
+	sound_freq(SOUND_CANCEL);
 	while (ROE_get() != ROE_N);
 }
 

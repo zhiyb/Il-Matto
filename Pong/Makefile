@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= pong
-OBJ	= main.o game.o rotary.o sound.o
+OBJ	= main.o game.o rotary.o sound.o eemem.o
 SUBDIRS = 
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
