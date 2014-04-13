@@ -22,6 +22,7 @@ namespace spi
 	static inline uint8_t trans(const uint8_t d = 0xFF);
 	static inline uint8_t trans8(void) {return trans();}
 	static inline uint16_t trans16(void);
+	static inline uint16_t trans16big(void);
 	static inline uint32_t trans24(void);
 	static inline uint32_t trans32(const uint32_t d = 0xFFFFFFFF);
 	static inline uint32_t trans32big(const uint32_t d = 0xFFFFFFFF);
@@ -74,6 +75,13 @@ inline uint16_t spi::trans16(void)
 {
 	uint16_t res = spi::trans();
 	res |= (uint16_t)spi::trans() << 8;
+	return res;
+}
+
+inline uint16_t spi::trans16big(void)
+{
+	uint16_t res = (uint16_t)spi::trans() << 8;
+	res |= (uint16_t)spi::trans();
 	return res;
 }
 

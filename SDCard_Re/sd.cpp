@@ -37,8 +37,6 @@ uint8_t sdhw_t::init(void)
 	spi::assert(false);
 	for (uint8_t i = 0; i < 10; i++)
 		spi::trans();			// >= 74 dummy clock
-	spi::assert(true);
-	spi::trans();
 	if ((errno = cmd(GO_IDLE_STATE, 0, GO_IDLE_STATE_CRC)) > 0x01)
 		return free(2);
 	if ((errno = cmd(SEND_IF_COND, SEND_IF_COND_ARG, SEND_IF_COND_CRC)) > 0x01)
@@ -75,9 +73,6 @@ uint32_t sdhw_t::getSize(void)
 
 uint8_t sdhw_t::getMBR(void)
 {
-	spi::free(false);
-	spi::assert(true);
-	spi::trans();
 	if (!dataInit(Read, Single, 0))
 		return free(1);
 	if (!readInit())
@@ -93,8 +88,7 @@ uint8_t sdhw_t::getMBR(void)
 	bool exist = true;
 	if (spi::trans() != 0x55 || spi::trans() != 0xAA)
 		exist = false;
-	spi::trans();
-	spi::trans();
+	readCRC();
 	if (!exist)
 		return free(3);
 	return free(0);

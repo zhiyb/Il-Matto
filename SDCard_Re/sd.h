@@ -56,6 +56,7 @@ public:
 	inline struct reg_t readRegister(const uint8_t type);
 	inline uint32_t size(void) {return _size;}
 	inline class mbr_t& mbr(void) {return _mbr;}
+	static inline uint16_t readCRC(void) {return spi::trans16big();}
 
 	virtual inline uint8_t readNextByte(void);
 	virtual inline bool dataStop(const bool rw) {return dataStop(rw, Multiple);}
@@ -64,7 +65,7 @@ public:
 protected:
 	static inline void wait(void) {while (spi::trans() != 0xFF);}
 	static inline uint8_t response(void);
-	static inline uint8_t free(const uint8_t err);
+	static inline uint8_t free(const uint8_t err = 0);
 	static inline void send(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t cmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t acmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
@@ -131,7 +132,7 @@ inline uint8_t sdhw_t::response(void)
 inline void sdhw_t::send(const uint8_t index, const uint32_t arg, const uint8_t crc)
 {
 	spi::assert(false);
-	spi::trans();
+	//spi::trans();
 	spi::assert(true);
 	spi::trans();
 	spi::trans(index | _BV(6));
@@ -157,19 +158,16 @@ inline struct reg_t sdhw_t::readRegister(const uint8_t type)
 {
 	struct reg_t r;
 	spi::free(false);
-	spi::assert(true);
-	spi::trans();
 	if ((errno = cmd(type)) != 0x00)
 		goto ret;
 	if ((errno = response()) != 0xFE)
 		goto ret;
 	for (uint8_t i = 0; i < 16; i++)
 		r.data[i] = spi::trans();
-	spi::trans();
-	spi::trans();
+	readCRC();
 	errno = 0;
 ret:
-	spi::free(true);
+	free();
 	return r;
 }
 
@@ -183,8 +181,7 @@ inline bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
 inline uint8_t sdhw_t::readNextByte(void)
 {
 	if (counter % 512 == 0) {
-		spi::trans();
-		spi::trans();
+		readCRC();
 		readInit();
 	}
 	counter++;
