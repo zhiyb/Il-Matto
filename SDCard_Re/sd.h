@@ -31,42 +31,50 @@
 
 #include <avr/io.h>
 #include "spi.h"
+#include "mbr.h"
+#include "hw.h"
 
-struct reg {
+struct reg_t {
 	uint8_t data[16];
 };
 
-class sdhw
+class sdhw_t : public hw_t
 {
 public:
-	enum Operations {Read = 0, Write = 1, Single = 0, Multi = 1};
+	enum Operations {Single = 0, Multi = 1};
 
-	sdhw(void);
+	sdhw_t(void);
 	uint8_t init(void);
 	bool detect(void);
+	uint32_t getSize(void);
+	uint8_t getMBR(void);
 	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
 	inline uint8_t err(void) {return errno;}
 	inline bool dataInit(const bool rw, const bool multi, const uint32_t addr);
 	inline bool readInit(void);
 	inline bool dataStop(const bool rw);
-	inline struct reg readRegister(const uint8_t type);
+	inline struct reg_t readRegister(const uint8_t type);
 	inline uint32_t size(void) {return _size;}
-	inline uint32_t getSize(void);
+	inline class mbr_t& mbr(void) {return _mbr;}
+
+	virtual inline uint8_t readNextByte(void) {return spi::trans();}
+	virtual inline bool dataAddress(const bool rw, const uint32_t addr);
 
 protected:
 	static inline void wait(void) {while (spi::trans() != 0xFF);}
 	static inline uint8_t response(void);
-	static inline uint8_t free(const uint8_t errno);
+	static inline uint8_t free(const uint8_t err);
 	static inline uint8_t cmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t acmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 
+	class mbr_t _mbr;
 	uint32_t _size;
 	uint8_t errno;
 };
 
-extern class sdhw sd;
+extern class sdhw_t sd;
 
-inline bool sdhw::dataInit(const bool rw, const bool multi, const uint32_t addr)
+inline bool sdhw_t::dataInit(const bool rw, const bool multi, const uint32_t addr)
 {
 	uint8_t command;
 	if (rw)
@@ -82,14 +90,14 @@ inline bool sdhw::dataInit(const bool rw, const bool multi, const uint32_t addr)
 	return true;
 }
 
-inline bool sdhw::readInit(void)
+inline bool sdhw_t::readInit(void)
 {
 	if ((errno = response()) != 0xFE)
 		return false;
 	return true;
 }
 
-inline bool sdhw::dataStop(const bool rw)
+inline bool sdhw_t::dataStop(const bool rw)
 {
 	cmd(STOP_TRANSMISSION);
 	if (rw == Read && (errno = response()) != 0x00)
@@ -98,20 +106,21 @@ inline bool sdhw::dataStop(const bool rw)
 	return true;
 }
 
-inline uint8_t sdhw::free(const uint8_t errno)
+inline uint8_t sdhw_t::free(const uint8_t err)
 {
 	spi::free(true);
-	return errno;
+	spi::assert(false);
+	return err;
 }
 
-inline uint8_t sdhw::response(void)
+inline uint8_t sdhw_t::response(void)
 {
 	uint8_t res;
 	while ((res = spi::trans()) == 0xFF);
 	return res;
 }
 
-inline uint8_t sdhw::cmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
+inline uint8_t sdhw_t::cmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
 {
 	wait();
 	spi::trans(index | _BV(6));
@@ -120,7 +129,7 @@ inline uint8_t sdhw::cmd(const uint8_t index, const uint32_t arg, const uint8_t 
 	return response();
 }
 
-inline uint8_t sdhw::acmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
+inline uint8_t sdhw_t::acmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
 {
 	uint8_t res = cmd(APP_CMD);
 	if (res > 0x01)
@@ -128,9 +137,9 @@ inline uint8_t sdhw::acmd(const uint8_t index, const uint32_t arg, const uint8_t
 	return cmd(index, arg, crc);
 }
 
-inline struct reg sdhw::readRegister(const uint8_t type)
+inline struct reg_t sdhw_t::readRegister(const uint8_t type)
 {
-	struct reg r;
+	struct reg_t r;
 	spi::free(false);
 	spi::assert(true);
 	spi::trans();
@@ -148,13 +157,14 @@ ret:
 	return r;
 }
 
-inline uint32_t sdhw::getSize(void)
+inline bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
 {
-	struct reg csd = readRegister(SEND_CSD);
-	if (errno)
-		return 0;
-	else
-		return (((uint32_t)csd.data[7] << 16) | ((uint32_t)csd.data[8] << 8) | csd.data[9]) * 512;
+	if (!dataInit(rw, Single, addr))
+		return false;
+	if (rw == Read)
+		if (!readInit())
+			return false;
+	return true;
 }
 
 #endif

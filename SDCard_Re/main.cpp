@@ -31,6 +31,9 @@ start:
 	puts(sd.writeProtected() ? "Write protected!" : "Not write protected!");
 	printf("Initialisation result: %u, errno: %u\n", sd.init(), sd.err());
 	printf("SDCard size: %u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
+	printf("Read MBR result: %u, errno: %u\n", sd.getMBR(), sd.err());
+	for (uint8_t i = 0; i < 4; i++)
+		printf("Partition %u type: 0x%02X\n", i, sd.mbr().type[i]);
 	while (sd.detect());
 	goto start;
 

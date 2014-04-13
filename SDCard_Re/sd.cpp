@@ -1,9 +1,9 @@
 #include "sd.h"
 #include <util/delay.h>
 
-class sdhw sd;
+class sdhw_t sd;
 
-sdhw::sdhw(void)
+sdhw_t::sdhw_t(void)
 {
 	SD_DDR &= ~(SD_CD | SD_WP);
 	SD_PORT |= SD_CD | SD_WP;
@@ -13,7 +13,7 @@ sdhw::sdhw(void)
 	errno = 0;
 }
 
-bool sdhw::detect(void)
+bool sdhw_t::detect(void)
 {
 	if (SD_PIN & SD_CD)
 		return false;
@@ -27,7 +27,7 @@ loop:
         return true;
 }
 
-uint8_t sdhw::init(void)
+uint8_t sdhw_t::init(void)
 {
 	if (SD_PIN & SD_CD)
 		return 1;
@@ -61,5 +61,41 @@ initFin:
 		return free(7);
 	spi::fast();
 	_size = getSize();
+	return free(0);
+}
+
+uint32_t sdhw_t::getSize(void)
+{
+	struct reg_t csd = readRegister(SEND_CSD);
+	if (errno)
+		return 0;
+	else
+		return (((uint32_t)csd.data[7] << 16) | ((uint32_t)csd.data[8] << 8) | csd.data[9]) * 512;
+}
+
+uint8_t sdhw_t::getMBR(void)
+{
+	spi::free(false);
+	spi::assert(true);
+	spi::trans();
+	if (!dataInit(Read, Single, 0))
+		return free(1);
+	if (!readInit())
+		return free(2);
+	for (uint16_t i = 0; i < 446; i++)
+		spi::trans();
+	for (uint8_t j = 0; j < 4; j++) {
+		uint8_t data[16];
+		for (uint8_t i = 0; i < 16; i++)
+			data[i] = spi::trans();
+		_mbr.setEntry(j, data);
+	}
+	bool exist = true;
+	if (spi::trans() != 0x55 || spi::trans() != 0xAA)
+		exist = false;
+	spi::trans();
+	spi::trans();
+	if (!exist)
+		return free(3);
 	return free(0);
 }
