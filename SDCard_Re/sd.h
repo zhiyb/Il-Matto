@@ -41,7 +41,7 @@ struct reg_t {
 class sdhw_t : public hw_t
 {
 public:
-	enum Operations {Single = 0, Multi = 1};
+	enum Operations {Single = 0, Multiple = 1};
 
 	sdhw_t(void);
 	uint8_t init(void);
@@ -57,19 +57,21 @@ public:
 	inline uint32_t size(void) {return _size;}
 	inline class mbr_t& mbr(void) {return _mbr;}
 
-	virtual inline uint8_t readNextByte(void) {return spi::trans();}
-	virtual inline bool dataStop(const bool rw) {return dataStop(rw, Single);}
+	virtual inline uint8_t readNextByte(void);
+	virtual inline bool dataStop(const bool rw) {return dataStop(rw, Multiple);}
 	virtual inline bool dataAddress(const bool rw, const uint32_t addr);
 
 protected:
 	static inline void wait(void) {while (spi::trans() != 0xFF);}
 	static inline uint8_t response(void);
 	static inline uint8_t free(const uint8_t err);
+	static inline void send(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t cmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t acmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 
 	class mbr_t _mbr;
 	uint32_t _size;
+	uint16_t counter;
 	uint8_t errno;
 };
 
@@ -77,6 +79,8 @@ extern class sdhw_t sd;
 
 inline bool sdhw_t::dataInit(const bool rw, const bool multi, const uint32_t addr)
 {
+	spi::free(false);
+	counter = 0;
 	uint8_t command;
 	if (rw)
 		command = WRITE_SINGLE_BLOCK;
@@ -85,9 +89,7 @@ inline bool sdhw_t::dataInit(const bool rw, const bool multi, const uint32_t add
 	if (multi)
 		command++;
 	if ((errno = cmd(command, addr)) != 0x00)
-		return false;
-	if (command == WRITE_SINGLE_BLOCK || command == WRITE_MULTIPLE_BLOCK)
-		spi::trans();
+		return free(false);
 	return true;
 }
 
@@ -101,23 +103,15 @@ inline bool sdhw_t::readInit(void)
 inline bool sdhw_t::dataStop(const bool rw, const bool multi)
 {
 	if (multi) {
-		spi::trans(STOP_TRANSMISSION | _BV(6));
-		spi::trans32(0);
-		spi::trans(1);
+		send(STOP_TRANSMISSION);
 		spi::trans();
-		response();
-		if (rw == Read && (errno = response()) != 0x00) {
-			spi::assert(false);
-			spi::free(true);
-			return false;
-		}
+		if (rw == Read && (errno = response()) != 0x00)
+			return free(false);
 		wait();
 	} else
 		for (uint16_t i = 0; i < 512 + 2; i++)
 			spi::trans();
-	spi::assert(false);
-	spi::free(true);
-	return true;
+	return free(true);
 }
 
 inline uint8_t sdhw_t::free(const uint8_t err)
@@ -134,12 +128,20 @@ inline uint8_t sdhw_t::response(void)
 	return res;
 }
 
-inline uint8_t sdhw_t::cmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
+inline void sdhw_t::send(const uint8_t index, const uint32_t arg, const uint8_t crc)
 {
-	wait();
+	spi::assert(false);
+	spi::trans();
+	spi::assert(true);
+	spi::trans();
 	spi::trans(index | _BV(6));
 	spi::trans32(arg);
 	spi::trans((crc << 1) | 1);
+}
+
+inline uint8_t sdhw_t::cmd(const uint8_t index, const uint32_t arg, const uint8_t crc)
+{
+	send(index, arg, crc);
 	return response();
 }
 
@@ -171,17 +173,22 @@ ret:
 	return r;
 }
 
-bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
+inline bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
 {
-	spi::free(false);
-	spi::assert(true);
-	spi::trans();
-	if (!dataInit(rw, Single, addr))
+	if (!dataInit(rw, Multiple, addr))
 		return false;
-	if (rw == Read)
-		if (!readInit())
-			return false;
 	return true;
+}
+
+inline uint8_t sdhw_t::readNextByte(void)
+{
+	if (counter % 512 == 0) {
+		spi::trans();
+		spi::trans();
+		readInit();
+	}
+	counter++;
+	return spi::trans();
 }
 
 #endif
