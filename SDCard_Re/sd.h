@@ -51,13 +51,14 @@ public:
 	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
 	inline uint8_t err(void) {return errno;}
 	inline bool dataInit(const bool rw, const bool multi, const uint32_t addr);
+	inline bool dataStop(const bool rw, const bool multi);
 	inline bool readInit(void);
-	inline bool dataStop(const bool rw);
 	inline struct reg_t readRegister(const uint8_t type);
 	inline uint32_t size(void) {return _size;}
 	inline class mbr_t& mbr(void) {return _mbr;}
 
 	virtual inline uint8_t readNextByte(void) {return spi::trans();}
+	virtual inline bool dataStop(const bool rw) {return dataStop(rw, Single);}
 	virtual inline bool dataAddress(const bool rw, const uint32_t addr);
 
 protected:
@@ -97,12 +98,25 @@ inline bool sdhw_t::readInit(void)
 	return true;
 }
 
-inline bool sdhw_t::dataStop(const bool rw)
+inline bool sdhw_t::dataStop(const bool rw, const bool multi)
 {
-	cmd(STOP_TRANSMISSION);
-	if (rw == Read && (errno = response()) != 0x00)
-		return false;
-	wait();
+	if (multi) {
+		spi::trans(STOP_TRANSMISSION | _BV(6));
+		spi::trans32(0);
+		spi::trans(1);
+		spi::trans();
+		response();
+		if (rw == Read && (errno = response()) != 0x00) {
+			spi::assert(false);
+			spi::free(true);
+			return false;
+		}
+		wait();
+	} else
+		for (uint16_t i = 0; i < 512 + 2; i++)
+			spi::trans();
+	spi::assert(false);
+	spi::free(true);
 	return true;
 }
 
@@ -157,8 +171,11 @@ ret:
 	return r;
 }
 
-inline bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
+bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
 {
+	spi::free(false);
+	spi::assert(true);
+	spi::trans();
 	if (!dataInit(rw, Single, addr))
 		return false;
 	if (rw == Read)
