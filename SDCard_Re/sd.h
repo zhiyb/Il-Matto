@@ -50,17 +50,17 @@ public:
 	bool detect(void);
 	uint32_t getSize(void);
 	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
-	inline uint8_t err(void) {return errno;}
+	inline uint8_t err(void) const {return errno;}
 	inline bool dataInit(const bool rw, const bool multi, const uint32_t addr);
 	inline bool dataStop(const bool rw, const bool multi);
 	inline bool readInit(void);
 	inline struct reg_t readRegister(const uint8_t type);
-	inline uint32_t size(void) {return _size;}
+	inline uint32_t size(void) const {return _size;}
 	static inline uint16_t readCRC(void) {return spi::trans16big();}
 
-	virtual inline uint8_t readNextByte(void);
-	virtual inline bool dataStop(const bool rw) {return dataStop(rw, Multiple);}
-	virtual inline bool dataAddress(const bool rw, const uint32_t addr);
+	virtual inline uint8_t nextByte(void);
+	virtual inline bool streamStart(const bool rw, const uint32_t addr);
+	virtual inline bool streamStop(const bool rw) {return dataStop(rw, Multiple);}
 
 protected:
 	static inline void wait(void) {while (spi::trans() != 0xFF);}
@@ -170,14 +170,14 @@ ret:
 	return r;
 }
 
-inline bool sdhw_t::dataAddress(const bool rw, const uint32_t addr)
+inline bool sdhw_t::streamStart(const bool rw, const uint32_t addr)
 {
 	if (!dataInit(rw, Multiple, addr))
 		return false;
 	return true;
 }
 
-inline uint8_t sdhw_t::readNextByte(void)
+inline uint8_t sdhw_t::nextByte(void)
 {
 	if (counter % 512 == 0) {
 		readCRC();
