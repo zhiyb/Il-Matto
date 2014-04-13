@@ -29,7 +29,7 @@ int main(void)
 	init();
 
 start:
-	tft *= 2;
+	tft *= 1;
 	tft /= tft.FlipLandscape;
 	tft.clean();
 	puts("*** SD library test ***");
@@ -45,11 +45,11 @@ start:
 		printf("Initialise failed with %02X!\n", res);
 		goto finished;
 	}
-	/*printf("SD Card version: %u\n", sd.version() & 0x0F);
+	printf("SD Card version: %u\n", sd.version() & 0x0F);
 	printf("Address: %s\n", (sd.version() & 0xF0) ? \
 			"Block address" : "Byte address");
 
-	printf("Manufacture ID: %u\n", sd.cid().MID);
+	/*printf("Manufacture ID: %u\n", sd.cid().MID);
 	printf("OEM/Application ID: %u\n", sd.cid().OID);
 	printf("Product name: %.5s\n", sd.cid().PNM);
 	printf("Serial number: %lu\n", sd.cid().PSN);
@@ -92,7 +92,7 @@ start:
 		}
 		fs.closedir(dir);
 		//tft /= tft.Portrait;
-#define FUNC 1
+#define FUNC 0
 #if (FUNC == 2)
 		timer0::set(8000);
 		char wav[] = "ILMATT~1/WAV/TEST    WAV";

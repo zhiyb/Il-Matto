@@ -1,14 +1,8 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-<<<<<<< HEAD:TFT/Makefile
-PRG	= TFT
-OBJ	= main.o ascii.o tft.o
-=======
 PRG	= SDCard
 OBJ	= main.o ascii.o tft.o ascii.o sd.o fat32.o dir.o
-#scale.o pan.o melody.o
->>>>>>> SDCard:SDCard/Makefile
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
@@ -74,14 +68,6 @@ lst: $(PRG).lst
 # Only hex is needed; Others: bin, srec
 text: hex
 
-<<<<<<< HEAD:TFT/Makefile
-EXTRA_CLEAN_FILES	+= $(PRG).hex
-
-=======
-EXTRA_CLEAN_FILES	+= *.hex
-EXTRA_CLEAN_FILES	+= *.bin
-EXTRA_CLEAN_FILES	+= *.srec
->>>>>>> SDCard:SDCard/Makefile
 hex: $(PRG).hex
 bin: $(PRG).bin
 srec: $(PRG).srec
