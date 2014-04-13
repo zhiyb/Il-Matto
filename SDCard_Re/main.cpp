@@ -3,6 +3,8 @@
 #include <util/delay.h>
 #include "tft.h"
 #include "sd.h"
+#include "mbr.h"
+#include "fat32.h"
 
 void init(void)
 {
@@ -32,9 +34,8 @@ start:
 	printf("Initialisation result: %u, errno: %u\n", sd.init(), sd.err());
 	printf("SDCard size: %u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
 	class mbr_t mbr(&sd);
-	printf("Read MBR result: %u\n", mbr.errno);
-	for (uint8_t i = 0; i < 4; i++)
-		printf("Partition %u type: 0x%02X\n", i, mbr.type[i]);
+	printf("Read MBR result: %u\n", mbr.err());
+	printf("Partition 1 type: 0x%02X\n", mbr.type(0));
 	puts("Test finished, remove SDCard to run again...");
 	while (sd.detect());
 	goto start;

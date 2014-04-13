@@ -31,7 +31,6 @@
 
 #include <avr/io.h>
 #include "spi.h"
-#include "mbr.h"
 #include "hw.h"
 
 struct reg_t {

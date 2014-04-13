@@ -6,13 +6,19 @@
 class mbr_t
 {
 public:
+	enum FSTypes {Empty = 0x00, FAT32_OLD = 0x0B, FAT32 = 0x0C};
 	enum ErrorTypes {Succeed = 0, AddressFailed = 1, NoMBRExist = 2, DataStopFailed = 3};
 
 	inline mbr_t(hw_t *hw);
+	inline uint8_t err(void) const {return errno;}
+	inline uint8_t type(const uint8_t index) const {return _type[index];}
+	inline uint8_t address(const uint8_t index) const {return _addr[index];}
+
+private:
 	inline void setEntry(const uint8_t index, uint8_t data[]);
 
-	uint8_t type[4], errno;
-	uint32_t addr[4];
+	uint8_t _type[4], errno;
+	uint32_t _addr[4];
 };
 
 inline mbr_t::mbr_t(hw_t *hw)
@@ -41,10 +47,10 @@ inline mbr_t::mbr_t(hw_t *hw)
 
 inline void mbr_t::setEntry(const uint8_t index, uint8_t data[])
 {
-	type[index] = data[4];
+	_type[index] = data[4];
 	for (uint8_t i = 0; i < 4; i++) {
-	        addr[index] <<= 8;
-		addr[index] |= data[8 + (3 - i)];
+		_addr[index] <<= 8;
+		_addr[index] |= data[8 + (3 - i)];
 	}
 }
 
