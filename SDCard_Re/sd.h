@@ -42,6 +42,9 @@ class sdhw_t : public hw_t
 {
 public:
 	enum Operations {Single = 0, Multiple = 1};
+	enum ErrorTypes {Succeed = 0, NotExist = 1, GO_IDLE_STATE_Failed = 2, \
+			SEND_IF_COND_Failed = 3, SEND_IF_COND_CheckFailed = 4, \
+			APP_SEND_OP_COND_Failed = 5, READ_OCR_Failed = 6, CCS_Failed = 7};
 
 	sdhw_t(void);
 	uint8_t init(void);
