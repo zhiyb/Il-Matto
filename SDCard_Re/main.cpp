@@ -31,17 +31,18 @@ start:
 	puts(sd.writeProtected() ? "Write protected!" : "Not write protected!");
 	printf("Initialisation result: %u, errno: %u\n", sd.init(), sd.err());
 	printf("SDCard size: %u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
-	printf("Read MBR result: %u, errno: %u\n", sd.getMBR(), sd.err());
+	class mbr_t mbr(&sd);
+	printf("Read MBR result: %u\n", mbr.errno);
 	for (uint8_t i = 0; i < 4; i++)
-		printf("Partition %u type: 0x%02X\n", i, sd.mbr().type[i]);
+		printf("Partition %u type: 0x%02X\n", i, mbr.type[i]);
 	hw_t *hw = &sd;
 	puts("hw read attempt 1.");
-	if (!hw->dataAddress(hw->Read, sd.mbr().addr[0]))
+	if (!hw->dataAddress(hw->Read, mbr.addr[0]))
 		printf("Initialise hw read failed: %u\n", sd.err());
 	if (!hw->dataStop(hw->Read))
 		printf("Stop hw read failed: %u\n", sd.err());
 	puts("hw read attempt 2.");
-	if (!hw->dataAddress(hw->Read, sd.mbr().addr[0]))
+	if (!hw->dataAddress(hw->Read, mbr.addr[0]))
 		printf("Initialise hw read failed: %u\n", sd.err());
 	if (!hw->dataStop(hw->Read))
 		printf("Stop hw read failed: %u\n", sd.err());

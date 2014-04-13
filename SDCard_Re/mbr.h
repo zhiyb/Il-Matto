@@ -1,14 +1,43 @@
 #ifndef MBR_H
 #define MBR_H
 
+#include "hw.h"
+
 class mbr_t
 {
 public:
+	enum ErrorTypes {Succeed = 0, AddressFailed = 1, NoMBRExist = 2, DataStopFailed = 3};
+
+	inline mbr_t(hw_t *hw);
 	inline void setEntry(const uint8_t index, uint8_t data[]);
 
-	uint8_t type[4];
+	uint8_t type[4], errno;
 	uint32_t addr[4];
 };
+
+inline mbr_t::mbr_t(hw_t *hw)
+{
+	if (!hw->dataAddress(hw_t::Read, 0)) {
+		errno = 1;
+		return;
+	}
+	for (uint16_t i = 0; i < 446; i++)
+		hw->readNextByte();
+	for (uint8_t j = 0; j < 4; j++) {
+		uint8_t data[16];
+		for (uint8_t i = 0; i < 16; i++)
+			data[i] = hw->readNextByte();
+		setEntry(j, data);
+	}
+	if (hw->readNextByte() != 0x55 || hw->readNextByte() != 0xAA)
+		errno = 2;
+	else
+		errno = 0;
+	if (!hw->dataStop(hw_t::Read)) {
+		errno = 3;
+		return;
+	}
+}
 
 inline void mbr_t::setEntry(const uint8_t index, uint8_t data[])
 {

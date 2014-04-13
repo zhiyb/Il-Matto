@@ -47,7 +47,6 @@ public:
 	uint8_t init(void);
 	bool detect(void);
 	uint32_t getSize(void);
-	uint8_t getMBR(void);
 	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
 	inline uint8_t err(void) {return errno;}
 	inline bool dataInit(const bool rw, const bool multi, const uint32_t addr);
@@ -55,7 +54,6 @@ public:
 	inline bool readInit(void);
 	inline struct reg_t readRegister(const uint8_t type);
 	inline uint32_t size(void) {return _size;}
-	inline class mbr_t& mbr(void) {return _mbr;}
 	static inline uint16_t readCRC(void) {return spi::trans16big();}
 
 	virtual inline uint8_t readNextByte(void);
@@ -70,7 +68,6 @@ protected:
 	static inline uint8_t cmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 	static inline uint8_t acmd(const uint8_t index, const uint32_t arg = 0, const uint8_t crc = 0xFF);
 
-	class mbr_t _mbr;
 	uint32_t _size;
 	uint16_t counter;
 	uint8_t errno;

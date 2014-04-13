@@ -70,26 +70,3 @@ uint32_t sdhw_t::getSize(void)
 	else
 		return (((uint32_t)csd.data[7] << 16) | ((uint32_t)csd.data[8] << 8) | csd.data[9]) * 512;
 }
-
-uint8_t sdhw_t::getMBR(void)
-{
-	if (!dataInit(Read, Single, 0))
-		return free(1);
-	if (!readInit())
-		return free(2);
-	for (uint16_t i = 0; i < 446; i++)
-		spi::trans();
-	for (uint8_t j = 0; j < 4; j++) {
-		uint8_t data[16];
-		for (uint8_t i = 0; i < 16; i++)
-			data[i] = spi::trans();
-		_mbr.setEntry(j, data);
-	}
-	bool exist = true;
-	if (spi::trans() != 0x55 || spi::trans() != 0xAA)
-		exist = false;
-	readCRC();
-	if (!exist)
-		return free(3);
-	return free(0);
-}
