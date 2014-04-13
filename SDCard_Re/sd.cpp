@@ -1,8 +1,6 @@
 #include "sd.h"
 #include <util/delay.h>
 
-class sdhw_t sd;
-
 sdhw_t::sdhw_t(void)
 {
 	SD_DDR &= ~(SD_CD | SD_WP);

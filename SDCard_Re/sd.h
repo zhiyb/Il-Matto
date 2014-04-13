@@ -75,8 +75,6 @@ protected:
 	uint8_t errno;
 };
 
-extern class sdhw_t sd;
-
 inline bool sdhw_t::dataInit(const bool rw, const bool multi, const uint32_t addr)
 {
 	spi::free(false);

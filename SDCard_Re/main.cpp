@@ -6,6 +6,9 @@
 #include "mbr.h"
 #include "fat32.h"
 #include "conv.h"
+#include "dirent.h"
+
+class sdhw_t sd;
 
 void init(void)
 {
