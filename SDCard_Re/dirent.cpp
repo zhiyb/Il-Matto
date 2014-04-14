@@ -5,7 +5,7 @@
 dirent *__dirent__[MAX_DIRENT_CNT];
 DIR *__dir__[MAX_DIRENT_CNT];
 uint32_t __current_dir__ = 0;
-uint8_t __allocated_dir__ = 0, errno = 0;
+uint8_t __allocated_dir__ = 0;
 
 class fs_t *fs;
 
