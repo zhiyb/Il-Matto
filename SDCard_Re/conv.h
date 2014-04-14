@@ -1,7 +1,8 @@
 #ifndef RGBCONV_H
 #define RGBCONV_H
 
-#include <stdio.h>
+#include <ctype.h>
+#include <inttypes.h>
 
 namespace conv
 {
@@ -15,6 +16,8 @@ namespace conv
 
 	static inline uint32_t uint24(FILE *f);
 	static inline uint32_t uint32(FILE *f);
+
+	static inline char ucs2decode(const uint8_t a, const uint8_t b);
 }
 
 // Inline functions
@@ -76,6 +79,15 @@ static inline uint32_t conv::uint32(FILE *f)
 	res |= (uint32_t)(uint8_t)fgetc(f) * 0x00010000;
 	res |= (uint32_t)(uint8_t)fgetc(f) * 0x01000000;
 	return res;
+}
+
+static inline char conv::ucs2decode(const uint8_t a, const uint8_t b)
+{
+	if (a == '\0' && b == '\0')
+		return '\0';
+	if (!isprint(a) || b != 0)
+		return '?';
+	return a;
 }
 
 #endif

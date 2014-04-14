@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
+#include <string.h>
 #include "tft.h"
 #include "sd.h"
 #include "mbr.h"
@@ -40,9 +41,9 @@ start:
 	puts("SDCard detected!");
 	puts(sd.writeProtected() ? "Write protected!" : "Not write protected!");
 
-	uint8_t errno;
-	if ((errno = sd.init()) != 0x00) {
-		printf("Initialisation failed: %u, errno: %u\n", errno, sd.err());
+	uint8_t err;
+	if ((err = sd.init()) != 0x00) {
+		printf("Initialisation failed: %u, err: %u\n", err, sd.err());
 		goto fin;
 	}
 	printf("SDCard size: %u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
@@ -64,11 +65,27 @@ start:
 		goto fin;
 	}
 
-	putchar(fs.chainRead(fs.rootClus));
-	for (uint8_t i = 1; i < 11; i++)
-		putchar(fs.chainRead());
-	putchar('\n');
-	fs.chainReadClose();
+	setfs(&fs);
+	DIR *dir = opendir("/");
+	if (dir == NULL) {
+		printf("opendir failed: %u\n", errno);
+		goto fin;
+	}
+	puts("\nReading directory...");
+	struct dirent *ent;
+	while ((ent = readdir(dir)) != NULL)
+		printf("%s<-END\n", ent->d_name);
+	closedir(dir);
+
+	dir = opendir("/Il Matto");
+	if (dir == NULL) {
+		printf("opendir failed: %u\n", errno);
+		goto fin;
+	}
+	puts("\nReading 'Il Matto' directory...");
+	while ((ent = readdir(dir)) != NULL)
+		printf("%s<-END\n", ent->d_name);
+	closedir(dir);
 
 	goto fin;
 
