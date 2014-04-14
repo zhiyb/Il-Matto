@@ -1,7 +1,7 @@
 #include "sd.h"
 #include <util/delay.h>
 
-sdhw_t::sdhw_t(void)
+sdhw_t::sdhw_t(void) : hw_t()
 {
 	SD_DDR &= ~(SD_CD | SD_WP);
 	SD_PORT |= SD_CD | SD_WP;
@@ -67,4 +67,21 @@ uint32_t sdhw_t::getSize(void)
 		return 0;
 	else
 		return (((uint32_t)csd.data[7] << 16) | ((uint32_t)csd.data[8] << 8) | csd.data[9]) * 512;
+}
+
+struct reg_t sdhw_t::readRegister(const uint8_t type)
+{
+	struct reg_t r;
+	spi::free(false);
+	if ((errno = cmd(type)) != 0x00)
+		goto ret;
+	if ((errno = response()) != 0xFE)
+		goto ret;
+	for (uint8_t i = 0; i < 16; i++)
+		r.data[i] = spi::trans();
+	readCRC();
+	errno = 0;
+ret:
+	free();
+	return r;
 }

@@ -9,6 +9,8 @@
 #include "fat32.h"
 #include "conv.h"
 #include "dirent.h"
+#include "file.h"
+#include "errno.h"
 
 #define PI	3.1415927
 
@@ -66,25 +68,46 @@ start:
 		printf("Read FAT32 file system failed: %u\n", fs.err());
 		goto fin;
 	}
-	setfs(&fs);
+	op::setfs(&fs);
 
-	puts("\nReading '/Il Matto/Testing' directory...");
-	DIR *dir = opendir("/Il Matto/Testing");
+	/*puts("\nReading '/Il Matto/Testing' directory...");
+	DIR *dir = op::opendir("/Il Matto/Testing");
 	if (dir == NULL) {
 		printf("opendir failed: %u\n", errno);
 		goto fin;
 	}
 	uint16_t bgc = tft.getForeground();
 	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL) {
+	while ((ent = op::readdir(dir)) != NULL) {
 		if (ent->d_type & IS_DIR)
 			tft.setForeground(conv::c32to16(0x0000FF));
 		else
 			tft.setForeground(conv::c32to16(0xFFFFFF));
 		printf("%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_name, ent->d_type, ent->d_size / 1024);
 	}
-	closedir(dir);
-	tft.setForeground(bgc);
+	op::closedir(dir);
+	tft.setForeground(bgc);*/
+
+	puts("\nReading '/Il Matto/Testing/Soton.bmp' file...");
+	FILE *fp = op::fopen("/Il Matto/Testing/Soton.bmp", "r");
+	if (fp == NULL) {
+		printf("Open file failed: %u\n", errno);
+		goto fin;
+	}
+	for (uint8_t i = 0; i < 10; i++)
+		fgetc(fp);
+	uint16_t offset = conv::uint32(fp);
+	for (uint8_t i = 10 + 4; i < offset; i++)
+		fgetc(fp);
+	uint16_t x, y;
+	tft.bmp(true);
+	tft.all();
+	tft.start();
+	for (y = 240; y > 0; y--)
+		for (x = 0; x < 320; x++)
+			tft.write(conv::c32to16(conv::uint24(fp)));
+	tft.bmp(false);
+	op::fclose(fp);
 
 	goto fin;
 

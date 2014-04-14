@@ -2,27 +2,33 @@
 #include <stdlib.h>
 #include "dirent.h"
 
-dirent *__dirent__[MAX_DIRENT_CNT];
-DIR *__dir__[MAX_DIRENT_CNT];
-uint32_t __current_dir__ = 0;
-uint8_t __allocated_dir__ = 0;
+namespace op
+{
+	static int8_t alloc_dir(void);
 
-class fs_t *fs;
+	dirent *__dirent__[MAX_DIRENT_CNT];
+	DIR *__dir__[MAX_DIRENT_CNT];
+	uint32_t __current_dir__ = 0;
+	uint8_t __allocated_dir__ = 0;
+	class fs_t *fs;
+}
 
-void setfs(class fs_t *filesys)
+void op::setfs(class fs_t *filesys)
 {
 	fs = filesys;
 	__current_dir__ = fs->rootAddr();
 }
 
-static int8_t alloc_dir(void)
+static int8_t op::alloc_dir(void)
 {
 	for (uint8_t i = 0; i < MAX_DIRENT_CNT; i++) {
 		if (__allocated_dir__ & (1 << i))
 			continue;
 		__allocated_dir__ |= 1 << i;
-		__dir__[i] = (DIR *)malloc(sizeof(DIR));
-		__dirent__[i] = (struct dirent *)malloc(sizeof(struct dirent));
+		if ((__dir__[i] = (DIR *)malloc(sizeof(DIR))) == NULL || (__dirent__[i] = (struct dirent *)malloc(sizeof(struct dirent))) == NULL) {
+			errno = ENOMEM;
+			return -1;
+		}
 		__dir__[i]->des = i;
 		return i;
 	}
@@ -30,9 +36,9 @@ static int8_t alloc_dir(void)
 	return -1;
 }
 
-DIR *opendir(const char *name)
+DIR *op::opendir(const char *path)
 {
-	if (name == NULL || *name == '\0') {
+	if (path == NULL || *path == '\0') {
 		errno = ENOENT;
 		return NULL;
 	}
@@ -44,19 +50,19 @@ DIR *opendir(const char *name)
 	if ((int8_t)(d = alloc_dir()) == -1)
 		return NULL;
 	DIR *dir = __dir__[d];
-	if (*name == '/') {
+	if (*path == '/') {
 		dir->orig = fs->rootAddr();
-		name++;
+		path++;
 	} else
 		dir->orig = __current_dir__;
 nextlevel:
 	rewinddir(dir);
 	char buff[256];
 	uint8_t i;
-	for (i = 0; i < 255 && *name != '\0' && *name != '/'; name++, i++)
-		buff[i] = *name;
-	if (*name == '/')
-		name++;
+	for (i = 0; i < 255 && *path != '\0' && *path != '/'; path++, i++)
+		buff[i] = *path;
+	if (*path == '/')
+		path++;
 	if (i == 255) {
 		closedir(dir);
 		errno = ENOENT;
@@ -85,7 +91,7 @@ readent:
 	goto nextlevel;
 }
 
-struct dirent *readdir(DIR *dir)
+struct dirent *op::readdir(DIR *dir)
 {
 	struct dirent *ent = __dirent__[dir->des];
 	if (!fs->readDirEntry(dir, ent))
@@ -93,18 +99,18 @@ struct dirent *readdir(DIR *dir)
 	return ent;
 }
 
-void rewinddir(DIR *dir)
+void op::rewinddir(DIR *dir)
 {
 	dir->addr = dir->orig;
 	dir->offset = 0;
 }
 
-int8_t closedir(DIR *dir)
+int op::closedir(DIR *dir)
 {
 	errno = EBADF;
 	if (dir == NULL)
 		return -1;
-	if (dir->des > MAX_DIRENT_CNT)
+	if (dir->des >= MAX_DIRENT_CNT)
 		return -1;
 	if ((__allocated_dir__ & (1 << dir->des)) == 0)
 		return -1;

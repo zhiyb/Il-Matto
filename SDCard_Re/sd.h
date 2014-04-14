@@ -49,12 +49,12 @@ public:
 	uint8_t init(void);
 	bool detect(void);
 	uint32_t getSize(void);
+	struct reg_t readRegister(const uint8_t type);
 	inline bool writeProtected(void) {return SD_PIN & SD_WP;}
 	inline uint8_t err(void) const {return errno;}
 	inline bool dataInit(const bool rw, const bool multi, const uint32_t addr);
 	inline bool dataStop(const bool rw, const bool multi);
 	inline bool readInit(void);
-	inline struct reg_t readRegister(const uint8_t type);
 	inline uint32_t size(void) const {return _size;}
 	static inline uint16_t readCRC(void) {return spi::trans16big();}
 
@@ -149,23 +149,6 @@ inline uint8_t sdhw_t::acmd(const uint8_t index, const uint32_t arg, const uint8
 	if (res > 0x01)
 		return res;
 	return cmd(index, arg, crc);
-}
-
-inline struct reg_t sdhw_t::readRegister(const uint8_t type)
-{
-	struct reg_t r;
-	spi::free(false);
-	if ((errno = cmd(type)) != 0x00)
-		goto ret;
-	if ((errno = response()) != 0xFE)
-		goto ret;
-	for (uint8_t i = 0; i < 16; i++)
-		r.data[i] = spi::trans();
-	readCRC();
-	errno = 0;
-ret:
-	free();
-	return r;
 }
 
 inline bool sdhw_t::streamStart(const bool rw, const uint32_t addr)
