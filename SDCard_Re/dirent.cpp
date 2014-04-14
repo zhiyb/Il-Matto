@@ -38,7 +38,7 @@ DIR *opendir(const char *name)
 		return NULL;
 	}
 	uint8_t d;
-	if ((d = alloc_dir()) == -1)
+	if ((int8_t)(d = alloc_dir()) == -1)
 		return NULL;
 	DIR *dir = &__dir__[d];
 	if (*name == '/') {
@@ -47,13 +47,14 @@ DIR *opendir(const char *name)
 	} else
 		dir->orig = __current_dir__;
 nextlevel:
-	dir->addr = dir->orig;
-	dir->offset = 0;
+	rewinddir(dir);
 	char buff[256];
 	uint8_t i;
-	for (i = 0; i < 256 && *name != '\0' && *name != '/'; name++, i++)
+	for (i = 0; i < 255 && *name != '\0' && *name != '/'; name++, i++)
 		buff[i] = *name;
-	if (i == 256) {
+	if (*name == '/')
+		name++;
+	if (i == 255) {
 		closedir(dir);
 		errno = ENOENT;
 		return NULL;
@@ -87,6 +88,12 @@ struct dirent *readdir(DIR *dir)
 	if (!fs->readDirEntry(dir, ent))
 		return NULL;
 	return ent;
+}
+
+void rewinddir(DIR *dir)
+{
+	dir->addr = dir->orig;
+	dir->offset = 0;
 }
 
 int8_t closedir(DIR *dir)

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 // Note: less than 8
-#define MAX_DIRENT_CNT	2
+#define MAX_DIRENT_CNT	3
 
 #define EACCESS	1
 #define EMFILE	2
@@ -57,6 +57,7 @@ extern uint8_t __allocated_dir__, errno;
 void setfs(class fs_t *filesys);
 DIR *opendir(const char *name);
 struct dirent *readdir(DIR *dir);
+void rewinddir(DIR *dir);
 int8_t closedir(DIR *dir);
 
 #endif

@@ -38,15 +38,14 @@ start:
 	puts("*** SDCard library test ***");
 	puts("Please insert SDCard...");
 	while (!sd.detect());
-	puts("SDCard detected!");
-	puts(sd.writeProtected() ? "Write protected!" : "Not write protected!");
+	printf("SDCard detected, %swrite protected, ", sd.writeProtected() ? "" : "not ");
 
 	uint8_t err;
 	if ((err = sd.init()) != 0x00) {
 		printf("Initialisation failed: %u, err: %u\n", err, sd.err());
 		goto fin;
 	}
-	printf("SDCard size: %u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
+	printf("%u GB\n", (uint16_t)(sd.size() / 1024 / 1024));
 
 	class mbr_t mbr(&sd);
 	if (mbr.err()) {
@@ -67,25 +66,39 @@ start:
 
 	setfs(&fs);
 	DIR *dir = opendir("/");
+	puts("\nReading root directory...");
 	if (dir == NULL) {
 		printf("opendir failed: %u\n", errno);
 		goto fin;
 	}
-	puts("\nReading directory...");
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL)
-		printf("%s<-END\n", ent->d_name);
-	closedir(dir);
 
-	dir = opendir("/Il Matto");
-	if (dir == NULL) {
+	DIR *dir2 = opendir("/Il Matto");
+	puts("\nReading 'Il Matto' directory...");
+	if (dir2 == NULL) {
 		printf("opendir failed: %u\n", errno);
 		goto fin;
 	}
-	puts("\nReading 'Il Matto' directory...");
-	while ((ent = readdir(dir)) != NULL)
-		printf("%s<-END\n", ent->d_name);
+	struct dirent *ent;
+	while ((ent = readdir(dir2)) != NULL)
+		puts(ent->d_name);
+
+	DIR *dir3 = opendir("/Il Matto/Testing");
+	puts("\nReading 'Il Matto/Testing' directory...");
+	if (dir3 == NULL) {
+		printf("opendir failed: %u\n", errno);
+		goto fin;
+	}
+
+	DIR *dir4 = opendir("/Il Matto/Testing/");
+	puts("\nReading 'Il Matto/Testing' directory...");
+	if (dir4 == NULL) {
+		printf("opendir failed: %u\n", errno);
+		goto fin;
+	}
+
 	closedir(dir);
+	closedir(dir2);
+	closedir(dir3);
 
 	goto fin;
 
