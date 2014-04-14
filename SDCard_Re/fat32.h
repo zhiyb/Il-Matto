@@ -135,23 +135,26 @@ newEntry:
 			for (uint8_t i = 0; i < 12; i++)
 				buff[i] = chainRead();	// For next loop
 		}
+		chainRead();				// Type byte
 	} else						// 8.3 format short file name
 		if (buff[11] & IS_DIR) {
+			uint8_t type = chainRead();	// Type byte
 			for (uint8_t i = 11; i > 0; i--)
 				if (buff[i - 1] != ' ')
 					break;
 				else
 					buff[i - 1] = '\0';
 			for (uint8_t i = 0; i < 11; i++)
-				ent->d_name[index++] = buff[i];
+				ent->d_name[index++] = (type & (1 << 3)) ? tolower(buff[i]) : buff[i];
 		} else {
+			uint8_t type = chainRead();	// Type byte
 			for (uint8_t i = 8; i > 0; i--)
 				if (buff[i - 1] != ' ')
 					break;
 				else
 					buff[i - 1] = '\0';
 			for (uint8_t i = 0; i < 8 && buff[i] != '\0'; i++)
-				ent->d_name[index++] = buff[i];
+				ent->d_name[index++] = (type & (1 << 3)) ? tolower(buff[i]) : buff[i];
 			uint8_t i;
 			for (i = 11; i > 8; i--)
 				if (buff[i - 1] != ' ')
@@ -161,11 +164,11 @@ newEntry:
 			if (i != 8)
 				ent->d_name[index++] = '.';
 			for (i = 0; i < 3; i++)
-				ent->d_name[index++] = buff[i + 8];
+				ent->d_name[index++] = (type & (1 << 4)) ? tolower(buff[i + 8]) : buff[i + 8];
 			ent->d_name[index++] = '\0';
 		}
 	ent->d_type = buff[11];
-	for (uint8_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < 7; i++)
 		chainRead();
 	ent->d_addr = (uint32_t)chainRead() << 16;
 	ent->d_addr |= (uint32_t)chainRead() << 24;

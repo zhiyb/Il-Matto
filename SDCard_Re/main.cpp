@@ -81,31 +81,10 @@ start:
 			tft.setForeground(conv::c32to16(0x0000FF));
 		else
 			tft.setForeground(conv::c32to16(0xFFFFFF));
-		puts(ent->d_name);
+		printf("%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_name, ent->d_type, ent->d_size / 1024);
 	}
 	closedir(dir);
 	tft.setForeground(bgc);
-
-	_delay_ms(2000);
-	tft.clean();
-	tft.line(0, tft.height() / 2, tft.width(), tft.height() / 2, conv::c32to16(0xFF0000));
-	tft.line(tft.width() / 2, 0, tft.width() / 2, tft.height(), conv::c32to16(0xFF0000));
-	float _y = 0;
-	for (uint16_t i = 0; i < tft.width(); i++) {
-		float x = PI * 6 * i / tft.width() - PI * 3;
-		float y = sin(x) + x / 4 / PI;
-		y = -y;
-		if (y > 2)
-			y = 2;
-		if (-y > 2)
-			y = -2;
-		y *= tft.height() / 4;
-		if (i == 0)
-			tft.point(0, tft.height() / 2 + y, conv::c32to16(0x66CCFF));
-		else
-			tft.line(i - 1, tft.height() / 2 + _y, i, tft.height() / 2 + y, conv::c32to16(0x66CCFF));
-		_y = y;
-	}
 
 	goto fin;
 
