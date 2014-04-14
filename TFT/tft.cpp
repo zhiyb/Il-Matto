@@ -32,6 +32,14 @@ void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 void tfthw::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c)
 {
+	if (x0 > w)
+		x0 = w - 1;
+	if (x1 > w)
+		x1 = w - 1;
+	if (y0 > h)
+		y0 = h - 1;
+	if (y1 > h)
+		y1 = h - 1;
 	if (x0 == x1) {
 		if (y0 > y1)
 			SWAP(y0, y1);

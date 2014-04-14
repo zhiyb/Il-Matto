@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 // Note: less than 8
-#define MAX_DIRENT_CNT	3
+#define MAX_DIRENT_CNT	2
 
 #define EACCESS	1
 #define EMFILE	2
