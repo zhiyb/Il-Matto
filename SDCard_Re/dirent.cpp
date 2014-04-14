@@ -1,8 +1,9 @@
 #include <string.h>
+#include <stdlib.h>
 #include "dirent.h"
 
-dirent __dirent__[MAX_DIRENT_CNT];
-DIR __dir__[MAX_DIRENT_CNT];
+dirent *__dirent__[MAX_DIRENT_CNT];
+DIR *__dir__[MAX_DIRENT_CNT];
 uint32_t __current_dir__ = 0;
 uint8_t __allocated_dir__ = 0, errno = 0;
 
@@ -20,7 +21,9 @@ static int8_t alloc_dir(void)
 		if (__allocated_dir__ & (1 << i))
 			continue;
 		__allocated_dir__ |= 1 << i;
-		__dir__[i].des = i;
+		__dir__[i] = (DIR *)malloc(sizeof(DIR));
+		__dirent__[i] = (struct dirent *)malloc(sizeof(struct dirent));
+		__dir__[i]->des = i;
 		return i;
 	}
 	errno = ENFILE;
@@ -40,7 +43,7 @@ DIR *opendir(const char *name)
 	uint8_t d;
 	if ((int8_t)(d = alloc_dir()) == -1)
 		return NULL;
-	DIR *dir = &__dir__[d];
+	DIR *dir = __dir__[d];
 	if (*name == '/') {
 		dir->orig = fs->rootAddr();
 		name++;
@@ -84,7 +87,7 @@ readent:
 
 struct dirent *readdir(DIR *dir)
 {
-	struct dirent *ent = &__dirent__[dir->des];
+	struct dirent *ent = __dirent__[dir->des];
 	if (!fs->readDirEntry(dir, ent))
 		return NULL;
 	return ent;
@@ -106,6 +109,8 @@ int8_t closedir(DIR *dir)
 	if ((__allocated_dir__ & (1 << dir->des)) == 0)
 		return -1;
 	errno = 0;
+	free(__dir__[dir->des]);
+	free(__dirent__[dir->des]);
 	__allocated_dir__ &= ~(1 << dir->des);
 	return 0;
 }

@@ -47,10 +47,7 @@ struct dirstream
 
 typedef struct dirstream DIR;
 
-extern dirent __dirent__[MAX_DIRENT_CNT];
-extern DIR __dir__[MAX_DIRENT_CNT];
-extern uint32_t __current_dir__;
-extern uint8_t __allocated_dir__, errno;
+extern uint8_t errno;
 
 #include "fs.h"
 
