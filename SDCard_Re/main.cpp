@@ -70,7 +70,7 @@ start:
 	}
 	op::setfs(&fs);
 
-	/*puts("\nReading '/Il Matto/Testing' directory...");
+	puts("\nReading '/Il Matto/Testing' directory...");
 	DIR *dir = op::opendir("/Il Matto/Testing");
 	if (dir == NULL) {
 		printf("opendir failed: %u\n", errno);
@@ -86,10 +86,10 @@ start:
 		printf("%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_name, ent->d_type, ent->d_size / 1024);
 	}
 	op::closedir(dir);
-	tft.setForeground(bgc);*/
+	tft.setForeground(bgc);
 
-	puts("\nReading '/Il Matto/Testing/Soton.bmp' file...");
-	FILE *fp = op::fopen("/Il Matto/Testing/Soton.bmp", "r");
+	puts("\nReading '/Il Matto/Testing/Fin.bmp' file...");
+	FILE *fp = op::fopen("/Il Matto/Testing/Fin.bmp", "r");
 	if (fp == NULL) {
 		printf("Open file failed: %u\n", errno);
 		goto fin;
