@@ -12,10 +12,10 @@
 #define LED_LB		_BV(PB1)
 #define LED_LC		_BV(PB2)
 #define LED_LD		_BV(PB3)
-#define LED_RU		_BV(PB4)
-#define LED_RD		_BV(PB5)
-#define LED_GU		_BV(PB6)
-#define LED_GD		_BV(PB7)
+#define LED_GU		_BV(PB4)
+#define LED_GD		_BV(PB5)
+#define LED_RU		_BV(PB6)
+#define LED_RD		_BV(PB7)
 
 #define LED_CDDR	DDRC
 #define LED_CPORT	PORTC
