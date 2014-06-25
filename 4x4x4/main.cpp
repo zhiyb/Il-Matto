@@ -15,11 +15,17 @@ int main(void)
 	scan();
 	expand(false);
 	shrink(false);
+	circle(Out, false);
+	circle(In, false);
 
 start:
+#if 1
+	circle(Out, true);
+	circle(In, true);
+#else
 	expand(true);
 	shrink(true);
-	delay();
+#endif
 	goto start;
 	return 1;
 }

@@ -11,9 +11,11 @@ void effect::breath(bool in)
 	if (in)
 		for (OCR1B = 0; OCR1B != Max; OCR1B++)
 			_delay_us(Breath);
-	else
+	else {
 		for (OCR1B = Max; OCR1B != 0; OCR1B--)
 			_delay_us(Breath);
+		delay();
+	}
 }
 
 void effect::scan(void)
@@ -41,12 +43,12 @@ void effect::expand(bool br)
 {
 	enablePWM(br);
 	setPWM(0);
-	fill(false);
+	/*fill(false);
 	if (br) {
 		breath(In);
 		breath(Out);
 	} else
-		_delay_us(Expand);
+		_delay_us(Expand);*/
 	buff[1] = 0x0660;
 	buff[2] = 0x0660;
 	if (br) {
@@ -88,6 +90,7 @@ void effect::shrink(bool br)
 	if (br) {
 		breath(In);
 		breath(Out);
+
 	} else
 		_delay_us(Expand);
 	buff[0] = 0x6FF6;
@@ -115,12 +118,117 @@ void effect::shrink(bool br)
 		breath(Out);
 	} else
 		_delay_us(Expand);
-	fill(false);
+	/*fill(false);
 	if (br) {
 		breath(In);
 		breath(Out);
 	} else
-		_delay_us(Expand);
+		_delay_us(Expand);*/
+}
+
+void effect::circle(bool in, bool br)
+{
+	enablePWM(br);
+	setPWM(0);
+	if (in) {
+		/*fill(false);
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);*/
+		buff[0] = 0x9009;
+		buff[1] = 0x0000;
+		buff[2] = 0x0000;
+		buff[3] = 0x9009;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x6996;
+		buff[1] = 0x9009;
+		buff[2] = 0x9009;
+		buff[3] = 0x6996;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x0660;
+		buff[1] = 0x6996;
+		buff[2] = 0x6996;
+		buff[3] = 0x0660;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x0000;
+		buff[1] = 0x0660;
+		buff[2] = 0x0660;
+		buff[3] = 0x0000;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		/*fill(false);
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);*/
+	} else {
+		/*fill(false);
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);*/
+		buff[0] = 0x0000;
+		buff[1] = 0x0660;
+		buff[2] = 0x0660;
+		buff[3] = 0x0000;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x0660;
+		buff[1] = 0x6996;
+		buff[2] = 0x6996;
+		buff[3] = 0x0660;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x6996;
+		buff[1] = 0x9009;
+		buff[2] = 0x9009;
+		buff[3] = 0x6996;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		buff[0] = 0x9009;
+		buff[1] = 0x0000;
+		buff[2] = 0x0000;
+		buff[3] = 0x9009;
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);
+		/*fill(false);
+		if (br) {
+			breath(In);
+			breath(Out);
+		} else
+			_delay_us(Expand);*/
+	}
 }
 
 void effect::delay(void)
