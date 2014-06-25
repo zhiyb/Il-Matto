@@ -1,19 +1,25 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "led.h"
+#include "effect.h"
 
-using namespace led;
+using namespace effect;
 
 int main(void)
 {
 	led::init();
 	sei();
 
-	//led::fill(true);
-	led::buff[0] = 0x5A5A;
-	_delay_ms(1000);
-	led::buff[3] = 0xA5A5;
+	led::enable(true);
 
-	while (1);
+	scan();
+	expand(false);
+	shrink(false);
+
+start:
+	expand(true);
+	shrink(true);
+	delay();
+	goto start;
 	return 1;
 }

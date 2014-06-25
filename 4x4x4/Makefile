@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= 4x4x4
-SRC	= main.cpp led.cpp
+SRC	= main.cpp led.cpp effect.cpp
 MCU_TARGET	= atmega48
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
@@ -13,7 +13,7 @@ LIBS	=
 PRGER	= c232hm
 
 EFUSE	= 0x00
-HFUSE	= 0xDF
+HFUSE	= 0xD7
 LFUSE	= 0xE2
 
 LOG	= ~/.make_avr.log

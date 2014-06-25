@@ -17,16 +17,15 @@ void led::init(void)
 	DDRC = 0x0F;
 	PORTC = 0;
 
+	enable(false);
+	enablePWM(true);
 	TCCR1A = 0;
-	TCCR1B = 0;					// Stop
+	TCCR1B = 0;
 	TCCR1C = 0;
 	TCNT1 = 0;
-	OCR1A = 1470;					// 85Hz
-	//OCR1A = 368;					// 85Hz * 4
-	TIMSK1 = _BV(OCIE1A);
+	OCR1A = Top;
+	OCR1B = 0;
 	TIFR1 = 0xFF;
-	//TCCR1B = _BV(WGM12) | _BV(CS11) | _BV(CS10);
-	TCCR1B = _BV(WGM12) |  _BV(CS10);				// / 1
 }
 
 void led::fill(bool state)
@@ -35,14 +34,55 @@ void led::fill(bool state)
 		buff[i] = state ? 0xFFFF : 0x0000;
 }
 
+void led::enable(bool e)
+{
+	if (e)
+		TCCR1B = _BV(WGM12) |  _BV(CS10);
+	else
+		TCCR1B = 0;
+}
+
+bool led::enabled(void)
+{
+	return TCCR1B != 0;
+}
+
+void led::enablePWM(bool e)
+{
+	if (e)
+		TIMSK1 = _BV(OCIE1A) | _BV(OCIE1B);
+	else
+		TIMSK1 = _BV(OCIE1A);
+}
+
+bool led::PWMEnabled(void)
+{
+	return TIMSK1 & _BV(OCIE1B);
+}
+
+void led::setPWM(uint16_t pwm)
+{
+	OCR1B = pwm;
+}
+
 ISR(TIMER1_COMPA_vect)
 {
 	using namespace led;
 
+	if (DDRC == 0x0F && PWMEnabled())
+		return;
+	DDRC = 0x0F;
 	PORTC = 0x00;
 	PORTB = (buff[level] >> 8) & 0xFF;
 	PORTD = buff[level] & 0xFF;
-	PORTC = 1 << level;
+	if (DDRC == 0x0F)
+		PORTC = 1 << level;
 
 	level = level == 3 ? 0 : level + 1;
+}
+
+ISR(TIMER1_COMPB_vect)
+{
+	PORTC = 0x00;
+	DDRC = 0x00;
 }
