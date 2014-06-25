@@ -6,7 +6,7 @@
 namespace led
 {
 	enum States {On = true, Off = false};
-	enum Num {Max = 1024, Top = 1030};
+	enum Num {Max = 2048, Top = 2055};
 
 	void init(void);
 	void fill(bool state = Off);
