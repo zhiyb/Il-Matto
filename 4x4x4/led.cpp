@@ -25,7 +25,7 @@ void led::init(void)
 	TCCR0A = _BV(WGM01);
 	TCCR0B = 0;
 	TCNT0 = 0;
-	OCR0A = 64;
+	OCR0A = 63;
 	TIFR0 = 0xFF;
 	TIMSK0 = _BV(OCIE0A);
 
