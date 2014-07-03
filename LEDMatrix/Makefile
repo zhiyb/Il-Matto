@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= LEDMatrix
-SRC	= main.cpp led.cpp ascii.cpp
+SRC	= main.cpp led.cpp ascii.cpp display.cpp lcd.cpp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
@@ -10,7 +10,8 @@ VERSION	= 0.0.1
 DEFS	= -DF_CPU=12000000
 LIBS	=
 
-PRGER	= usbasp
+#PRGER	= FT232
+PRGER	= c232hm
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
