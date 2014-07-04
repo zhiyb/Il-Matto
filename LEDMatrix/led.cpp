@@ -19,8 +19,8 @@ void led::init(void)
 	TCCR0A = _BV(WGM01);
 	TCCR0B = 0;
 	TCNT0 = 0;
-	//OCR0A = 137;					// 85Hz
-	OCR0A = 50;					// 85Hz * 2.5
+	OCR0A = 137;					// 85Hz
+	//OCR0A = 50;					// 85Hz * 2.5
 	TIMSK0 = _BV(OCIE0A);
 	TIFR0 = 0xFF;
 	TCCR0B = _BV(CS01) | _BV(CS00);

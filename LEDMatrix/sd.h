@@ -5,8 +5,8 @@
 #define SD_PORT PORTB
 #define SD_PIN PINB
 
-#define SD_CD (1 << 1)
-#define SD_WP (1 << 0)
+#define SD_CD _BV(PB0)
+#define SD_WP _BV(PB1)
 
 #define GO_IDLE_STATE			0
 #define GO_IDLE_STATE_CRC		0x4A

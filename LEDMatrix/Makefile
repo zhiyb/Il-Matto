@@ -2,7 +2,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= LEDMatrix
-SRC	= main.cpp led.cpp ascii.cpp display.cpp lcd.cpp
+SRC	= main.cpp led.cpp ascii.cpp display.cpp lcd.cpp sd.cpp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
