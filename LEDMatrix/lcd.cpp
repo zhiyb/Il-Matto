@@ -73,14 +73,20 @@ void lcd::init(void)
 	write(Cmd, CMD_FUNCTION(1, 1, 1));
 	write(Cmd, CMD_SELECT(1));
 	write(Cmd, CMD_SCROLL(0));
-	for (uint_t r = 0; r < 64; r++) {
+	for (uint_t r = 0; r < 32; r++) {
 		write(Cmd, CMD_GDRAM(r));
 		write(Cmd, CMD_GDRAM(0x00));
-		for (uint_t c = 0; c < 4 * 8; c++)
-			write(Data, r % 2 ? 0x55 : 0xAA);
+		for (uint_t c = 0; c < 32; c++)
+			write(Data, 0x00);
 	}
 }
 
 void lcd::update(void)
 {
+	for (uint_t r = 0; r < 32; r++) {
+		write(Cmd, CMD_GDRAM(r));
+		write(Cmd, CMD_GDRAM(0x00));
+		for (uint_t c = 0; c < 32; c++)
+			write(Data, r % 2 ? 0x55 : 0xAA);
+	}
 }

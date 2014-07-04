@@ -26,6 +26,7 @@ namespace display
 	enum BuffColours {BuffRed = 0, BuffGreen = 1};
 
 	void init(void);
+	void update(void);
 
 	void fill(const uint_t clr = None);
 	void drawPoint(const uint_t x, const uint_t y, const uint_t clr);
