@@ -94,7 +94,7 @@ start:	{
 	op::closedir(dir);
 	
 	fputs(TTY_YELLOW "Reading '/BoardData/Messages.txt' file...\n", stderr);
-	FILE *fp = op::fopen("/BoardData/Messages.txt", "r");
+	FILE *fp = op::fopen("/BoardData/Display.buff", "r");
 	if (fp == NULL) {
 		fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
 		goto failed;
@@ -102,11 +102,19 @@ start:	{
 	disp.clear();
 	disp.setColour(Green);
 	fputs(TTY_MAGENTA, stderr);
+#if 1
+	for (uint_t r = 0; r < BUFF_H; r++)
+		for (uint_t c = 0; c < BUFF_W / 8; c++) {
+			buff[r][c][BuffRed] = fgetc(fp);
+			buff[r][c][BuffGreen] = fgetc(fp);
+		}
+#else
 	int c;
 	while ((c = fgetc(fp)) != -1) {
 		fputc(c, stderr);
 		putchar(c);
 	}
+#endif
 
 	}
 	goto ret;
