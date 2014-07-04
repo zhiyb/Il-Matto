@@ -207,13 +207,13 @@ Display& Display::operator<<(const char c)
 	return *this;
 }
 
-inline int putch(const char c, FILE *stream)
+static int putch(const char c, FILE *stream)
 {
 	disp << c;
 	return 0;
 }
 
-FILE *displayOut(void)
+FILE *Display::out(void)
 {
 	static FILE *out = NULL;
 	if (out == NULL)

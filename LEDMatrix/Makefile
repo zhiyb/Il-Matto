@@ -2,12 +2,12 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= LEDMatrix
-SRC	= main.cpp led.cpp ascii.cpp display.cpp lcd.cpp sd.cpp
+SRC	= main.cpp led.cpp ascii.cpp display.cpp lcd.cpp sd.cpp uart.cpp fat32.cpp errno.cpp dirent.cpp file.cpp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 
-DEFS	= -DF_CPU=12000000
+DEFS	= -DF_CPU=12000000 -DBAUD=9600
 LIBS	=
 
 #PRGER	= FT232

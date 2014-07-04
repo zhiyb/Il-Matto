@@ -41,6 +41,7 @@ public:
 
 	static void init(void);
 	static void update(void);
+	static FILE *out(void);
 
 	void setX(uint_t _x) {x = _x;}
 	void setY(uint_t _y) {y = _y;}
@@ -48,7 +49,7 @@ public:
 	void setColour(uint_t colour) {clr = colour;}
 
 	void fill(const uint_t clr);
-	void clear(void) {fill(clr & display::BGC);}
+	void clear(void) {fill(clr & display::BGC); setXY(0, 0);}
 	void drawPoint(const uint_t x, const uint_t y, const uint_t clr);
 	void drawChar(const uint_t x, const uint_t y, const uint_t zoom, const char ch);
 	void drawChar(const char ch);
@@ -66,8 +67,6 @@ private:
 	uint8_t zoom, tabSize;
 	uint_t x, y, clr;
 };
-
-FILE *displayOut(void);
 
 extern Display disp;
 
