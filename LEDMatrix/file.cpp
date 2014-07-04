@@ -13,8 +13,6 @@ namespace op
 	extern class fs_t *fs;
 }
 
-using namespace op;
-
 int op::fgetchar(FILE *fp)
 {
 	fs->activate(fp);
@@ -77,7 +75,7 @@ FILE *op::fopen(const char *path, const char *mode)
 	return file->fp;
 }
 
-FILE *fopen(const struct dirent *ent, const char *mode)
+FILE *op::fopen(const struct dirent *ent, const char *mode)
 {
 	uint8_t fd;
 	if ((int8_t)(fd = alloc_file()) == -1)

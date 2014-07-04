@@ -80,7 +80,7 @@ readent:
 		errno = ENOENT;
 		return NULL;
 	}
-	if (strcasecmp(buff, ent->d_name) != 0)
+	if (strcmp(buff, ent->d_name) != 0)
 		goto readent;
 	if (!(ent->d_type & IS_DIR)) {
 		closedir(dir);

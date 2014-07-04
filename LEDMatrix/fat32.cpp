@@ -153,7 +153,7 @@ bool fat32_t::readFileInfo(const char *path, file_t *file)
 	}
 	struct dirent *ent;
 	while ((ent = op::readdir(dir)) != NULL)
-		if (strcasecmp(ent->d_name, last) == 0) {
+		if (strcmp(ent->d_name, last) == 0) {
 			if (!readFileInfo(ent, file))
 				goto failed;
 			free(dirpath);

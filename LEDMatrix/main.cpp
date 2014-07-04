@@ -1,5 +1,6 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <string.h>
 #include "display.h"
 #include "sd.h"
 #include "ascii.h"
@@ -26,7 +27,7 @@ int main(void)
 {
 	init();
 	class sdhw_t sd;
-	uint8_t err;
+	uint8_t err, cnt;
 	sei();
 
 	fputs(TTY_WHITE "*** Hello, world! ***\n", stderr);
@@ -92,7 +93,34 @@ start:	{
 	}
 	struct dirent *ent;
 	while ((ent = op::readdir(dir)) != NULL)
-		fprintf(stderr, "%s%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_type & IS_DIR ? TTY_BLUE : TTY_GREEN, ent->d_name, ent->d_type, ent->d_size / 1024);
+		if (strcmp(ent->d_name, "Display.buff") == 0) {
+			fputs(TTY_GREEN "Got buff file\n", stderr);
+			break;
+		}
+		//fprintf(stderr, "%s%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_type & IS_DIR ? TTY_BLUE : TTY_GREEN, ent->d_name, ent->d_type, ent->d_size / 1024);
+
+
+#if 0
+	fputs(TTY_YELLOW "Reading 'Display.buff' file by dirent...\n", stderr);
+	timer1::start();
+	cnt = 0;
+	while (!timer1::over()) {
+		FILE *fp = op::fopen(ent, "r");
+		if (fp == NULL) {
+			fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
+			goto failed;
+		}
+		for (uint_t r = 0; r < BUFF_H; r++)
+			for (uint_t c = 0; c < BUFF_W / 8; c++) {
+				buff[r][c][BuffRed] = fgetc(fp);
+				buff[r][c][BuffGreen] = fgetc(fp);
+			}
+		op::fclose(fp);
+		cnt++;
+	}
+	timer1::stop();
+	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
+#endif
 	op::closedir(dir);
 
 	fputs(TTY_YELLOW "Changing to '/BoardData' directory...\n", stderr);
@@ -103,7 +131,7 @@ start:	{
 
 	fputs(TTY_YELLOW "Reading 'Display.buff' file...\n", stderr);
 	timer1::start();
-	uint8_t cnt = 0;
+	cnt = 0;
 	while (!timer1::over()) {
 		FILE *fp = op::fopen("Display.buff", "r");
 		if (fp == NULL) {
@@ -121,6 +149,7 @@ start:	{
 	timer1::stop();
 	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
 
+#if 0
 	fputs(TTY_YELLOW "Testing max refresh speed...\n", stderr);
 	timer1::start();
 	cnt = 0;
@@ -130,6 +159,7 @@ start:	{
 	}
 	timer1::stop();
 	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
+#endif
 
 	}
 	goto ret;
