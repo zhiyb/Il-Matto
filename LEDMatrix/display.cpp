@@ -5,15 +5,39 @@
 #include "led.h"
 #include "ascii.h"
 
+namespace display
+{
+	bool useLCD(void);
+}
+
 volatile uint_t display::buff[LED_H][LED_W / 8][2];
 bool display::lcdOutput;
+
+bool display::useLCD(void)
+{
+	static bool checked = false, use;
+	if (checked)
+		return use;
+	CHECK_DDR &= ~CHECK_BIT;
+	//CHECK_DDR |= CHECK_BIT;
+	CHECK_PORT |= CHECK_BIT;
+	checked = true;
+	use = CHECK_PIN & CHECK_BIT;
+	return use;
+}
 
 void display::init(void)
 {
 	lcdOutput = 1;
 	fill(None);
-	//lcd::init();
-	led::init();
+
+	MCUCR |= 0x80;			// Disable JTAG
+	MCUCR |= 0x80;
+
+	if (useLCD())
+		lcd::init();
+	else
+		led::init();
 }
 
 void display::fill(const uint_t clr)

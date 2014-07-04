@@ -1,10 +1,22 @@
 #include <avr/interrupt.h>
 #include "display.h"
 
+#define USB_DDR		DDRD
+#define USB_PORT	PORTD
+#define USB_DMINUS	_BV(PD2)
+#define USB_DPLUS	_BV(PD3)
+
 using namespace display;
+
+void usbDisconnect(void)
+{
+	USB_DDR |= USB_DMINUS;
+	USB_PORT &= ~USB_DMINUS;
+}
 
 int main(void)
 {
+	usbDisconnect();
 	display::init();
 	sei();
 	for (uint8_t j = 0; j < LED_H; j++)

@@ -1,6 +1,11 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#define CHECK_DDR	DDRC
+#define CHECK_PORT	PORTC
+#define CHECK_PIN	PINC
+#define CHECK_BIT	_BV(PC4)
+
 #define LED_W	64
 #define LED_H	32
 

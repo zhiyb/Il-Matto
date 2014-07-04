@@ -11,9 +11,6 @@ void led::init(void)
 {
 	row = 0;
 
-	MCUCR |= 0x80;			// Disable JTAG
-	MCUCR |= 0x80;
-
 	LED_DPORT = 0;
 	LED_CPORT &= ~(LED_EN | LED_STB | LED_CLK);
 	LED_DDDR |= LED_LMASK | LED_DMASK;

@@ -31,13 +31,14 @@ void lcd::wait(void)
 	LCD_CPORT &= ~LCD_RS;
 	LCD_CPORT |= LCD_RW;
 	LCD_CPORT |= LCD_E;
-	while (LCD_DPORT & 0x80);
+	while (LCD_DPIN & 0x80);
 	LCD_CPORT &= ~LCD_E;
 	LCD_DDDR = 0xFF;
 }
 
 void lcd::write(bool cmd, uint8_t data)
 {
+	wait();
 	LCD_DPORT = data;
 	if (cmd)
 		LCD_CPORT &= ~LCD_RS;
@@ -50,9 +51,6 @@ void lcd::write(bool cmd, uint8_t data)
 
 void lcd::init(void)
 {
-	MCUCR |= 0x80;			// Disable JTAG
-	MCUCR |= 0x80;
-
 	LCD_DPORT = 0;
 	LCD_CPORT &= ~(LCD_RS | LCD_RW | LCD_E | LCD_RST);
 	LCD_DDDR = 0xFF;
