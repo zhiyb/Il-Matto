@@ -30,6 +30,7 @@ int main(void)
 	drawEllipse(0, 0, 63, 31, Orange);
 	//fill();
 	//buff[3][3][Green] = 0x00;
+	update();
 	while (1);
 	return 1;
 }
