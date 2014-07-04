@@ -17,44 +17,53 @@ void usbDisconnect(void)
 
 using namespace display;
 
-int main(void)
+void init(void)
 {
 	usbDisconnect();
 	disp.init();
+	stdout = displayOut();
+}
+
+int main(void)
+{
+	init();
 	class sdhw_t sd;
-	uint8_t row, err;
-	char str[11];
+	uint8_t err;
 	sei();
 
-	disp.drawString(2, 0, 2, Red,"Hello");
-	disp.drawString(2, 16, 2, Green, "World");
-	disp.drawEllipse(0, 0, 63, 31, Orange);
+	disp.setColour(Red);
+	disp.drawString(2, 0, 2,"Hello");
+	disp.setColour(Green);
+	disp.drawString(2, 16, 2, "World");
+	disp.setColour(Orange);
+	disp.drawEllipse(0, 0, 63, 31);
 	disp.update();
 	_delay_ms(500);
 
 start:
-	disp.fill(None);
-	row = 0;
+	disp.setColour(None);
+	disp.clear();
 	if (!sd.detect()) {
 		disp.update();
 		goto start;
 	}
-	disp.drawString(0, row, 1, Green, "SDCard.");
-	row += FONT_H;
+	disp.setColour(Green);
+	puts("SDCard.");
 
 	if (sd.writeProtected()) {
-		disp.drawString(0, row, 1, Red, "Protected.");
-		row += FONT_H;
+		disp.setColour(Red);
+		puts("Protected.");
 	}
 	if ((err = sd.init()) != 0x00) {
-		disp.drawString(0, row, 1, Red, "Failed.");
-		goto start;
+		disp.setColour(Red);
+		puts("Failed.");
+		goto ret;
 	}
-	sprintf(str, "%u MB", (uint16_t)(sd.size() / 1024));
-	disp.drawString(0, row, 1, Orange, str);
-	row += FONT_H;
-	disp.update();
+	disp.setColour(Orange);
+	printf("%u MB\n", (uint16_t)(sd.size() / 1024));
 
+ret:
+	disp.update();
 	while (sd.detect());
 	goto start;
 

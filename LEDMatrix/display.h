@@ -12,6 +12,9 @@
 #define LCD_W	128
 #define LCD_H	64
 
+#define BUFF_W	LED_W
+#define BUFF_H	LED_H
+
 #include <inttypes.h>
 #include <stdio.h>
 
@@ -27,22 +30,41 @@ namespace display
 	enum BuffColours {BuffRed = 0, BuffGreen = 1};
 
 	// Row, Column, Colour
-	extern volatile uint_t buff[LED_H][LED_W / 8][2];
+	extern volatile uint_t buff[BUFF_H][BUFF_W / 8][2];
 	extern bool lcdOutput;
 }
 
 class Display
 {
 public:
-	void init(void);
-	void update(void);
+	Display(void);
 
-	void fill(const uint_t clr = display::None);
-	static void drawPoint(const uint_t x, const uint_t y, const uint_t clr);
-	static void drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch);
-	static void drawString(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char *str);
-	static void drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t clr);
-	static void drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2, const uint_t clr);
+	static void init(void);
+	static void update(void);
+
+	void setX(uint_t _x) {x = _x;}
+	void setY(uint_t _y) {y = _y;}
+	void setXY(uint_t _x, uint_t y) {setX(x); setY(y);}
+	void setColour(uint_t colour) {clr = colour;}
+
+	void fill(const uint_t clr);
+	void clear(void) {fill(clr & display::BGC);}
+	void drawPoint(const uint_t x, const uint_t y, const uint_t clr);
+	void drawChar(const uint_t x, const uint_t y, const uint_t zoom, const char ch);
+	void drawChar(const char ch);
+	void drawString(const uint_t x, const uint_t y, const uint_t zoom, const char *str);
+	void drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h);
+	void drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2);
+
+	Display& operator<<(const char c);
+
+private:
+	void newline(void);
+	void next(void);
+	void tab(void);
+
+	uint8_t zoom, tabSize;
+	uint_t x, y, clr;
 };
 
 FILE *displayOut(void);

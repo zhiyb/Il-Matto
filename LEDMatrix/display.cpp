@@ -7,15 +7,24 @@
 
 using namespace display;
 
-volatile uint_t display::buff[LED_H][LED_W / 8][2];
+volatile uint_t display::buff[BUFF_H][BUFF_W / 8][2];
 bool display::lcdOutput;
 
 Display disp;
 
+Display::Display(void)
+{
+	x = 0;
+	y = 0;
+	zoom = 1;
+	tabSize = 4;
+	clr = None;
+}
+
 void Display::init(void)
 {
 	lcdOutput = 1;
-	fill(None);
+	disp.fill(None);
 
 	MCUCR |= 0x80;			// Disable JTAG
 	MCUCR |= 0x80;
@@ -45,7 +54,7 @@ void Display::fill(const uint_t clr)
 		}
 }
 
-void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch)
+void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const char ch)
 {
 	for (uint_t dy = 0; dy < FONT_H * zoom; dy++) {
 		unsigned char c = pgm_read_byte(&(ascii[ch - ' '][dy / zoom]));
@@ -60,6 +69,11 @@ void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const 
 	}
 }
 
+void Display::drawChar(const char ch)
+{
+	drawChar(x, y, zoom, ch);
+}
+
 void Display::drawPoint(const uint_t x, const uint_t y, const uint_t clr)
 {
 	if (clr & AllRed)
@@ -72,16 +86,16 @@ void Display::drawPoint(const uint_t x, const uint_t y, const uint_t clr)
 		buff[y][x / 8][BuffGreen] &= ~(1 << x % 8);
 }
 
-void Display::drawString(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char *str)
+void Display::drawString(const uint_t x, const uint_t y, const uint_t zoom, const char *str)
 {
 	uint_t dx = x;
 	while (*str) {
-		drawChar(dx, y, zoom, clr, *str++);
+		drawChar(dx, y, zoom, *str++);
 		dx += FONT_W * zoom;
 	}
 }
 
-void Display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t clr)
+void Display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h)
 {
 	// midpoint, 1/4 ellipse
 	if (w == 0 || h == 0)
@@ -138,16 +152,64 @@ void Display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t c
 	}
 }
 
-void Display::drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2, const uint_t clr)
+void Display::drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2)
 {
 	;
 }
 
+void Display::newline(void)
+{
+	x = 0;
+	y += FONT_H * zoom;
+	if (y + FONT_H * zoom > BUFF_H) {
+#ifdef TFT_SCROLL
+		*this ^= BUFF_H * zoom;
+		y -= BUFF_H * zoom;
+#else
+		clear();
+		y = 0;
+#endif
+	}
+}
+
+void Display::next(void)
+{
+	x += FONT_W * zoom;
+	if (x > BUFF_W)
+		newline();
+}
+
+void Display::tab(void)
+{
+	if (x % (FONT_W * zoom))
+		x -= x % (FONT_W * zoom);
+	do
+		next();
+	while ((x / (FONT_W * zoom)) % tabSize);
+}
+
+
+Display& Display::operator<<(const char c)
+{
+	switch (c) {
+	case '\n':
+		newline();
+		break;
+	case '\t':
+		tab();
+		break;
+	default:
+		if ((unsigned)c < ' ' || (unsigned)c > 127)
+			break;
+		drawChar(c);
+		next();
+	}
+	return *this;
+}
+
 inline int putch(const char c, FILE *stream)
 {
-	//static uint_t row = 0, column = 0;
-//void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch)
-//	tft << c;
+	disp << c;
 	return 0;
 }
 
