@@ -4,16 +4,26 @@
 #include "lcd.h"
 #include "display.h"
 
+// Basic function set
 #define CMD_CLEAR()		(0x01)
-#define CMD_RETURN()		(0x02)
+#define CMD_HOME()		(0x02)
 #define CMD_ENTRY(id, s)	(0x04 | id << 1 | s)
 // Args: D: All display, C: Cursor, B: Cursor position
-#define CMD_STATUS(d, c, b)	(0x08 | d << 2 | c << 1 | b)
+#define CMD_DISPLAY(d, c, b)	(0x08 | d << 2 | c << 1 | b)
 #define CMD_CURSOR(sc, rl)	(0x10 | sc << 3 | rl << 2)
-// Args: RE: Extend(1)/Basic(0)
-#define CMD_FUNCTION(re)	(0x30 | re << 2)
+// Args: DL: 8-bit(1)/4-bit(0), RE: Extend(1)/Basic(0), G: Graphic display
+#define CMD_FUNCTION(dl, re, g)	(0x20 | dl << 4 | re << 2 | g << 1)
 #define CMD_CGRAM(addr)		(0x40 | addr)
 #define CMD_DDRAM(addr)		(0x80 | addr)
+
+// Extended fucntion set
+#define CMD_STANDBY()		(0x01)
+// Args: SR=1: vertical scroll position, SR=0: CGRAM address
+#define CMD_SELECT(sr)		(0x02 | sr)
+// Args: R: row select (0-3)
+#define CMD_REVERSE(r)		(0x04 | r)
+#define CMD_SCROLL(addr)	(0x40 | addr)
+#define CMD_GDRAM(addr)		(0x80 | addr)
 
 namespace lcd
 {
@@ -58,19 +68,17 @@ void lcd::init(void)
 	_delay_ms(40);
 	LCD_CPORT |= LCD_RST;
 
-	write(Cmd, CMD_FUNCTION(0));
-	write(Cmd, CMD_FUNCTION(0));
 	write(Cmd, CMD_CLEAR());
-	wait();
-	write(Cmd, CMD_RETURN());
-	wait();
-	write(Cmd, CMD_ENTRY(1, 0));
-	write(Cmd, CMD_DDRAM(0));
-	write(Data, 'T');
-	write(Data, 'e');
-	write(Data, 's');
-	write(Data, 't');
-	write(Cmd, CMD_STATUS(1, 0, 0));
+	write(Cmd, CMD_FUNCTION(1, 0, 1));
+	write(Cmd, CMD_FUNCTION(1, 1, 1));
+	write(Cmd, CMD_SELECT(1));
+	write(Cmd, CMD_SCROLL(0));
+	for (uint_t r = 0; r < 64; r++) {
+		write(Cmd, CMD_GDRAM(r));
+		write(Cmd, CMD_GDRAM(0x00));
+		for (uint_t c = 0; c < 4 * 8; c++)
+			write(Data, r % 2 ? 0x55 : 0xAA);
+	}
 }
 
 void lcd::update(void)
