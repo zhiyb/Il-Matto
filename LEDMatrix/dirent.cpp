@@ -38,7 +38,7 @@ static int8_t op::alloc_dir(void)
 
 DIR *op::opendir(const char *path)
 {
-	if (path == NULL || *path == '\0') {
+	if (path == NULL) {
 		errno = ENOENT;
 		return NULL;
 	}
@@ -89,6 +89,15 @@ readent:
 	}
 	dir->orig = ent->d_addr;
 	goto nextlevel;
+}
+
+int op::chdir(const char *path)
+{
+	DIR *dir = opendir(path);
+	if (dir == NULL)
+		return -1;
+	__current_dir__ = dir->orig;
+	return 0;
 }
 
 struct dirent *op::readdir(DIR *dir)

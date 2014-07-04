@@ -13,6 +13,8 @@ namespace op
 	extern class fs_t *fs;
 }
 
+using namespace op;
+
 int op::fgetchar(FILE *fp)
 {
 	fs->activate(fp);
@@ -62,6 +64,26 @@ FILE *op::fopen(const char *path, const char *mode)
 		return NULL;
 	file_t *file = __file__[fd];
 	if (!fs->readFileInfo(path, file)) {
+		uint8_t err = errno;
+		if (fclose(fd) == 0)
+			errno = err;
+		return NULL;
+	}
+	if ((file->fp = fdevopen(NULL, op::fgetchar)) == NULL) {
+		fclose(fd);
+		errno = ENOMEM;
+		return NULL;
+	}
+	return file->fp;
+}
+
+FILE *fopen(const struct dirent *ent, const char *mode)
+{
+	uint8_t fd;
+	if ((int8_t)(fd = alloc_file()) == -1)
+		return NULL;
+	file_t *file = __file__[fd];
+	if (!fs->readFileInfo(ent, file)) {
 		uint8_t err = errno;
 		if (fclose(fd) == 0)
 			errno = err;

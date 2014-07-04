@@ -24,9 +24,12 @@ struct file_t
 	uint32_t size;
 };
 
+#include "dirent.h"
+
 namespace op
 {
 	FILE *fopen(const char *path, const char *mode);
+	FILE *fopen(const struct dirent *ent, const char *mode);
 	struct file_t *fstruct(FILE *fp);
 	int fclose(FILE *fp);
 }

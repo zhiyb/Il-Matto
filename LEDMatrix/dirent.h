@@ -35,6 +35,7 @@ namespace op
 	void rewinddir(DIR *dir);
 	int closedir(DIR *dir);
 	void setfs(fs_t *filesys);
+	int chdir(const char *path);
 }
 
 #endif

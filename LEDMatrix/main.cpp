@@ -8,6 +8,7 @@
 #include "tty.h"
 #include "mbr.h"
 #include "fat32.h"
+#include "timer1.h"
 
 using namespace display;
 
@@ -16,6 +17,7 @@ void init(void)
 	usbDisconnect();
 	disp.init();
 	uart::init();
+	timer1::init();
 	stdout = disp.out();
 	stderr = uart::out();
 }
@@ -92,29 +94,42 @@ start:	{
 	while ((ent = op::readdir(dir)) != NULL)
 		fprintf(stderr, "%s%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_type & IS_DIR ? TTY_BLUE : TTY_GREEN, ent->d_name, ent->d_type, ent->d_size / 1024);
 	op::closedir(dir);
-	
-	fputs(TTY_YELLOW "Reading '/BoardData/Messages.txt' file...\n", stderr);
-	FILE *fp = op::fopen("/BoardData/Display.buff", "r");
-	if (fp == NULL) {
-		fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
+
+	fputs(TTY_YELLOW "Changing to '/BoardData' directory...\n", stderr);
+	if (op::chdir("/BoardData") != 0) {
+		fprintf(stderr, TTY_RED "Change dir failed: %u\n", errno);
 		goto failed;
 	}
-	disp.clear();
-	disp.setColour(Green);
-	fputs(TTY_MAGENTA, stderr);
-#if 1
-	for (uint_t r = 0; r < BUFF_H; r++)
-		for (uint_t c = 0; c < BUFF_W / 8; c++) {
-			buff[r][c][BuffRed] = fgetc(fp);
-			buff[r][c][BuffGreen] = fgetc(fp);
+
+	fputs(TTY_YELLOW "Reading 'Display.buff' file...\n", stderr);
+	timer1::start();
+	uint8_t cnt = 0;
+	while (!timer1::over()) {
+		FILE *fp = op::fopen("Display.buff", "r");
+		if (fp == NULL) {
+			fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
+			goto failed;
 		}
-#else
-	int c;
-	while ((c = fgetc(fp)) != -1) {
-		fputc(c, stderr);
-		putchar(c);
+		for (uint_t r = 0; r < BUFF_H; r++)
+			for (uint_t c = 0; c < BUFF_W / 8; c++) {
+				buff[r][c][BuffRed] = fgetc(fp);
+				buff[r][c][BuffGreen] = fgetc(fp);
+			}
+		op::fclose(fp);
+		cnt++;
 	}
-#endif
+	timer1::stop();
+	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
+
+	fputs(TTY_YELLOW "Testing max refresh speed...\n", stderr);
+	timer1::start();
+	cnt = 0;
+	while (!timer1::over()) {
+		disp.fill(Green);
+		cnt++;
+	}
+	timer1::stop();
+	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
 
 	}
 	goto ret;

@@ -134,14 +134,14 @@ bool fat32_t::readFileInfo(const char *path, file_t *file)
 {
 	char *dirpath = (char *)malloc(strlen(path) + 1);
 	strcpy(dirpath, path);
-	char *p = dirpath, *last = 0;
+	char *p = dirpath, *last = dirpath;
 	while (*p != '\0') {
 		if (*p == '/')
 			last = p;
 		p++;
 	}
 	DIR *dir;
-	if (last != 0) {
+	if (last != dirpath) {
 		*last++ = '\0';
 		dir = op::opendir(dirpath);
 	} else
@@ -154,14 +154,10 @@ bool fat32_t::readFileInfo(const char *path, file_t *file)
 	struct dirent *ent;
 	while ((ent = op::readdir(dir)) != NULL)
 		if (strcasecmp(ent->d_name, last) == 0) {
-			if (ent->d_type & IS_DIR)
+			if (!readFileInfo(ent, file))
 				goto failed;
-			file->addr = ent->d_addr;
-			file->offset = 0;
-			file->size = ent->d_size;
 			free(dirpath);
 			op::closedir(dir);
-			::errno = 0;
 			return true;
 		}
 failed:
@@ -169,4 +165,17 @@ failed:
 	op::closedir(dir);
 	::errno = ENOENT;
 	return false;
+}
+
+bool fat32_t::readFileInfo(const struct dirent *ent, file_t *file)
+{
+	if (ent->d_type & IS_DIR) {
+		::errno = ENOENT;
+		return false;
+	}
+	file->addr = ent->d_addr;
+	file->offset = 0;
+	file->size = ent->d_size;
+	::errno = 0;
+	return true;
 }

@@ -19,6 +19,7 @@ public:
 	virtual inline uint32_t rootAddr(void) const {return rootClus;}
 	virtual bool readDirEntry(DIR *dir, struct dirent *ent);
 	virtual bool readFileInfo(const char *path, file_t *file);
+	virtual bool readFileInfo(const struct dirent *ent, file_t *file);
 	virtual inline int readChar(void) {return chainRead();}
 	virtual inline void readClose(void) {chainReadClose();}
 	virtual inline void activate(FILE *fp);
