@@ -99,10 +99,14 @@ start:	{
 		fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
 		goto failed;
 	}
+	disp.clear();
+	disp.setColour(Green);
 	fputs(TTY_MAGENTA, stderr);
 	int c;
-	while ((c = fgetc(fp)) != -1)
+	while ((c = fgetc(fp)) != -1) {
 		fputc(c, stderr);
+		putchar(c);
+	}
 
 	}
 	goto ret;

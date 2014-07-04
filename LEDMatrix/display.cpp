@@ -175,7 +175,7 @@ void Display::newline(void)
 void Display::next(void)
 {
 	x += FONT_W * zoom;
-	if (x > BUFF_W)
+	if (x + FONT_W * zoom > BUFF_W)
 		newline();
 }
 
