@@ -5,10 +5,14 @@
 #include "led.h"
 #include "ascii.h"
 
+using namespace display;
+
 volatile uint_t display::buff[LED_H][LED_W / 8][2];
 bool display::lcdOutput;
 
-void display::init(void)
+Display disp;
+
+void Display::init(void)
 {
 	lcdOutput = 1;
 	fill(None);
@@ -26,13 +30,13 @@ void display::init(void)
 		led::init();
 }
 
-void display::update(void)
+void Display::update(void)
 {
 	if (lcdOutput)
 		lcd::update();
 }
 
-void display::fill(const uint_t clr)
+void Display::fill(const uint_t clr)
 {
 	for (uint_t j = 0; j < LED_H; j++)
 		for (uint_t k = 0; k < LED_W / 8; k++) {
@@ -41,7 +45,7 @@ void display::fill(const uint_t clr)
 		}
 }
 
-void display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch)
+void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch)
 {
 	for (uint_t dy = 0; dy < FONT_H * zoom; dy++) {
 		unsigned char c = pgm_read_byte(&(ascii[ch - ' '][dy / zoom]));
@@ -56,7 +60,7 @@ void display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const 
 	}
 }
 
-void display::drawPoint(const uint_t x, const uint_t y, const uint_t clr)
+void Display::drawPoint(const uint_t x, const uint_t y, const uint_t clr)
 {
 	if (clr & AllRed)
 		buff[y][x / 8][BuffRed] |= 1 << x % 8;
@@ -68,7 +72,7 @@ void display::drawPoint(const uint_t x, const uint_t y, const uint_t clr)
 		buff[y][x / 8][BuffGreen] &= ~(1 << x % 8);
 }
 
-void display::drawString(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char *str)
+void Display::drawString(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char *str)
 {
 	uint_t dx = x;
 	while (*str) {
@@ -77,7 +81,7 @@ void display::drawString(const uint_t x, const uint_t y, const uint_t zoom, cons
 	}
 }
 
-void display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t clr)
+void Display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t clr)
 {
 	// midpoint, 1/4 ellipse
 	if (w == 0 || h == 0)
@@ -134,7 +138,23 @@ void display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h, const uint_t c
 	}
 }
 
-void display::drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2, const uint_t clr)
+void Display::drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2, const uint_t clr)
 {
 	;
+}
+
+inline int putch(const char c, FILE *stream)
+{
+	//static uint_t row = 0, column = 0;
+//void Display::drawChar(const uint_t x, const uint_t y, const uint_t zoom, const uint_t clr, const char ch)
+//	tft << c;
+	return 0;
+}
+
+FILE *displayOut(void)
+{
+	static FILE *out = NULL;
+	if (out == NULL)
+		out = fdevopen(putch, NULL);
+	return out;
 }
