@@ -37,6 +37,8 @@ int main(void)
 	disp.drawString(2, 16, 2, "World");
 	disp.setColour(Orange);
 	disp.drawEllipse(0, 0, 63, 31);
+	disp.drawLine(0, 0, 63, 31);
+	disp.drawLine(0, 31, 63, 0);
 	disp.update();
 	_delay_ms(500);
 

@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 #include "display.h"
 #include "lcd.h"
 #include "led.h"
@@ -152,9 +153,30 @@ void Display::drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h)
 	}
 }
 
-void Display::drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2)
+void Display::drawLine(uint_t x0, uint_t y0, uint_t x1, uint_t y1)
 {
-	;
+	// Bresenham's line algorithm (http://en.wikipedia.org/wiki/Bresenham's_line_algorithm)
+	uint_t dx = abs(x1 - x0), dy = abs(y1 - y0);
+	int_t sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, err = dx - dy;
+
+	while (true) {
+		drawPoint(x0, y0, clr);
+		if (x0 == x1 && y0 == y1)
+			break;
+		int e2 = 2 * err;
+		if (e2 > -dy) {
+			err = err - dy;
+			x0 = x0 + sx;
+		}
+		if (x0 == x1 && y0 == y1) {
+			drawPoint(x0, y0, clr);
+			break;
+		}
+		if (e2 < dx) {
+			err = err + dx;
+			y0 = y0 + sy;
+		}
+	}
 }
 
 void Display::newline(void)

@@ -55,7 +55,7 @@ public:
 	void drawChar(const char ch);
 	void drawString(const uint_t x, const uint_t y, const uint_t zoom, const char *str);
 	void drawEllipse(uint_t xx, uint_t yy, int_t w, int_t h);
-	void drawLine(uint_t x1, uint_t y1, uint_t x2, uint_t y2);
+	void drawLine(uint_t x0, uint_t y0, uint_t x1, uint_t y1);
 
 	Display& operator<<(const char c);
 
