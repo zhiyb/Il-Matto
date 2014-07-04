@@ -73,20 +73,34 @@ void lcd::init(void)
 	write(Cmd, CMD_FUNCTION(1, 1, 1));
 	write(Cmd, CMD_SELECT(1));
 	write(Cmd, CMD_SCROLL(0));
-	for (uint_t r = 0; r < 32; r++) {
+	for (uint8_t r = 0; r < 32; r++) {
 		write(Cmd, CMD_GDRAM(r));
 		write(Cmd, CMD_GDRAM(0x00));
-		for (uint_t c = 0; c < 32; c++)
+		for (uint8_t c = 0; c < 32; c++)
 			write(Data, 0x00);
 	}
 }
 
 void lcd::update(void)
 {
-	for (uint_t r = 0; r < 32; r++) {
+	for (uint8_t r = 0; r < 32; r++) {
 		write(Cmd, CMD_GDRAM(r));
 		write(Cmd, CMD_GDRAM(0x00));
-		for (uint_t c = 0; c < 32; c++)
-			write(Data, r % 2 ? 0x55 : 0xAA);
+		for (uint8_t d = 0; d < 2; d++)	// Up(0)/Lower(1) half
+			for (uint8_t c = 0; c < 32 / 2 / 2; c++) {
+				uint8_t data = buff[r / 2 + d * 16] \
+					       [c][BuffRed];
+				data |= buff[r / 2 + d * 16][c][BuffGreen];
+				uint8_t l = 0, r = 0;
+				for (uint8_t i = 0; i < 8; i++) {
+					uint8_t move = i / 2;
+					l |= ((data >> move) & 0x01) \
+					     << (7 - i);
+					r |= ((data << move) & 0x80) \
+					     >> (7 - i);
+				}
+				write(Data, l);
+				write(Data, r);
+			}
 	}
 }
