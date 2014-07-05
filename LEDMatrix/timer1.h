@@ -4,7 +4,7 @@
 #include <avr/io.h>
 
 //#define TIMER1_MAX	(F_CPU / 256)		// 1Hz
-#define TIMER1_MAX	(F_CPU / 256 / 5 - 55)	// 5Hz
+#define TIMER1_MAX	(F_CPU / 256 / 5)	// 5Hz
 
 namespace timer1
 {

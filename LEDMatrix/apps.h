@@ -90,7 +90,7 @@ static uint8_t apps::animation(const char *path, const uint_t clr)
 				if (clr & (Green << Background))
 					buff[r][c][BuffGreen] |= ~ch;
 			}
-		_delay_us(1000);
+		_delay_us(2000);
 	}
 	timer1::stop();
 	op::fclose(fp);
