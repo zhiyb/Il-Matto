@@ -10,6 +10,7 @@
 #include "mbr.h"
 #include "fat32.h"
 #include "timer1.h"
+#include "pwm.h"
 #include "apps.h"
 
 using namespace display;
@@ -20,6 +21,7 @@ void init(void)
 	disp.init();
 	uart::init();
 	timer1::init();
+	pwm::init();
 	stdout = disp.out();
 	stderr = uart::out();
 }
@@ -89,18 +91,6 @@ start:	{
 	op::setfs(&fs);
 
 #if 0
-	fputs(TTY_YELLOW "Testing max refresh speed...\n", stderr);
-	timer1::start();
-	cnt = 0;
-	while (!timer1::over()) {
-		disp.fill(Green);
-		cnt++;
-	}
-	timer1::stop();
-	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
-#endif
-
-#if 1
 	fputs(TTY_YELLOW "Reading '/BoardData' directory...\n", stderr);
 	DIR *dir = op::opendir("/BoardData");
 	if (dir == NULL) {
@@ -116,7 +106,6 @@ start:	{
 		//fprintf(stderr, "%s%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_type & IS_DIR ? TTY_BLUE : TTY_GREEN, ent->d_name, ent->d_type, ent->d_size / 1024);
 
 	apps::image(ent);
-
 	op::closedir(dir);
 #endif
 
@@ -127,10 +116,12 @@ start:	{
 	}
 
 	//apps::image("Display.buff");
+	//apps::wav("Play.wav");
+	//apps::wav("/wav/01_out.wav");
 
 	while (1) {
-		apps::animation("Movie.buffs", Red << Foreground);
-		apps::animation("Movie.buffs", Green << Foreground);
+		apps::animation("Animation.buffs", Red << Foreground);
+		apps::animation("Animation.buffs", Green << Foreground);
 	}
 
 	}

@@ -8,12 +8,14 @@
 #include "dirent.h"
 #include "file.h"
 #include "tty.h"
+#include "pwm.h"
 
 namespace apps
 {
 	static uint8_t image(const char *path);
 	static uint8_t image(struct dirent *ent);
 	static uint8_t animation(const char *path, const uint_t clr);
+	static uint8_t wav(const char *path);
 }
 
 static uint8_t apps::image(const char *path)
@@ -68,7 +70,7 @@ static uint8_t apps::animation(const char *path, const uint_t clr)
 	}
 	uint8_t cnt = 0;
 	int ch;
-	timer1::start();
+	timer1::freq5();
 	while ((ch = fgetc(fp)) != -1) {
 		if (cnt++ % (30 / 5) == 0) {
 			while (!timer1::over());
@@ -97,4 +99,28 @@ static uint8_t apps::animation(const char *path, const uint_t clr)
 	fputs(TTY_YELLOW "apps::animation() finished\n", stderr);
 	return 0;
 }
+
+static uint8_t apps::wav(const char *path)
+{
+	fprintf(stderr, TTY_YELLOW "apps::wav(): \'%s\'\n", path);
+	FILE *fp = op::fopen(path, "r");
+	if (fp == NULL) {
+		fprintf(stderr, TTY_RED "apps::wav(): open file failed: %u\n", errno);
+		return 1;
+	}
+	int ch;
+	pwm::enable(true);
+	timer1::freq8000();
+	while ((ch = fgetc(fp)) != -1) {
+		while (!timer1::over());
+		timer1::clear();
+		pwm::set(ch);
+	}
+	timer1::stop();
+	pwm::enable(false);
+	op::fclose(fp);
+	fputs(TTY_YELLOW "apps::wav() finished\n", stderr);
+	return 0;
+}
+
 #endif
