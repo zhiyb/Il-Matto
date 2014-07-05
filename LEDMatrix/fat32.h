@@ -53,11 +53,11 @@ inline uint8_t fat32_t::chainRead(uint32_t clus, uint32_t offset)
 		hw->skipBytes(offset % 512);
 		return 0;
 	}
-	if (++counter % (secPerClus * 512) == 0) {
+	if (counter != 0 && counter++ % (secPerClus * 512) == 0) {
 		hw->streamStop(hw_t::Read);
 		curClus = findNextClus(curClus);
 		hw->streamStart(hw_t::Read, clusAddr + secPerClus * (curClus - 2));
-		counter = 0;
+		counter = 1;
 	}
 	return hw->nextByte();
 }

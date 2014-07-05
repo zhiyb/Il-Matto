@@ -27,7 +27,7 @@ int main(void)
 {
 	init();
 	class sdhw_t sd;
-	uint8_t err, cnt;
+	uint8_t err;//, cnt;
 	sei();
 
 	fputs(TTY_WHITE "*** Hello, world! ***\n", stderr);
@@ -87,6 +87,7 @@ start:	{
 	}
 	op::setfs(&fs);
 
+#if 0
 	fputs(TTY_YELLOW "Reading '/BoardData' directory...\n", stderr);
 	DIR *dir = op::opendir("/BoardData");
 	if (dir == NULL) {
@@ -101,6 +102,17 @@ start:	{
 		}
 		//fprintf(stderr, "%s%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_type & IS_DIR ? TTY_BLUE : TTY_GREEN, ent->d_name, ent->d_type, ent->d_size / 1024);
 
+#if 0
+	fputs(TTY_YELLOW "Testing max refresh speed...\n", stderr);
+	timer1::start();
+	cnt = 0;
+	while (!timer1::over()) {
+		disp.fill(Green);
+		cnt++;
+	}
+	timer1::stop();
+	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
+#endif
 
 #if 0
 	fputs(TTY_YELLOW "Reading 'Display.buff' file by dirent...\n", stderr);
@@ -124,6 +136,7 @@ start:	{
 	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
 #endif
 	op::closedir(dir);
+#endif
 
 	fputs(TTY_YELLOW "Changing to '/BoardData' directory...\n", stderr);
 	if (op::chdir("/BoardData") != 0) {
@@ -131,6 +144,7 @@ start:	{
 		goto failed;
 	}
 
+#if 0
 	fputs(TTY_YELLOW "Reading 'Display.buff' file...\n", stderr);
 	timer1::start();
 	cnt = 0;
@@ -150,18 +164,28 @@ start:	{
 	}
 	timer1::stop();
 	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
-
-#if 0
-	fputs(TTY_YELLOW "Testing max refresh speed...\n", stderr);
-	timer1::start();
-	cnt = 0;
-	while (!timer1::over()) {
-		disp.fill(Green);
-		cnt++;
-	}
-	timer1::stop();
-	fprintf(stderr, TTY_WHITE "CNT: %u\n", cnt);
 #endif
+
+	fputs(TTY_YELLOW "Reading 'Movie.buffs' file...\n", stderr);
+	{
+		FILE *fp = op::fopen("Movie.buffs", "r");
+		if (fp == NULL) {
+			fprintf(stderr, TTY_RED "Open file failed: %u\n", errno);
+			goto failed;
+		}
+		int ch;
+		while ((ch = fgetc(fp)) != -1) {
+			for (uint_t r = 0; r < BUFF_H; r++)
+				for (uint_t c = 0; c < BUFF_W / 8; c++) {
+					if (r != 0 || c != 0)
+						ch = fgetc(fp);
+					buff[r][c][BuffRed] = ch;
+					//buff[r][c][BuffGreen] = fgetc(fp);
+				}
+			//_delay_ms(100);
+		}
+		op::fclose(fp);
+	}
 
 	}
 	goto ret;
