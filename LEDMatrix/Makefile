@@ -32,8 +32,8 @@ CXX	= avr-g++
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
-override CXXFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) -Wno-unused-function
+override CXXFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) -Wno-unused-function
 override LDFLAGS	= -Wl,-Map,$(PRG).map
 
 OBJCOPY	= avr-objcopy
