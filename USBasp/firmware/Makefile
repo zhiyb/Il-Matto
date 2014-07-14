@@ -15,10 +15,12 @@
 #     make lock    # to protect the boot loader from overwriting
 
 F_CPU = 12000000
-DEVICE = atmega644p
+DEVICE = atmega168p
 # BOOTLOADER_ADDRESS is 1800 for 8k devices, 3800 for 16k and 7800 for 32k.
-BOOTLOADER_ADDRESS = F800
-FUSEOPT = $(FUSEOPT_644)
+#BOOTLOADER_ADDRESS = F800
+BOOTLOADER_ADDRESS = 1C00
+#FUSEOPT = $(FUSEOPT_644)
+FUSEOPT = $(FUSEOPT_168)
 LOCKOPT = 
 #-U lock:w:0x2f:m
 
@@ -27,7 +29,7 @@ PROGRAMMER = -c c232hm
 
 FUSEOPT_8 = -U hfuse:w:0xc0:m -U lfuse:w:0x9f:m
 FUSEOPT_88 = -U hfuse:w:0xd6:m -U lfuse:w:0xdf:m -U efuse:w:0x00:m
-FUSEOPT_168 = -U hfuse:w:0xd6:m -U lfuse:w:0xdf:m -U efuse:w:0x00:m
+FUSEOPT_168 = -U hfuse:w:0xd6:m -U lfuse:w:0xd7:m -U efuse:w:0x00:m
 FUSEOPT_328 = -U lfuse:w:0xf7:m -U hfuse:w:0xda:m -U efuse:w:0x03:m
 FUSEOPT_644 = -U lfuse:w:0xE7:m -U hfuse:w:0x9C:m -U efuse:w:0xFF:m
 # You may have to change the order of these -U commands.
