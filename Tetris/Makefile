@@ -1,20 +1,11 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-<<<<<<< HEAD:TFT/Makefile
-PRG	= TFT
-OBJ	= main.o ascii.o tft.o
-MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
-VERSION	= 0.0.1
-EXT = cpp
-=======
 PRG	= Tetris
 OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o rotary.o sound.o display.o tetris.o rand.o timer.o eemem.o
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 2.1.0
->>>>>>> Tetris:Tetris/Makefile
 
 DEFS	= -DF_CPU=12000000
 LIBS	=
@@ -49,22 +40,14 @@ $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(SIZE) $@
 
-<<<<<<< HEAD:TFT/Makefile
-%.o: %.$(EXT)
-=======
 %.o: %.c
->>>>>>> Tetris:Tetris/Makefile
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Dependency:
 
 -include $(OBJ:.o=.d)
 
-<<<<<<< HEAD:TFT/Makefile
-%.d: %.$(EXT)
-=======
 %.d: %.c
->>>>>>> Tetris:Tetris/Makefile
 	@set -e; rm -f $@; \
 	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
@@ -153,11 +136,7 @@ TAR	= tar
 EXTRA_CLEAN_FILES	+= $(ARCHIVE)
 
 archive: hex ehex
-<<<<<<< HEAD:TFT/Makefile
-	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.$(EXT)) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
-=======
 	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.c) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
->>>>>>> Tetris:Tetris/Makefile
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.
