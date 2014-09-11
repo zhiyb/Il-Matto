@@ -1,35 +1,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define USE_5V
+#define ON	400
+#define OFF	100
 
-#ifdef USE_5V
-#define RINIT	150
-#define RMIN	1
-#define RTH	30
-#define RFACT	1
-
-#define DINIT	10
-#define DMIN	4
-#define DFACT	1
-#define D2	1
-
-#define	BREAK	40
-#define STEP	2
-#else
-#define RINIT	254
-#define RMIN	1
-#define RTH	14
-#define RFACT	1
-
-#define DINIT	20
-#define DMIN	10
-#define DFACT	1
-#define D2	1
-
-#define	BREAK	10
-#define STEP	2
-#endif
+#define ONMIN	200
 
 #define PINS	(_BV(5) | _BV(6) | _BV(7))
 
@@ -52,43 +27,6 @@ const uint8_t seq[6][2] = {
 	{_BV(5) | _BV(7),	_BV(5) | _BV(7)},
 };
 #endif
-
-uint8_t r = RINIT, d = DINIT;
-
-void delay(uint16_t d)
-{
-	while (d--)
-		_delay_us(10);
-}
-
-void faster(void)
-{
-	if (r > RTH || d == DMIN) {
-		if (r > RMIN + RFACT)
-			r -= RFACT;
-		else
-			r = RMIN;
-	} else if (r <= RTH) {
-		if (d > DMIN + DFACT)
-			d -= DFACT;
-		else
-			d = DMIN;
-	}
-}
-
-void slower(void)
-{
-	if (r < RINIT + RFACT)
-		r += RFACT;
-	else
-		r = RINIT;
-	if (r > RTH) {
-		if (d < DINIT + DFACT)
-			d += DFACT;
-		else
-			d = DINIT;
-	}
-}
 
 void init(void)
 {
@@ -115,44 +53,23 @@ int main(void)
 {
 	init();
 
-#if 0
 	while (1) {
-		uint8_t i;
+		uint8_t i, j;
 		for (i = 0; i < 6; i++) {
+			uint8_t k = 0;
 			do {
 				PORTD = seq[i][0];
-				_delay_us(2000);
+				_delay_us(ON);
 				PORTD = 0;
-				_delay_us(2000);
-			} while (0);
-		}
-	}
-#else
-	while (1) {
-		uint8_t i;
-		for (i = 0; i < 6; i++) {
-			uint8_t j = 0;
-			do {
-				PORTD = seq[i][0];
-				delay(r);
-				PORTD = 0;
-				delay(d);
-				if (j == 0 && (PINC & PINS) == seq[i][1]) {
-					faster();
-					break;
+				for (j = 0; j < OFF; j++) {
+					_delay_us(1);
+					if ((PINC & PINS) == seq[i][1])
+						break;
 				}
-				delay(D2);
-				if ((PINC & PINS) == seq[i][1])
-					break;
-				if (j > STEP)
-					slower();
-				if (j > BREAK)
-					break;
-				j++;
-			} while ((PINC & PINS) != seq[i][1]);
+				k++;
+			} while ((PINC & PINS) != seq[i][1] && k != 255);
 		}
 	}
-#endif
 
 	return 1;
 }
