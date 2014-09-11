@@ -17,12 +17,12 @@ const uint8_t seq[6][2] = {
 };
 #else
 const uint8_t seq[6][2] = {
-	{_BV(5),		_BV(5)},
-	{_BV(5) | _BV(6),	_BV(5) | _BV(6)},
-	{_BV(6),		_BV(6)},
-	{_BV(6) | _BV(7),	_BV(6) | _BV(7)},
-	{_BV(7),		_BV(7)},
-	{_BV(5) | _BV(7),	_BV(5) | _BV(7)},
+	{_BV(5),		_BV(6)},
+	{_BV(5) | _BV(6),	_BV(6) | _BV(7)},
+	{_BV(6),		_BV(7)},
+	{_BV(6) | _BV(7),	_BV(5) | _BV(7)},
+	{_BV(7),		_BV(5)},
+	{_BV(5) | _BV(7),	_BV(5) | _BV(6)},
 };
 #endif
 
@@ -39,12 +39,14 @@ void init(void)
 	DDRC &= ~PINS;
 	PORTC |= PINS;
 
+#if 0
 	DDRB |= _BV(4);
 	TCCR0B = 0;
 	TCCR0A = _BV(COM0B1) | _BV(WGM00) | _BV(WGM01);	// Fast PWM
 	OCR0B = 128;
 	TIMSK0 = 0;
 	TCCR0B = _BV(CS00);				// Start PWM
+#endif
 }
 
 int main(void)
