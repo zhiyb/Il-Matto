@@ -1,10 +1,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define ON	400
-#define OFF	100
-
-#define ONMIN	200
+#define ON	250
+#define OFF	80
 
 #define PINS	(_BV(5) | _BV(6) | _BV(7))
 
@@ -54,9 +52,9 @@ int main(void)
 	init();
 
 	while (1) {
-		uint8_t i, j;
+		uint8_t i;
 		for (i = 0; i < 6; i++) {
-			uint8_t k = 0;
+			uint8_t j, k = 0;
 			do {
 				PORTD = seq[i][0];
 				_delay_us(ON);
@@ -67,7 +65,7 @@ int main(void)
 						break;
 				}
 				k++;
-			} while ((PINC & PINS) != seq[i][1] && k != 255);
+			} while ((PINC & PINS) != seq[i][1] && k);
 		}
 	}
 
