@@ -39,13 +39,14 @@ void init(void)
 	DDRC &= ~PINS;
 	PORTC |= PINS;
 
-#if 0
+#if 1
 	DDRB |= _BV(4);
 	TCCR0B = 0;
 	TCCR0A = _BV(COM0B1) | _BV(WGM00) | _BV(WGM01);	// Fast PWM
-	OCR0B = 128;
+	OCR0A = 128;
+	OCR0B = 96;
 	TIMSK0 = 0;
-	TCCR0B = _BV(CS00);				// Start PWM
+	TCCR0B = _BV(CS00) | _BV(WGM02);		// Start PWM
 #endif
 }
 
