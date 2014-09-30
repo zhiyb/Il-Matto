@@ -488,8 +488,8 @@ static inline void tft_line(uint16_t x0, uint16_t y0, \
 			SWAP(y0, y1);
 		}
 		for (y = y0; y <= y1; y++)
-			tft_point(x0 + x1 * (y - y0) / dy - \
-					x0 * (y - y0) / dy, y, c);
+			tft_point(x0 + dx * (y - y0) / dy * \
+					(x0 > x1 ? -1 : 1), y, c);
 	} else {
 		uint16_t x;
 		if (x0 > x1) {
@@ -497,8 +497,8 @@ static inline void tft_line(uint16_t x0, uint16_t y0, \
 			SWAP(y0, y1);
 		}
 		for (x = x0; x <= x1; x++)
-			tft_point(x, y0 + y1 * (x - x0) / dx - \
-					y0 * (x - x0) / dx, c);
+			tft_point(x, y0 + dy * (x - x0) / dx * \
+					(y0 > y1 ? -1 : 1), c);
 	}
 }
 

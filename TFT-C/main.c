@@ -59,7 +59,7 @@ start:
 	tft_line(100, 150, 300, 150, 0xF800);
 	tft_line(300, 160, 100, 160, 0x001F);
 	tft_line(250, 0, 250, 200, 0xF800);
-	tft_line(260, 200, 260, 0, 0x001F);
+	tft_line(260, 200, 270, 0, 0x001F);
 	puts("Draw lines test");
 	while (1);
 	goto start;
