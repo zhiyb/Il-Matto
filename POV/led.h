@@ -6,6 +6,7 @@
 namespace led
 {
 	void init(void);
+	void send(uint8_t data);
 }
 
 #endif
