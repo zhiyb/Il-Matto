@@ -36,8 +36,8 @@ public:
 	inline uint16_t getY(void) {return y;}
 	inline void setForeground(uint16_t c) {fgc = c;}
 	inline void setBackground(uint16_t c) {bgc = c;}
-	inline uint8_t getForeground(void) {return fgc;}
-	inline uint8_t getBackground(void) {return bgc;}
+	inline uint16_t getForeground(void) {return fgc;}
+	inline uint16_t getBackground(void) {return bgc;}
 	inline void setOrient(uint8_t o);
 	inline uint8_t getOrient(void) {return orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
@@ -57,9 +57,10 @@ public:
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void);
 	inline void bmp(bool e);
+	inline uint16_t width(void) const {return w;}
+	inline uint16_t height(void) const {return h;}
 	static inline void start(void) {cmd(0x2C);}
-	static inline void write(uint16_t c)
-		{data(c / 0x0100); data(c % 0x0100);}
+	static inline void write(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 protected:
 	inline void newline(void);

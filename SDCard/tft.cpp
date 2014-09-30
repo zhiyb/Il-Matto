@@ -32,6 +32,14 @@ void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 void tfthw::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c)
 {
+	if (x0 > w)
+		x0 = w - 1;
+	if (x1 > w)
+		x1 = w - 1;
+	if (y0 > h)
+		y0 = h - 1;
+	if (y1 > h)
+		y1 = h - 1;
 	if (x0 == x1) {
 		if (y0 > y1)
 			SWAP(y0, y1);
@@ -51,16 +59,16 @@ void tfthw::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 			SWAP(y0, y1);
 		}
 		for (uint16_t y = y0; y <= y1; y++)
-			point(x0 + x1 * (y - y0) / dy - \
-					x0 * (y - y0) / dy, y, c);
+			point(x0 + dx * (y - y0) / dy * \
+					(x0 > x1 ? -1 : 1), y, c);
 	} else {
 		if (x0 > x1) {
 			SWAP(x0, x1);
 			SWAP(y0, y1);
 		}
 		for (uint16_t x = x0; x <= x1; x++)
-			point(x, y0 + y1 * (x - x0) / dx - \
-					y0 * (x - x0) / dx, c);
+			point(x, y0 + dy * (x - x0) / dx * \
+					(y0 > y1 ? -1 : 1), c);
 	}
 }
 
