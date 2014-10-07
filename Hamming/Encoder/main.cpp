@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include "tft.h"
+#include "conv.h"
 
 void init(void)
 {
@@ -9,8 +10,8 @@ void init(void)
 	PORTB |= 0x80;
 	tft.init();
 	tft /= tft.Portrait;
-	tft.setBackground(0x667F);
-	tft.setForeground(0x0000);
+	tft.setBackground(0x0000);
+	tft.setForeground(0x667F);
 	tft.clean();
 	stdout = tftout();
 	tft++;
@@ -49,6 +50,12 @@ start:
 		PORTD = 0xE0;
 		//	PINB |= 1;
 		//	PINB |= 1;
+		uint8_t exp = ((num & 0x08) << 4) | ((num & 0x04) << 3) | ((num & 0x02) << 2) | ((num & 0x01) << 1);
+		exp |= ((num & 0x02) << 5) ^ ((num & 0x04) << 4) ^ ((num & 0x08) << 3);
+		exp |= ((~num & 0x01) << 4) ^ ((num & 0x02) << 3) ^ ((num & 0x04) << 2);
+		exp |= ((~num & 0x01) << 2) ^ ((num & 0x02) << 1) ^ ((num & 0x08) >> 1);
+		exp |= (~num & 0x01) ^ ((num & 0x04) >> 2) ^ ((num & 0x08) >> 3);
+		tft.setForeground(conv::c32to16(data == exp ? 0x0022B14C : 0x00ED1C24));
 		printf("Num: %u, data: 0x%02X\n", num, data);
 		//_delay_ms(1000);
 	}
