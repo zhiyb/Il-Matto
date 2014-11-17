@@ -11,6 +11,7 @@
 #include "dirent.h"
 #include "file.h"
 #include "errno.h"
+#include "apps.h"
 
 #define PI	3.1415927
 
@@ -70,6 +71,7 @@ start:
 	}
 	op::setfs(&fs);
 
+#if 1
 	puts("\nReading '/Il Matto/Testing' directory...");
 	DIR *dir = op::opendir("/Il Matto/Testing");
 	if (dir == NULL) {
@@ -108,6 +110,10 @@ start:
 			tft.write(conv::c32to16(conv::uint24(fp)));
 	tft.bmp(false);
 	op::fclose(fp);
+#endif
+	pwm::init();
+	timer1::init();
+	apps::wav("/Il Matto/Testing/8bit.wav");
 
 	goto fin;
 
