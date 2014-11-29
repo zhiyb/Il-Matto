@@ -1,33 +1,17 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-<<<<<<< HEAD:Tetris/Makefile
-<<<<<<< HEAD:TFT/Makefile
-PRG	= TFT
-OBJ	= main.o ascii.o tft.o
-MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
-VERSION	= 0.0.1
-EXT = cpp
-=======
-PRG	= Tetris
-OBJ	= main.o ili9341.o ascii.o tft.o rgbconv.o rotary.o sound.o display.o tetris.o rand.o timer.o eemem.o
-MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
-VERSION	= 2.1.0
->>>>>>> Tetris:Tetris/Makefile
-=======
-PRG	= pong
-OBJ	= main.o game.o rotary.o sound.o eemem.o
-SUBDIRS = 
+PRG	= Pong
+SRC	= main.c rotary.c sound.c game.c eemem.c
+SUBDIRS = libtft
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
->>>>>>> Pong:Pong/Makefile
 
 DEFS	= -DF_CPU=12000000
-LIBS	= libili9341.a
+LIBS	= -L./libtft -ltft
+INCS	= -I./libtft
 
 PRGER	= usbasp
 
@@ -42,38 +26,39 @@ ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 
 # You should not have to change anything below here.
 
+OBJ	= $(subst .c,.o,$(subst .cpp,.o,$(SRC)))
+
 CC	= avr-gcc
+CXX	= avr-g++
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCS)
+override CXXFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCS)
 override LDFLAGS	= -Wl,-Map,$(PRG).map
 
 OBJCOPY	= avr-objcopy
 OBJDUMP	= avr-objdump
 SIZE	= avr-size
 
-all: subdirs $(PRG).elf lst text eeprom
+all: elf lst text eeprom
 
-$(PRG).elf: $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+.PHONY: elf
+elf: $(PRG).elf
+
+$(PRG).elf: subdirs $(OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
 	$(SIZE) $@
 
-<<<<<<< HEAD:Tetris/Makefile
-<<<<<<< HEAD:TFT/Makefile
-%.o: %.$(EXT)
-=======
 %.o: %.c
->>>>>>> Tetris:Tetris/Makefile
-=======
-%.o: %.$(EXT)
->>>>>>> Pong:Pong/Makefile
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # Subdirectories
 
 .PHONY: subdirs $(SUBDIRS)
-
 subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
@@ -83,17 +68,15 @@ $(SUBDIRS):
 
 -include $(OBJ:.o=.d)
 
-<<<<<<< HEAD:Tetris/Makefile
-<<<<<<< HEAD:TFT/Makefile
-%.d: %.$(EXT)
-=======
 %.d: %.c
->>>>>>> Tetris:Tetris/Makefile
-=======
-%.d: %.$(EXT)
->>>>>>> Pong:Pong/Makefile
 	@set -e; rm -f $@; \
 	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.d: %.cpp
+	@set -e; rm -f $@; \
+	$(CXX) -MM $(CXXFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -103,7 +86,7 @@ $(SUBDIRS):
 
 clean:
 	for d in $(SUBDIRS); do (cd $$d; $(MAKE) clean); done
-	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf *.bak
+	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
 lst: $(PRG).lst
@@ -187,15 +170,7 @@ TAR	= tar
 EXTRA_CLEAN_FILES	+= $(ARCHIVE)
 
 archive: hex ehex
-<<<<<<< HEAD:Tetris/Makefile
-<<<<<<< HEAD:TFT/Makefile
 	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.$(EXT)) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
-=======
-	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.c) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
->>>>>>> Tetris:Tetris/Makefile
-=======
-	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.$(EXT)) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
->>>>>>> Pong:Pong/Makefile
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.
