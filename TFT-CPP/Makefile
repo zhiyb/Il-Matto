@@ -1,7 +1,7 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= 2048
+PRG	= TFT
 SRC	= main.cpp
 SUBDIRS = libtft-cpp
 MCU_TARGET	= atmega644p
