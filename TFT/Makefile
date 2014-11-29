@@ -1,8 +1,8 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= TFT
-OBJ	= main.o
+PRG	= 2048
+SRC	= main.c
 SUBDIRS = libtft
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
@@ -25,6 +25,8 @@ TARFLAGS	= -jc
 ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 
 # You should not have to change anything below here.
+
+OBJ	= $(subst .c,.o,$(subst .cpp,.o,$(SRC)))
 
 CC	= avr-gcc
 CXX	= avr-g++
