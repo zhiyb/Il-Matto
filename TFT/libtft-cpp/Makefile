@@ -4,7 +4,7 @@ MCU_PROGRAMMER=m644p
 MCU_FREQ=12000000 
 
 # Name of our project
-PROJECTNAME=libtft
+PROJECTNAME=libtft-cpp
 
 # Source files
 PRJSRC=ascii.cpp tft.cpp
