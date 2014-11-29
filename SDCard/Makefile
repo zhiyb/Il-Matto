@@ -86,7 +86,7 @@ $(SUBDIRS):
 
 clean:
 	for d in $(SUBDIRS); do (cd $$d; $(MAKE) clean); done
-	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf *.bak
+	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
 lst: $(PRG).lst

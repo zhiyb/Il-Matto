@@ -1,7 +1,7 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= 2048
+PRG	= TFT
 SRC	= main.c
 SUBDIRS = libtft
 MCU_TARGET	= atmega644p
@@ -86,7 +86,7 @@ $(SUBDIRS):
 
 clean:
 	for d in $(SUBDIRS); do (cd $$d; $(MAKE) clean); done
-	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf *.bak
+	rm -rf *.o *.d *.d.* $(PRG).elf *.eps *.png *.pdf
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
 lst: $(PRG).lst
