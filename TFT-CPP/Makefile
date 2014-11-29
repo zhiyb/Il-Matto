@@ -3,15 +3,15 @@
 
 PRG	= TFT
 OBJ	= main.o
-SUBDIRS = libtft
+SUBDIRS = libtft-cpp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= -L./libtft -ltft
-INCS	= -I./libtft
+LIBS	= -L./libtft-cpp -ltft-cpp
+INCS	= -I./libtft-cpp
 
 PRGER	= usbasp
 
