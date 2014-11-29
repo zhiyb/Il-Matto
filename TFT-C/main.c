@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
-#include "libili9341/tft.h"
+#include <tft.h>
 
 void init(void)
 {

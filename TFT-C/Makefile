@@ -3,14 +3,15 @@
 
 PRG	= TFT
 OBJ	= main.o
-SUBDIRS = libili9341
+SUBDIRS = libtft
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= libili9341.a
+LIBS	= libtft.a
+INCS	= -I ./libtft
 
 PRGER	= usbasp
 
@@ -29,7 +30,7 @@ CC	= avr-gcc
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCS)
 override LDFLAGS	= -Wl,-Map,$(PRG).map
 
 OBJCOPY	= avr-objcopy
