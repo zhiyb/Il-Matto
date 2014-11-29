@@ -10,8 +10,8 @@ VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= libtft.a
-INCS	= -I ./libtft
+LIBS	= -L./libtft -ltft
+INCS	= -I./libtft
 
 PRGER	= usbasp
 
@@ -27,29 +27,36 @@ ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 # You should not have to change anything below here.
 
 CC	= avr-gcc
+CXX	= avr-g++
 
 # Override is only needed by avr-lib build system.
 
 override CFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCS)
+override CXXFLAGS	= -g -Werror -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCS)
 override LDFLAGS	= -Wl,-Map,$(PRG).map
 
 OBJCOPY	= avr-objcopy
 OBJDUMP	= avr-objdump
 SIZE	= avr-size
 
-all: subdirs $(PRG).elf lst text eeprom
+all: elf lst text eeprom
 
-$(PRG).elf: $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+.PHONY: elf
+elf: $(PRG).elf
+
+$(PRG).elf: subdirs $(OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
 	$(SIZE) $@
 
-%.o: %.$(EXT)
+%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # Subdirectories
 
 .PHONY: subdirs $(SUBDIRS)
-
 subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
@@ -59,9 +66,15 @@ $(SUBDIRS):
 
 -include $(OBJ:.o=.d)
 
-%.d: %.$(EXT)
+%.d: %.c
 	@set -e; rm -f $@; \
 	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.d: %.cpp
+	@set -e; rm -f $@; \
+	$(CXX) -MM $(CXXFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 

@@ -19,26 +19,34 @@ override CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \
 	-fpack-struct -fshort-enums             \
 	-Wa,-ahlms=$(firstword                  \
 	$(filter %.lst, $(<:.c=.lst)))
+override CXXFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \
+	-Wall                                   \
+	-funsigned-bitfields -funsigned-char    \
+	-fpack-struct -fshort-enums             \
+	-Wa,-ahlms=$(firstword                  \
+	$(filter %.lst, $(<:.cpp=.lst)))
 
 # Archiver
 ARFLAGS=rcs
 
 ##### executables ####
 CC=avr-gcc
+CXX=avr-g++
 AR=avr-ar
 REMOVE=rm -f
 
 ##### automatic target names ####
-LIBTRG=../$(PROJECTNAME).a
+LIBTRG=$(PROJECTNAME).a
 
 # List all object files we need to create
 CFILES=$(filter %.c, $(PRJSRC))
-OBJDEPS=$(CFILES:.c=.o) 
+CPPFILES=$(filter %.cpp, $(PRJSRC))
+OBJDEPS=$(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 # Define all lst files.
 LST=$(filter %.lst, $(OBJDEPS:.o=.lst))
 
-.SUFFIXES : .c .o .h
+.SUFFIXES : .cpp .c .o .h
 
 .PHONY: clean
 
@@ -52,9 +60,12 @@ $(LIBTRG): $(OBJDEPS)
 .c.o: 
 	$(CC) $(CFLAGS) -c $< -o $@
 
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 #### Cleanup ####
 clean:
 	$(REMOVE) $(LIBTRG)
 	$(REMOVE) $(OBJDEPS)
 	$(REMOVE) $(LST)
-	
+
