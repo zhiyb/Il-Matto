@@ -3,11 +3,11 @@
 #include <util/delay.h>
 #include <string.h>
 #include <math.h>
-#include "tft.h"
+#include <tft.h>
+#include <conv.h>
 #include "sd.h"
 #include "mbr.h"
 #include "fat32.h"
-#include "conv.h"
 #include "dirent.h"
 #include "file.h"
 #include "errno.h"
