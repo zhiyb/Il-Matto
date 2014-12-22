@@ -1,7 +1,7 @@
 #ifndef BOX_H
 #define BOX_H
 
-#include "libili9341/tft.h"
+#include "libtft/tft.h"
 #include "game.h"
 #include "timer.h"
 #include "connect.h"
