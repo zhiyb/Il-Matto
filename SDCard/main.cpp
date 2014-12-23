@@ -4,7 +4,8 @@
 #include <string.h>
 #include <math.h>
 #include <tft.h>
-#include <conv.h>
+#include <rgbconv.h>
+#include "conv.h"
 #include "sd.h"
 #include "mbr.h"
 #include "fat32.h"

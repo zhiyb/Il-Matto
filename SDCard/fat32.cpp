@@ -2,6 +2,7 @@
 #include <string.h>
 #include "fat32.h"
 #include "errno.h"
+#include "conv.h"
 
 fat32_t::fat32_t(hw_t *hardware, const uint32_t addr) : fs_t()
 {

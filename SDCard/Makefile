@@ -3,15 +3,17 @@
 
 PRG	= SDCard
 SRC	= main.cpp sd.cpp dirent.cpp file.cpp errno.cpp fat32.cpp
-SUBDIRS = libtft-cpp
+LIBTFT	= tft-cpp
+LIBTFTDIR	= lib$(LIBTFT)
+SUBDIRS = $(LIBTFTDIR)
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= -L./libtft-cpp -ltft-cpp
-INCS	= -I./libtft-cpp
+LIBS	= -L./$(LIBTFTDIR) -l$(LIBTFT)
+INCS	= -I./$(LIBTFTDIR)
 
 PRGER	= usbasp
 
