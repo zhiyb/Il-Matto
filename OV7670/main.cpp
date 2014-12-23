@@ -4,11 +4,12 @@
 #include <tft.h>
 #include <ov7670.h>
 
-class OV7670hw ov;
-
 void init(void)
 {
-	ov.init();
+	OV7670::init();
+	OV7670::reset();
+	OV7670::write(0x12, 0x80);
+	_delay_ms(1);
 	tft.init();
 	tft /= tft.Portrait;
 	tft.setForeground(0x667F);
@@ -26,9 +27,8 @@ start:
 	tft.clean();
 	tft *= 1;
 	puts("*** OV7670 ***");
-	ov.write(0x12, 0x80);
 	for (uint8_t i = 0; i < 0xC0; i++)
-		printf("%02X/%02X\t", i, ov.read(i));
+		printf("%02X/%02X\t", i, OV7670::read(i));
 	while (1);
 	goto start;
 

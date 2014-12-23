@@ -4,13 +4,12 @@
 #include <avr/io.h>
 #include "connection.h"
 
-class OV7670hw
+namespace OV7670
 {
-public:
-	//OV7670(void);
-	static void init(void);
-	static uint8_t read(const uint8_t addr);
-	static void write(const uint8_t addr, const uint8_t data);
-};
+	void init(void);
+	uint8_t read(const uint8_t addr);
+	void write(const uint8_t addr, const uint8_t data);
+	void reset(void);
+}
 
 #endif

@@ -1,9 +1,10 @@
+#include <util/delay.h>
 #include "ov7670.h"
 #include "i2c.h"
 
 #define IP(R)	(R ? 0x43 : 0x42)
 
-void OV7670hw::init(void)
+void OV7670::init(void)
 {
 	i2c::init();
 	OV_CTRLD &= ~(OV_VSYNC | OV_HREF);
@@ -14,7 +15,7 @@ void OV7670hw::init(void)
 	OV_CTRLW |= OV_RCLK;
 }
 
-uint8_t OV7670hw::read(const uint8_t addr)
+uint8_t OV7670::read(const uint8_t addr)
 {
 	i2c::start();
 	i2c::write(IP(0));
@@ -27,14 +28,17 @@ uint8_t OV7670hw::read(const uint8_t addr)
 	return data;
 }
 
-void OV7670hw::write(const uint8_t addr, const uint8_t data)
+void OV7670::write(const uint8_t addr, const uint8_t data)
 {
 	i2c::start();
 	i2c::write(IP(0));
 	i2c::write(addr);
-	i2c::stop();
-	i2c::start();
-	i2c::write(IP(0));
 	i2c::write(data);
 	i2c::stop();
+}
+
+void OV7670::reset(void)
+{
+	write(0x12, 0x80);
+	_delay_ms(1);
 }
