@@ -10,7 +10,7 @@ PROJECTNAME=libOV7670-cpp
 PRJSRC=ov7670.cpp i2c_pin.cpp
 
 # Optimization level, 
-OPTLEVEL=s
+OPTLEVEL=3
 
 # compiler
 override CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \

@@ -15,6 +15,7 @@
 #define OV_OE		_BV(6)
 #define OV_RCLK		_BV(7)
 // PORTB
+#define OV_DATAW	PORTB
 #define OV_DATAR	PINB
 #define OV_DATAD	DDRB
 
