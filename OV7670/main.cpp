@@ -83,7 +83,7 @@ start:
 				tft.write(c);
 			}
 		OV7670::enableFIFO(false);
-		_delay_ms(1000);
+		//_delay_ms(1000);
 	}
 
 	tft /= tft.Portrait;
