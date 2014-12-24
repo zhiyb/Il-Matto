@@ -49,6 +49,7 @@ void i2c::write(uint8_t data)
 		I2C_PORT &= ~I2C_SCL;
 	}
 	// ACK
+	I2C_DDR &= ~I2C_SDA;
 	I2C_PORT |= I2C_SDA;
 	DELAY_tLOW();
 	I2C_PORT |= I2C_SCL;
@@ -71,8 +72,9 @@ uint8_t i2c::read(void)
 		I2C_PORT &= ~I2C_SCL;
 	}
 	// ACK
+	I2C_DDR |= I2C_SDA;
 	DELAY_tLOW();
-	I2C_PORT |= I2C_SCL;
+	I2C_PORT |= I2C_SCL | I2C_SDA;
 	DELAY_tHIGH();
 	//if (!(I2C_PIN & I2C_SDA))
 	//	data = 0xA5;
