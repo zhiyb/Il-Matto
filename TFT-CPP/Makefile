@@ -4,7 +4,7 @@
 PRG	= TFT-CPP
 SRC	= main.cpp
 LIBTFT	= tft-cpp
-LIBTFTDIR	= lib$(LIBTFT)-BD
+LIBTFTDIR	= lib$(LIBTFT)
 SUBDIRS = $(LIBTFTDIR)
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
