@@ -3,6 +3,8 @@
 #include <util/delay.h>
 #include "tft.h"
 
+class tfthw tft;
+
 void init(void)
 {
 	DDRB |= 0x80;			// LED
@@ -12,7 +14,7 @@ void init(void)
 	tft.setBackground(0x667F);
 	tft.setForeground(0x0000);
 	tft.clean();
-	stdout = tftout();
+	stdout = tftout(&tft);
 	tft++;
 }
 

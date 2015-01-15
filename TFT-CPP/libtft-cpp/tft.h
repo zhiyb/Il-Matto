@@ -71,9 +71,9 @@ protected:
 	uint16_t x, y, w, h, fgc, bgc;
 };
 
-FILE *tftout(void);
+FILE *tftout(tfthw *hw);
 
-extern class tfthw tft;
+//extern class tfthw tft;
 
 // Defined as inline to execute faster
 

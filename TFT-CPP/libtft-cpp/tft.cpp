@@ -18,8 +18,6 @@
 
 #include <avr/pgmspace.h>
 
-class tfthw tft;
-
 void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint8_t s, uint16_t c)
 {
@@ -105,15 +103,18 @@ void tfthw::putch(char ch)
 	}
 }
 
+static tfthw *tft;
+
 inline int tftputch(const char c, FILE *stream)
 {
-	tft << c;
+	(*tft) << c;
 	return 0;
 }
 
-FILE *tftout(void)
+FILE *tftout(tfthw *hw)
 {
 	static FILE *out = NULL;
+	tft = hw;
 	if (out == NULL)
 		out = fdevopen(tftputch, NULL);
 	return out;
