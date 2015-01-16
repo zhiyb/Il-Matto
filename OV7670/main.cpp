@@ -4,6 +4,8 @@
 #include <tft.h>
 #include <ov7670.h>
 
+tfthw tft;
+
 void init(void)
 {
 	OV7670::init();
@@ -12,7 +14,7 @@ void init(void)
 	tft.setForeground(0x667F);
 	tft.setBackground(0x0000);
 	tft.clean();
-	stdout = tftout();
+	stdout = tftout(&tft);
 	tft++;
 }
 

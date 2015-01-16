@@ -12,6 +12,7 @@
  */
 
 #include "ov7670.h"
+#include "connection.h"
 
 /*
  * Information we maintain about a known sensor.

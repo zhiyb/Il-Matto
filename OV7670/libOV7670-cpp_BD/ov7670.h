@@ -3,7 +3,7 @@
 
 #include <avr/io.h>
 #include <inttypes.h>
-#include "connection.h"
+//#include "connection.h"
 #include "ov7670regs.h"
 
 struct regval_list {
