@@ -17,6 +17,7 @@
 #define PI	3.1415927
 
 class sdhw_t sd;
+class tfthw_t tft;
 
 void init(void)
 {
@@ -27,7 +28,7 @@ void init(void)
 	tft.setForeground(conv::c32to16(0x00FF00));
 	tft.setBackground(0);
 	tft.clean();
-	stdout = tftout();
+	stdout = tftout(&tft);
 	tft++;
 }
 
