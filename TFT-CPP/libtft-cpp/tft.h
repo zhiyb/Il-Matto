@@ -31,7 +31,7 @@ public:
 	inline void setBackground(uint16_t c) {d.bgc = c;}
 	inline uint16_t foreground(void) const {return d.fgc;}
 	inline uint16_t background(void) const {return d.bgc;}
-	inline void setOrient(uint8_t o);
+	void setOrient(uint8_t o);
 	inline uint8_t orient(void) const {return d.orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
@@ -50,20 +50,19 @@ public:
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void);
-	inline void bmp(bool e);
+	void bmp(bool e);
 	inline uint16_t width(void) const {return d.w;}
 	inline uint16_t height(void) const {return d.h;}
 	static inline void start(void) {cmd(0x2C);}
 	static inline void write(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
-protected:
-	inline void newline(void);
-	inline void next(void);
-	inline void tab(void);
-
 private:
 	inline void setWidth(const uint16_t w) {d.w = w;}
 	inline void setHeight(const uint16_t h) {d.h = h;}
+
+	inline void newline(void);
+	inline void next(void);
+	inline void tab(void);
 
 	struct {
 		uint8_t zoom, orient, tabSize;
@@ -87,27 +86,6 @@ FILE *tftout(tft_t *hw);
 	(x) = (x) ^ (y); \
 	(y) = (x) ^ (y); \
 	(x) = (x) ^ (y); \
-}
-
-inline void tft_t::bmp(bool e)
-{
-	if (!e) {
-		_setOrient(orient());
-		return;
-	}
-	switch (orient()) {
-	case Landscape:
-		_setOrient(BMPLandscape);
-		break;
-	case Portrait:
-		_setOrient(BMPPortrait);
-		break;
-	case FlipLandscape:
-		_setOrient(BMPFlipLandscape);
-		break;
-	case FlipPortrait:
-		_setOrient(BMPFlipPortrait);
-	}
 }
 
 inline void tft_t::shiftUp(const uint16_t l)
@@ -275,24 +253,6 @@ inline void tft_t::tab(void)
 	while ((x() / (WIDTH * zoom())) % tabSize());
 }
 
-inline void tft_t::setOrient(uint8_t o)
-{
-	_setOrient(o);
-	switch (o) {
-	case Landscape:
-	case FlipLandscape:
-		setWidth(SIZE_H);
-		setHeight(SIZE_W);
-		break;
-	case Portrait:
-	case FlipPortrait:
-		setWidth(SIZE_W);
-		setHeight(SIZE_H);
-	}
-	d.orient = o;
-	setX(0);
-	setY(0);
-}
 
 #undef WIDTH
 #undef HEIGHT

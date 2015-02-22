@@ -10,8 +10,10 @@
 class ili9341
 {
 public:
-	enum Orientation {Landscape, Portrait, FlipLandscape, FlipPortrait, \
-		BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait};
+	enum Orientation {Landscape = 0, Portrait, \
+		FlipLandscape, FlipPortrait, \
+		BMPLandscape, BMPPortrait, \
+		BMPFlipLandscape, BMPFlipPortrait};
 
 	static inline void init(void);
 	static inline void idle(bool e) {cmd(0x38 + e);}
@@ -40,33 +42,14 @@ public:
 
 inline void ili9341::_setOrient(uint8_t o)
 {
+	// Landscape, Portrait, FlipLandscape, FlipPortrait
+	// BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait
+	static const uint8_t orient[] = {
+			0x28, 0x48, 0xE8, 0x88,
+			0x68, 0xA8, 0xD8, 0x18
+	};
 	cmd(0x36);			// Memory Access Control
-	switch (o) {
-	case Landscape:
-		data(0x28);		// Column Address Order, BGR
-		break;
-	case Portrait:
-		data(0x48);		// Column Address Order, BGR
-		break;
-	case FlipLandscape:
-		data(0xE8);		// Column Address Order, BGR
-		break;
-	case FlipPortrait:
-		data(0x88);		// Column Address Order, BGR
-		break;
-	case BMPLandscape:
-		data(0x68);		// Column Address Order, BGR
-		break;
-	case BMPFlipLandscape:
-		data(0xA8);		// Column Address Order, BGR
-		break;
-	case BMPPortrait:
-		data(0xD8);		// Column Address Order, BGR
-		break;
-	case BMPFlipPortrait:
-		data(0x18);		// Column Address Order, BGR
-		break;
-	}
+	data(orient[o]);
 }
 
 inline void ili9341::cmd(uint8_t dat)

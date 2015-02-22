@@ -116,6 +116,34 @@ void tft_t::putch(char ch)
 	}
 }
 
+void tft_t::setOrient(uint8_t o)
+{
+	_setOrient(o);
+	switch (o) {
+	case Landscape:
+	case FlipLandscape:
+		setWidth(SIZE_H);
+		setHeight(SIZE_W);
+		break;
+	case Portrait:
+	case FlipPortrait:
+		setWidth(SIZE_W);
+		setHeight(SIZE_H);
+	}
+	d.orient = o;
+	setX(0);
+	setY(0);
+}
+
+void tft_t::bmp(bool e)
+{
+	if (!e) {
+		_setOrient(orient());
+		return;
+	}
+	_setOrient(orient() + BMPLandscape - Landscape);
+}
+
 static tft_t *tft;
 
 inline int tftputch(const char c, FILE *stream)
