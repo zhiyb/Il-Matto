@@ -25,6 +25,8 @@ public:
 	inline void setXY(uint16_t x, uint16_t y) {setX(x); setY(y);}
 	inline uint16_t x(void) const {return d.x;}
 	inline uint16_t y(void) const {return d.y;}
+	inline uint16_t width(void) const {return d.w;}
+	inline uint16_t height(void) const {return d.h;}
 	inline void setZoom(const uint8_t zoom) {d.zoom = zoom;}
 	inline uint8_t zoom(void) const {return d.zoom;}
 	inline void setForeground(uint16_t c) {d.fgc = c;}
@@ -49,12 +51,8 @@ public:
 	inline void shiftUp(const uint16_t l);
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-	inline void all(void);
+	inline void all(void) {area(0, 0, width(), height());}
 	void bmp(bool e);
-	inline uint16_t width(void) const {return d.w;}
-	inline uint16_t height(void) const {return d.h;}
-	static inline void start(void) {cmd(0x2C);}
-	static inline void write(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 private:
 	inline void setWidth(const uint16_t w) {d.w = w;}
@@ -63,6 +61,8 @@ private:
 	inline void newline(void);
 	inline void next(void);
 	inline void tab(void);
+	static inline void start(void) {cmd(0x2C);}
+	static inline void write16(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 	struct {
 		uint8_t zoom, orient, tabSize;
@@ -94,18 +94,14 @@ inline void tft_t::shiftUp(const uint16_t l)
 	uint8_t buff[width() * 2];
 	uint16_t r;
 	cmd(0x2A);			// Column Address Set
-	data(0x00);
-	data(0x00);
-	data((width() - 1) / 0x0100);
-	data((width() - 1) % 0x0100);
+	write16(0);
+	write16(width() - 1);
 	for (r = 0; r < height() - l; r++) {
 		uint16_t b = width() * 2;
 		//area(0, r + l, w, 1);
 		cmd(0x2B);		// Page Address Set
-		data((r + l) / 0x0100);
-		data((r + l) % 0x0100);
-		data((r + l) / 0x0100);
-		data((r + l) % 0x0100);
+		write16(r + l);
+		write16(r + l);
 		cmd(0x2E);		// Read
 		mode(true);		// Read mode
 		recv();
@@ -121,27 +117,20 @@ inline void tft_t::shiftUp(const uint16_t l)
 		b = width() * 2;
 		//area(0, r, w, 1);
 		cmd(0x2B);		// Page Address Set
-		data(r / 0x0100);
-		data(r % 0x0100);
-		data(r / 0x0100);
-		data(r % 0x0100);
+		write16(r);
+		write16(r);
 		cmd(0x2C);		// Write
 		while (b--)
 			data(buff[b]);
 	}
 	//area(0, h - l, w, l);
 	cmd(0x2B);		// Page Address Set
-	data((height() - l) / 0x0100);
-	data((height() - l) % 0x0100);
-	data((height() - 1) / 0x0100);
-	data((height() - 1) % 0x0100);
+	write16(height() - l);
+	write16(height() - 1);
 	cmd(0x2C);
-	while (r++ < height()) {
-		for (uint16_t c = width(); c; c--) {
-			data(background() / 0x0100);
-			data(background() % 0x0100);
-		}
-	}
+	while (r++ < height())
+		for (uint16_t c = width(); c; c--)
+			write16(background());
 }
 
 inline class tft_t& tft_t::operator<<(const char c)
@@ -174,9 +163,8 @@ inline class tft_t& tft_t::operator<<(const char *str)
 inline void tft_t::point(uint16_t x, uint16_t y, uint16_t c)
 {
 	area(x, y, 1, 1);
-	cmd(0x2C);			// Memory Write
-	data(c / 0x0100);
-	data(c % 0x0100);
+	start();			// Memory Write
+	write16(c);
 }
 
 inline void tft_t::newline(void)
@@ -199,7 +187,7 @@ inline void tft_t::fill(uint16_t clr)
 	uint8_t ch = clr / 0x0100, cl = clr % 0x0100;
 	uint16_t x = width(), y;
 	all();
-	cmd(0x2C);			// Memory Write
+	start();			// Memory Write
 	while (x--) {
 		y = height();
 		while (y--) {
@@ -212,29 +200,11 @@ inline void tft_t::fill(uint16_t clr)
 inline void tft_t::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
 	cmd(0x2A);			// Column Address Set
-	data(x / 0x0100);
-	data(x % 0x0100);
-	data((x + w - 1) / 0x0100);
-	data((x + w - 1) % 0x0100);
+	write16(x);
+	write16(x + w - 1);
 	cmd(0x2B);			// Page Address Set
-	data(y / 0x0100);
-	data(y % 0x0100);
-	data((y + h - 1) / 0x0100);
-	data((y + h - 1) % 0x0100);
-}
-
-inline void tft_t::all(void)
-{
-	cmd(0x2A);			// Column Address Set
-	data(0x00);			// x
-	data(0x00);
-	data((width() - 1) / 0x0100);	// w
-	data((width() - 1) % 0x0100);
-	cmd(0x2B);			// Page Address Set
-	data(0x00);			// y
-	data(0x00);
-	data((height() - 1) / 0x0100);	// h
-	data((height() - 1) % 0x0100);
+	write16(y);
+	write16(y + h - 1);
 }
 
 inline void tft_t::next(void)

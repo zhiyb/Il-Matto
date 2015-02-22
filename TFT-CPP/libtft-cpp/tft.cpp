@@ -89,10 +89,8 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 	area(x, y, w, h);
 	cmd(0x2C);			// Memory Write
 	while (w--)
-		for (y = 0; y < h; y++) {
-			data(c / 0x0100);
-			data(c % 0x0100);
-		}
+		for (y = 0; y < h; y++)
+			write16(c);
 }
 
 void tft_t::putch(char ch)
@@ -103,13 +101,10 @@ void tft_t::putch(char ch)
 		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
 		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
-			if (c & 0x80) {
-				data(foreground() / 0x0100);
-				data(foreground() % 0x0100);
-			} else {
-				data(background() / 0x0100);
-				data(background() % 0x0100);
-			}
+			if (c & 0x80)
+				write16(foreground());
+			else
+				write16(background());
 			if (j % zoom() == zoom() - 1)
 				c <<= 1;
 		}
