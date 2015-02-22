@@ -12,38 +12,40 @@
 #include "ili9341.h"
 #include "ascii.h"
 
-class tfthw: public ili9341
+class tft_t: public ili9341
 {
 public:
-	inline tfthw(void);
+	tft_t(void);
 
-	inline class tfthw& operator<<(const char c);
-	inline class tfthw& operator<<(const char *str);
-	inline class tfthw& operator<<(const int16_t i);
-	inline class tfthw& operator<<(const uint16_t i);
-	inline class tfthw& operator<<(const int32_t i);
-	inline class tfthw& operator<<(const uint32_t i);
-	inline class tfthw& operator++(int x);
-	inline class tfthw& operator--(int x);
-	inline class tfthw& operator*=(uint8_t z);
-	inline class tfthw& operator/=(uint8_t o);
-	inline class tfthw& operator^=(uint16_t l);
+	inline class tft_t& operator<<(const char c);
+	inline class tft_t& operator<<(const char *str);
+	inline class tft_t& operator<<(const int16_t i);
+	inline class tft_t& operator<<(const uint16_t i);
+	inline class tft_t& operator<<(const int32_t i);
+	inline class tft_t& operator<<(const uint32_t i);
+	inline class tft_t& operator++(int x);
+	inline class tft_t& operator--(int x);
+	inline class tft_t& operator*=(uint8_t z);
+	inline class tft_t& operator/=(uint8_t o);
+	inline class tft_t& operator^=(uint16_t l);
 
-	inline void setX(uint16_t n) {x = n;}
-	inline void setY(uint16_t n) {y = n;}
-	inline void setXY(uint16_t m, uint16_t n) {x = m; y = n;}
-	inline uint16_t getX(void) {return x;}
-	inline uint16_t getY(void) {return y;}
-	inline void setForeground(uint16_t c) {fgc = c;}
-	inline void setBackground(uint16_t c) {bgc = c;}
-	inline uint16_t getForeground(void) {return fgc;}
-	inline uint16_t getBackground(void) {return bgc;}
+	inline void setX(uint16_t x) {d.x = x;}
+	inline void setY(uint16_t y) {d.y = y;}
+	inline void setXY(uint16_t x, uint16_t y) {setX(x); setY(y);}
+	inline uint16_t x(void) const {return d.x;}
+	inline uint16_t y(void) const {return d.y;}
+	inline void setZoom(const uint8_t zoom) {d.zoom = zoom;}
+	inline uint8_t zoom(void) const {return d.zoom;}
+	inline void setForeground(uint16_t c) {d.fgc = c;}
+	inline void setBackground(uint16_t c) {d.bgc = c;}
+	inline uint16_t foreground(void) const {return d.fgc;}
+	inline uint16_t background(void) const {return d.bgc;}
 	inline void setOrient(uint8_t o);
-	inline uint8_t getOrient(void) {return orient;}
+	inline uint8_t orient(void) const {return d.orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
-	inline void setTabSize(uint8_t t) {tabSize = t;}
-	inline uint8_t getTabSize(void) {return tabSize;}
-	inline void clean(void) {fill(bgc); x = 0; y = 0;}
+	inline void setTabSize(uint8_t t) {d.tabSize = t;}
+	inline uint8_t tabSize(void) const {return d.tabSize;}
+	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c);
 	void frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
@@ -57,8 +59,8 @@ public:
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void);
 	inline void bmp(bool e);
-	inline uint16_t width(void) const {return w;}
-	inline uint16_t height(void) const {return h;}
+	inline uint16_t width(void) const {return d.w;}
+	inline uint16_t height(void) const {return d.h;}
 	static inline void start(void) {cmd(0x2C);}
 	static inline void write(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
@@ -67,13 +69,19 @@ protected:
 	inline void next(void);
 	inline void tab(void);
 
-	uint8_t zoom, orient, tabSize;
-	uint16_t x, y, w, h, fgc, bgc;
+private:
+	inline void setWidth(const uint16_t w) {d.w = w;}
+	inline void setHeight(const uint16_t h) {d.h = h;}
+
+	struct {
+		uint8_t zoom, orient, tabSize;
+		uint16_t x, y, w, h, fgc, bgc;
+	} d;
 };
 
-FILE *tftout(tfthw *hw);
+FILE *tftout(tft_t *hw);
 
-//extern class tfthw tft;
+//extern class tft_t tft;
 
 // Defined as inline to execute faster
 
@@ -89,26 +97,13 @@ FILE *tftout(tfthw *hw);
 	(x) = (x) ^ (y); \
 }
 
-inline tfthw::tfthw(void)
-{
-	x = 0;
-	y = 0;
-	zoom = 1;
-	orient = Portrait;
-	tabSize = 4;
-	w = SIZE_W;
-	h = SIZE_H;
-	fgc = DEF_FGC;
-	bgc = DEF_BGC;
-}
-
-inline void tfthw::bmp(bool e)
+inline void tft_t::bmp(bool e)
 {
 	if (!e) {
-		_setOrient(orient);
+		_setOrient(orient());
 		return;
 	}
-	switch (orient) {
+	switch (orient()) {
 	case Landscape:
 		_setOrient(BMPLandscape);
 		break;
@@ -123,18 +118,18 @@ inline void tfthw::bmp(bool e)
 	}
 }
 
-inline class tfthw& tfthw::operator^=(uint16_t l)
+inline class tft_t& tft_t::operator^=(uint16_t l)
 {
 	// 0x2C Write, 0x2E Read, 0x3C / 0x3E Continue, 0x00 NOP
-	uint8_t buff[w * 2];
+	uint8_t buff[width() * 2];
 	uint16_t r;
 	cmd(0x2A);			// Column Address Set
 	data(0x00);
 	data(0x00);
-	data((w - 1) / 0x0100);
-	data((w - 1) % 0x0100);
-	for (r = 0; r < h - l; r++) {
-		uint16_t b = w * 2;
+	data((width() - 1) / 0x0100);
+	data((width() - 1) % 0x0100);
+	for (r = 0; r < height() - l; r++) {
+		uint16_t b = width() * 2;
 		//area(0, r + l, w, 1);
 		cmd(0x2B);		// Page Address Set
 		data((r + l) / 0x0100);
@@ -153,7 +148,7 @@ inline class tfthw& tfthw::operator^=(uint16_t l)
 		}
 		mode(false);		// Write mode
 
-		b = w * 2;
+		b = width() * 2;
 		//area(0, r, w, 1);
 		cmd(0x2B);		// Page Address Set
 		data(r / 0x0100);
@@ -166,45 +161,45 @@ inline class tfthw& tfthw::operator^=(uint16_t l)
 	}
 	//area(0, h - l, w, l);
 	cmd(0x2B);		// Page Address Set
-	data((h - l) / 0x0100);
-	data((h - l) % 0x0100);
-	data((h - 1) / 0x0100);
-	data((h - 1) % 0x0100);
+	data((height() - l) / 0x0100);
+	data((height() - l) % 0x0100);
+	data((height() - 1) / 0x0100);
+	data((height() - 1) % 0x0100);
 	cmd(0x2C);
-	while (r++ < h) {
-		for (uint16_t c = w; c; c--) {
-			data(bgc / 0x0100);
-			data(bgc % 0x0100);
+	while (r++ < height()) {
+		for (uint16_t c = width(); c; c--) {
+			data(background() / 0x0100);
+			data(background() % 0x0100);
 		}
 	}
 	return *this;
 }
 
-inline class tfthw& tfthw::operator/=(uint8_t o)
+inline class tft_t& tft_t::operator/=(uint8_t o)
 {
 	setOrient(o);
 	return *this;
 }
 
-inline class tfthw& tfthw::operator*=(uint8_t z)
+inline class tft_t& tft_t::operator*=(uint8_t z)
 {
-	zoom = z;
+	setZoom(z);
 	return *this;
 }
 
-inline class tfthw& tfthw::operator++(int x)
+inline class tft_t& tft_t::operator++(int x)
 {
 	_setBGLight(true);
 	return *this;
 }
 
-inline class tfthw& tfthw::operator--(int x)
+inline class tft_t& tft_t::operator--(int x)
 {
 	_setBGLight(false);
 	return *this;
 }
 
-inline class tfthw& tfthw::operator<<(const int16_t i)
+inline class tft_t& tft_t::operator<<(const int16_t i)
 {
 	uint16_t p = 10000, n = abs(i);
 	if (i < 0)
@@ -218,7 +213,7 @@ inline class tfthw& tfthw::operator<<(const int16_t i)
 	return *this;
 }
 
-inline class tfthw& tfthw::operator<<(const uint16_t i)
+inline class tft_t& tft_t::operator<<(const uint16_t i)
 {
 	uint16_t p = 10000;
 	while ((p != 1) && (i / p == 0))
@@ -230,7 +225,7 @@ inline class tfthw& tfthw::operator<<(const uint16_t i)
 	return *this;
 }
 
-inline class tfthw& tfthw::operator<<(const char c)
+inline class tft_t& tft_t::operator<<(const char c)
 {
 	switch (c) {
 	case '\n':
@@ -248,7 +243,7 @@ inline class tfthw& tfthw::operator<<(const char c)
 	return *this;
 }
 
-inline class tfthw& tfthw::operator<<(const char *str)
+inline class tft_t& tft_t::operator<<(const char *str)
 {
 	while (*str) {
 		*this << *str;
@@ -257,7 +252,7 @@ inline class tfthw& tfthw::operator<<(const char *str)
 	return *this;
 }
 
-inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
+inline void tft_t::point(uint16_t x, uint16_t y, uint16_t c)
 {
 	area(x, y, 1, 1);
 	cmd(0x2C);			// Memory Write
@@ -265,29 +260,29 @@ inline void tfthw::point(uint16_t x, uint16_t y, uint16_t c)
 	data(c % 0x0100);
 }
 
-inline void tfthw::newline(void)
+inline void tft_t::newline(void)
 {
-	x = 0;
-	y += HEIGHT * zoom;
-	if (y + HEIGHT * zoom > h) {
+	setX(0);
+	setY(y() + HEIGHT * zoom());
+	if (y() + HEIGHT * zoom() > height()) {
 #ifdef TFT_SCROLL
 		*this ^= HEIGHT * zoom;
 		y -= HEIGHT * zoom;
 #else
-		fill(bgc);
-		y = 0;
+		fill(background());
+		setY(0);
 #endif
 	}
 }
 
-inline void tfthw::fill(uint16_t clr)
+inline void tft_t::fill(uint16_t clr)
 {
 	uint8_t ch = clr / 0x0100, cl = clr % 0x0100;
-	uint16_t x = w, y;
+	uint16_t x = width(), y;
 	all();
 	cmd(0x2C);			// Memory Write
 	while (x--) {
-		y = h;
+		y = height();
 		while (y--) {
 			data(ch);
 			data(cl);
@@ -295,7 +290,7 @@ inline void tfthw::fill(uint16_t clr)
 	}
 }
 
-inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+inline void tft_t::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
 	cmd(0x2A);			// Column Address Set
 	data(x / 0x0100);
@@ -309,53 +304,53 @@ inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 	data((y + h - 1) % 0x0100);
 }
 
-inline void tfthw::all(void)
+inline void tft_t::all(void)
 {
 	cmd(0x2A);			// Column Address Set
 	data(0x00);			// x
 	data(0x00);
-	data((w - 1) / 0x0100);	// w
-	data((w - 1) % 0x0100);
+	data((width() - 1) / 0x0100);	// w
+	data((width() - 1) % 0x0100);
 	cmd(0x2B);			// Page Address Set
 	data(0x00);			// y
 	data(0x00);
-	data((h - 1) / 0x0100);	// h
-	data((h - 1) % 0x0100);
+	data((height() - 1) / 0x0100);	// h
+	data((height() - 1) % 0x0100);
 }
 
-inline void tfthw::next(void)
+inline void tft_t::next(void)
 {
-	x += WIDTH * zoom;
-	if (x + WIDTH * zoom > w)
+	setX(x() + WIDTH * zoom());
+	if (x() + WIDTH * zoom() > width())
 		newline();
 }
 
-inline void tfthw::tab(void)
+inline void tft_t::tab(void)
 {
-	if (x % (WIDTH * zoom))
-		x -= x % (WIDTH * zoom);
+	if (x() % (WIDTH * zoom()))
+		setX(x() - x() % (WIDTH * zoom()));
 	do
 		next();
-	while ((x / (WIDTH * zoom)) % tabSize);
+	while ((x() / (WIDTH * zoom())) % tabSize());
 }
 
-inline void tfthw::setOrient(uint8_t o)
+inline void tft_t::setOrient(uint8_t o)
 {
 	_setOrient(o);
 	switch (o) {
 	case Landscape:
 	case FlipLandscape:
-		w = SIZE_H;
-		h = SIZE_W;
+		setWidth(SIZE_H);
+		setHeight(SIZE_W);
 		break;
 	case Portrait:
 	case FlipPortrait:
-		w = SIZE_W;
-		h = SIZE_H;
+		setWidth(SIZE_W);
+		setHeight(SIZE_H);
 	}
-	orient = o;
-	x = 0;
-	y = 0;
+	d.orient = o;
+	setX(0);
+	setY(0);
 }
 
 #undef WIDTH

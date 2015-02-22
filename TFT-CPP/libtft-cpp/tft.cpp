@@ -18,7 +18,20 @@
 
 #include <avr/pgmspace.h>
 
-void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
+tft_t::tft_t(void)
+{
+	setX(0);
+	setY(0);
+	setZoom(1);
+	d.orient = Portrait;
+	setTabSize(4);
+	setWidth(SIZE_W);
+	setHeight(SIZE_H);
+	setForeground(DEF_FGC);
+	setBackground(DEF_BGC);
+}
+
+void tft_t::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint8_t s, uint16_t c)
 {
 	rectangle(x, y, w - s, s, c);
@@ -27,17 +40,17 @@ void tfthw::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 	rectangle(x + s, y + h - s, w - s, s, c);
 }
 
-void tfthw::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
+void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c)
 {
-	if (x0 > w)
-		x0 = w - 1;
-	if (x1 > w)
-		x1 = w - 1;
-	if (y0 > h)
-		y0 = h - 1;
-	if (y1 > h)
-		y1 = h - 1;
+	if (x0 > width())
+		x0 = width() - 1;
+	if (x1 > width())
+		x1 = width() - 1;
+	if (y0 > height())
+		y0 = height() - 1;
+	if (y1 > height())
+		y1 = height() - 1;
 	if (x0 == x1) {
 		if (y0 > y1)
 			SWAP(y0, y1);
@@ -70,7 +83,7 @@ void tfthw::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 	}
 }
 
-void tfthw::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
+void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint16_t c)
 {
 	area(x, y, w, h);
@@ -82,28 +95,28 @@ void tfthw::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		}
 }
 
-void tfthw::putch(char ch)
+void tft_t::putch(char ch)
 {
-	area(x, y, WIDTH * zoom, HEIGHT * zoom);
+	area(x(), y(), WIDTH * zoom(), HEIGHT * zoom());
 	cmd(0x2C);			// Memory Write
-	for (uint8_t i = 0; i < HEIGHT * zoom; i++) {
+	for (uint8_t i = 0; i < HEIGHT * zoom(); i++) {
 		unsigned char c;
-		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom]));
-		for (uint8_t j = 0; j < WIDTH * zoom; j++) {
+		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
+		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
 			if (c & 0x80) {
-				data(fgc / 0x0100);
-				data(fgc % 0x0100);
+				data(foreground() / 0x0100);
+				data(foreground() % 0x0100);
 			} else {
-				data(bgc / 0x0100);
-				data(bgc % 0x0100);
+				data(background() / 0x0100);
+				data(background() % 0x0100);
 			}
-			if (j % zoom == zoom - 1)
+			if (j % zoom() == zoom() - 1)
 				c <<= 1;
 		}
 	}
 }
 
-static tfthw *tft;
+static tft_t *tft;
 
 inline int tftputch(const char c, FILE *stream)
 {
@@ -111,7 +124,7 @@ inline int tftputch(const char c, FILE *stream)
 	return 0;
 }
 
-FILE *tftout(tfthw *hw)
+FILE *tftout(tft_t *hw)
 {
 	static FILE *out = NULL;
 	tft = hw;
