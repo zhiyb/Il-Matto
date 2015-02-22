@@ -33,12 +33,15 @@ public:
 	inline void setBackground(uint16_t c) {d.bgc = c;}
 	inline uint16_t foreground(void) const {return d.fgc;}
 	inline uint16_t background(void) const {return d.bgc;}
-	void setOrient(uint8_t o);
 	void bmp(bool e);
+	void setOrient(uint8_t o);
 	inline uint8_t orient(void) const {return d.orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
+	void setVerticalScrolling(const uint16_t vsp);
+	void setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa);
+	inline void setPartialMode(const bool e) {cmd(e ? 0x12 : 0x13);}
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \

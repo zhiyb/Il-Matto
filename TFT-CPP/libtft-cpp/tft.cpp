@@ -113,7 +113,6 @@ void tft_t::putch(char ch)
 
 void tft_t::setOrient(uint8_t o)
 {
-	_setOrient(o);
 	switch (o) {
 	case Landscape:
 	case FlipLandscape:
@@ -125,18 +124,33 @@ void tft_t::setOrient(uint8_t o)
 		setWidth(SIZE_W);
 		setHeight(SIZE_H);
 	}
-	d.orient = o;
 	setX(0);
 	setY(0);
+	d.orient = o;
+	_setOrient(o);
 }
 
 void tft_t::bmp(bool e)
 {
-	if (!e) {
+	if (e)
+		_setOrient(orient() + BMPLandscape);
+	else
 		_setOrient(orient());
-		return;
-	}
-	_setOrient(orient() + BMPLandscape - Landscape);
+}
+
+void tft_t::setVerticalScrolling(const uint16_t vsp)
+{
+	cmd(0x37);	// Vertical Scrolling Start Address
+	write16(vsp);
+}
+
+void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
+{
+	uint16_t vsa = SIZE_H - tfa - bfa;
+	cmd(0x33);	// Vertical Scrolling Definition
+	write16(tfa);	// Top Fixed Area
+	write16(vsa);	// Vertical Scrolling Area
+	write16(bfa);	// Bottom Fixed Area
 }
 
 static tft_t *tft;
