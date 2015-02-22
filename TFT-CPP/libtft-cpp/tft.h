@@ -19,15 +19,6 @@ public:
 
 	inline class tft_t& operator<<(const char c);
 	inline class tft_t& operator<<(const char *str);
-	inline class tft_t& operator<<(const int16_t i);
-	inline class tft_t& operator<<(const uint16_t i);
-	inline class tft_t& operator<<(const int32_t i);
-	inline class tft_t& operator<<(const uint32_t i);
-	inline class tft_t& operator++(int x);
-	inline class tft_t& operator--(int x);
-	inline class tft_t& operator*=(uint8_t z);
-	inline class tft_t& operator/=(uint8_t o);
-	inline class tft_t& operator^=(uint16_t l);
 
 	inline void setX(uint16_t x) {d.x = x;}
 	inline void setY(uint16_t y) {d.y = y;}
@@ -55,6 +46,7 @@ public:
 	void rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint16_t c);
 	inline void point(uint16_t x, uint16_t y, uint16_t c);
+	inline void shiftUp(const uint16_t l);
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void);
@@ -118,7 +110,7 @@ inline void tft_t::bmp(bool e)
 	}
 }
 
-inline class tft_t& tft_t::operator^=(uint16_t l)
+inline void tft_t::shiftUp(const uint16_t l)
 {
 	// 0x2C Write, 0x2E Read, 0x3C / 0x3E Continue, 0x00 NOP
 	uint8_t buff[width() * 2];
@@ -172,57 +164,6 @@ inline class tft_t& tft_t::operator^=(uint16_t l)
 			data(background() % 0x0100);
 		}
 	}
-	return *this;
-}
-
-inline class tft_t& tft_t::operator/=(uint8_t o)
-{
-	setOrient(o);
-	return *this;
-}
-
-inline class tft_t& tft_t::operator*=(uint8_t z)
-{
-	setZoom(z);
-	return *this;
-}
-
-inline class tft_t& tft_t::operator++(int x)
-{
-	_setBGLight(true);
-	return *this;
-}
-
-inline class tft_t& tft_t::operator--(int x)
-{
-	_setBGLight(false);
-	return *this;
-}
-
-inline class tft_t& tft_t::operator<<(const int16_t i)
-{
-	uint16_t p = 10000, n = abs(i);
-	if (i < 0)
-		*this << '-';
-	while ((p != 1) && (n / p == 0))
-		p /= 10;
-	while (p != 0) {
-		*this << (char)((n / p) % 10 + '0');
-		p /= 10;
-	}
-	return *this;
-}
-
-inline class tft_t& tft_t::operator<<(const uint16_t i)
-{
-	uint16_t p = 10000;
-	while ((p != 1) && (i / p == 0))
-		p /= 10;
-	while (p != 0) {
-		*this << (char)((i / p) % 10 + '0');
-		p /= 10;
-	}
-	return *this;
 }
 
 inline class tft_t& tft_t::operator<<(const char c)

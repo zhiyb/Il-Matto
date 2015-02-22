@@ -15,7 +15,7 @@ void init(void)
 	tft.setForeground(0x0000);
 	tft.clean();
 	stdout = tftout(&tft);
-	tft++;
+	tft.setBGLight(true);
 }
 
 int main(void)
