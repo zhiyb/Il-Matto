@@ -3,22 +3,10 @@
 
 LIBDIR	= $(addprefix lib,$(LIBLIST) $(LIB))
 SUBDIRS += $(LIBDIR)
-MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
-VERSION	= 0.0.1
-EXT = c
 
-DEFS	= -DF_CPU=12000000
-LIBS	= $(addprefix -L./,$(LIBDIR)) $(addprefix -l$,$(LIB))
-INCS	= $(addprefix -I./,$(LIBDIR))
-
-PRGER	= usbasp
-
-EFUSE	= 0xFF
-HFUSE	= 0x9C
-LFUSE	= 0xE7
-
-LOG	= ~/.make_avr.log
+DEFS	+=
+LIBS	+= $(addprefix -L./,$(LIBDIR)) $(addprefix -l$,$(LIB))
+INCS	+= $(addprefix -I./,$(LIBDIR))
 
 TARFLAGS	= -jc
 ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
