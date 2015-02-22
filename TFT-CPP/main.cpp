@@ -3,14 +3,14 @@
 #include <util/delay.h>
 #include "tft.h"
 
-class tfthw tft;
+class tft_t tft;
 
 void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
 	tft.init();
-	tft /= tft.FlipLandscape;
+	tft.setOrient(tft.FlipLandscape);
 	tft.setBackground(0x667F);
 	tft.setForeground(0x0000);
 	tft.clean();
@@ -24,12 +24,12 @@ int main(void)
 
 start:
 	tft.clean();
-	tft *= 1;
+	tft.setZoom(1);
 	puts("*** TFT library testing ***");
 	puts("STDOUT output, orientation, FG/BG colour, BG light");
-	tft *= 3;
+	tft.setZoom(3);
 	puts("Font size test");
-	tft *= 1;
+	tft.setZoom(1);
 	tft.setXY(300, 38);
 	puts("Change text position & word warp test");
 	tft.frame(115, 56, 200, 10, 2, 0xF800);
