@@ -1,19 +1,19 @@
 # http://www.nongnu.org/avr-libc/user-manual/group__demo__project.html
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= SDCard
-SRC	= main.cpp sd.cpp dirent.cpp file.cpp errno.cpp fat32.cpp
-LIBTFT	= tft-cpp
-LIBTFTDIR	= lib$(LIBTFT)
-SUBDIRS = $(LIBTFTDIR)
+PRG	= TFT-CPP
+SRC	= dirent.cpp errno.cpp fat32.cpp file.cpp main.cpp sd.cpp
+LIB	= tft-cpp
+LIBDIR	= $(addprefix lib,$(LIBLIST) $(LIB))
+SUBDIRS = $(LIBDIR)
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= -L./$(LIBTFTDIR) -l$(LIBTFT)
-INCS	= -I./$(LIBTFTDIR)
+LIBS	= $(addprefix -L./,$(LIBDIR)) $(addprefix -l$,$(LIB))
+INCS	= $(addprefix -I./,$(LIBDIR))
 
 PRGER	= usbasp
 

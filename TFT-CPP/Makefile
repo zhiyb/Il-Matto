@@ -3,17 +3,17 @@
 
 PRG	= TFT-CPP
 SRC	= main.cpp
-LIBTFT	= tft-cpp
-LIBTFTDIR	= lib$(LIBTFT)
-SUBDIRS = $(LIBTFTDIR)
+LIB	= tft-cpp
+LIBDIR	= $(addprefix lib,$(LIBLIST) $(LIB))
+SUBDIRS = $(LIBDIR)
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 VERSION	= 0.0.1
 EXT = c
 
 DEFS	= -DF_CPU=12000000
-LIBS	= -L./$(LIBTFTDIR) -l$(LIBTFT)
-INCS	= -I./$(LIBTFTDIR)
+LIBS	= $(addprefix -L./,$(LIBDIR)) $(addprefix -l$,$(LIB))
+INCS	= $(addprefix -I./,$(LIBDIR))
 
 PRGER	= usbasp
 
