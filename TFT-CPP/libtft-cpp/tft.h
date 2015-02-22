@@ -34,10 +34,12 @@ public:
 	inline uint16_t foreground(void) const {return d.fgc;}
 	inline uint16_t background(void) const {return d.bgc;}
 	void setOrient(uint8_t o);
+	void bmp(bool e);
 	inline uint8_t orient(void) const {return d.orient;}
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
+
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c);
@@ -52,7 +54,8 @@ public:
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void) {area(0, 0, width(), height());}
-	void bmp(bool e);
+	static inline void start(void) {cmd(0x2C);}
+	static inline void write16(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 private:
 	inline void setWidth(const uint16_t w) {d.w = w;}
@@ -61,8 +64,6 @@ private:
 	inline void newline(void);
 	inline void next(void);
 	inline void tab(void);
-	static inline void start(void) {cmd(0x2C);}
-	static inline void write16(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 	struct {
 		uint8_t zoom, orient, tabSize;

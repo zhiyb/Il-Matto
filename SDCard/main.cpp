@@ -17,19 +17,19 @@
 #define PI	3.1415927
 
 class sdhw_t sd;
-class tfthw_t tft;
+class tft_t tft;
 
 void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
 	tft.init();
-	tft /= tft.FlipLandscape;
+	tft.setOrient(tft.FlipLandscape);
 	tft.setForeground(conv::c32to16(0x00FF00));
 	tft.setBackground(0);
 	tft.clean();
 	stdout = tftout(&tft);
-	tft++;
+	tft.setBGLight(true);
 }
 
 int main(void)
@@ -42,7 +42,7 @@ fin:
 	while (sd.detect());
 start:
 	tft.clean();
-	tft *= 1;
+	tft.setZoom(1);
 	puts("*** SDCard library test ***");
 	puts("Please insert SDCard...");
 	while (!sd.detect());
@@ -80,7 +80,7 @@ start:
 		printf("opendir failed: %u\n", errno);
 		goto fin;
 	}
-	uint16_t bgc = tft.getForeground();
+	uint16_t bgc = tft.foreground();
 	struct dirent *ent;
 	while ((ent = op::readdir(dir)) != NULL) {
 		if (ent->d_type & IS_DIR)
@@ -109,7 +109,7 @@ start:
 	tft.start();
 	for (y = 240; y > 0; y--)
 		for (x = 0; x < 320; x++)
-			tft.write(conv::c32to16(conv::uint24(fp)));
+			tft.write16(conv::c32to16(conv::uint24(fp)));
 	tft.bmp(false);
 	op::fclose(fp);
 #endif
