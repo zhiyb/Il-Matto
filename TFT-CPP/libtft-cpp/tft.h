@@ -39,9 +39,14 @@ public:
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
+	inline uint16_t maxVerticalScrolling(void) const;
 	void setVerticalScrolling(const uint16_t vsp);
 	void setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa);
 	inline void setPartialMode(const bool e) {cmd(e ? 0x12 : 0x13);}
+	inline uint8_t topMask(void) const {return d.topMask;}
+	inline void setTopMask(const uint8_t lm) {d.topMask = lm;}
+	inline uint8_t bottomMask(void) const {return d.bottomMask;}
+	inline void setBottomMask(const uint8_t lm) {d.bottomMask = lm;}
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
@@ -69,7 +74,7 @@ private:
 	inline void tab(void);
 
 	struct {
-		uint8_t zoom, orient, tabSize;
+		uint8_t zoom, orient, tabSize, topMask, bottomMask;
 		uint16_t x, y, w, h, fgc, bgc;
 	} d;
 };
@@ -90,6 +95,11 @@ FILE *tftout(tft_t *hw);
 	(x) = (x) ^ (y); \
 	(y) = (x) ^ (y); \
 	(x) = (x) ^ (y); \
+}
+
+inline uint16_t tft_t::maxVerticalScrolling(void) const
+{
+	return SIZE_H;
 }
 
 inline void tft_t::shiftUp(const uint16_t l)

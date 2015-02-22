@@ -22,6 +22,8 @@ tft_t::tft_t(void)
 {
 	setX(0);
 	setY(0);
+	setTopMask(0);
+	setBottomMask(0);
 	setZoom(1);
 	d.orient = Portrait;
 	setTabSize(4);
@@ -97,7 +99,7 @@ void tft_t::putch(char ch)
 {
 	area(x(), y(), WIDTH * zoom(), HEIGHT * zoom());
 	cmd(0x2C);			// Memory Write
-	for (uint8_t i = 0; i < HEIGHT * zoom(); i++) {
+	for (uint8_t i = topMask(); i < HEIGHT * zoom() - bottomMask(); i++) {
 		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
 		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
