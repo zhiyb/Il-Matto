@@ -46,7 +46,7 @@ inline void ili9341::_setOrient(uint8_t o)
 	// BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait
 	static const uint8_t orient[] = {
 			0x28, 0x48, 0xE8, 0x88,
-			0x68, 0xA8, 0xD8, 0x18
+			0x68, 0xD8, 0xA8, 0x18
 	};
 	cmd(0x36);			// Memory Access Control
 	data(orient[o]);
