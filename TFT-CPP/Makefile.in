@@ -18,6 +18,7 @@ OBJ	= $(subst .S,.o,$(subst .c,.o,$(subst .cpp,.o,$(SRC))))
 AS	= avr-gcc
 CC	= avr-gcc
 CXX	= avr-g++
+LD	= avr-gcc
 
 # Override is only needed by avr-lib build system.
 
@@ -36,7 +37,7 @@ all: elf lst text eeprom
 elf: $(PRG).elf
 
 $(PRG).elf: subdirs $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
+	$(LD) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
 	$(SIZE) $@
 
 .c.o:
