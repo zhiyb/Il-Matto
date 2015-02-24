@@ -1,3 +1,7 @@
+/* 
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef ILI9341_H
 #define ILI9341_H
 
@@ -108,7 +112,7 @@ inline void ili9341::init(void)
 	uint16_t r;
 
 	MCUCR |= 0x80;			// Disable JTAG
-	MCUCR |= 0x80;			// Thanks to someone point that out
+	MCUCR |= 0x80;
 
 	TFT_PCTRL = 0xFF & ~TFT_FMK;
 	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light

@@ -1,3 +1,7 @@
+/* 
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef TFT_H
 #define TFT_H
 
@@ -39,14 +43,27 @@ public:
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
+
 	inline uint16_t maxVerticalScrolling(void) const;
+	// Vertical scrolling pointer
 	void setVerticalScrolling(const uint16_t vsp);
+	// Top fixed area, bottom fixed area
 	void setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa);
-	inline void setPartialMode(const bool e) {cmd(e ? 0x12 : 0x13);}
-	inline uint8_t topMask(void) const {return d.topMask;}
-	inline void setTopMask(const uint8_t lm) {d.topMask = lm;}
-	inline uint8_t bottomMask(void) const {return d.bottomMask;}
-	inline void setBottomMask(const uint8_t lm) {d.bottomMask = lm;}
+	//inline void setPartialMode(const bool e) {cmd(e ? 0x12 : 0x13);}
+	// Vertical scrolling mode drawing auto transform
+	inline bool transform(void) const {return d.tf;}
+	inline void setTransform(const bool on) {d.tf = on;}
+	// Vertical scrolling mode helper functions
+	inline uint16_t upperEdge(void) const {return d.vsp;}
+	inline uint16_t lowerEdge(void) const
+	{return (d.vsp == d.tfa) ? maxVerticalScrolling() - d.bfa : d.vsp;}
+	inline uint16_t vsHeight(void) const
+	{return maxVerticalScrolling() - d.bfa - d.tfa;}
+	//inline uint8_t topMask(void) const {return d.topMask;}
+	//inline void setTopMask(const uint8_t lm) {d.topMask = lm;}
+	//inline uint8_t bottomMask(void) const {return d.bottomMask;}
+	//inline void setBottomMask(const uint8_t lm) {d.bottomMask = lm;}
+
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
@@ -74,8 +91,10 @@ private:
 	inline void tab(void);
 
 	struct {
+		bool tf;
 		uint8_t zoom, orient, tabSize, topMask, bottomMask;
 		uint16_t x, y, w, h, fgc, bgc;
+		uint16_t vsp, tfa, bfa;
 	} d;
 };
 

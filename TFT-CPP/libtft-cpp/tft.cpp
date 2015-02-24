@@ -1,3 +1,7 @@
+/* 
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include <avr/io.h>
 #include <ctype.h>
 #include "ascii.h"
@@ -22,8 +26,12 @@ tft_t::tft_t(void)
 {
 	setX(0);
 	setY(0);
-	setTopMask(0);
-	setBottomMask(0);
+	//setTopMask(0);
+	//setBottomMask(0);
+	d.tfa = 0;
+	d.bfa = 0;
+	d.vsp = 0;
+	setTransform(false);
 	setZoom(1);
 	d.orient = Portrait;
 	setTabSize(4);
@@ -88,6 +96,21 @@ void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint16_t c)
 {
+//start:
+	if (transform()) {
+		if (y < lowerEdge() && y + h > lowerEdge())
+			h = lowerEdge() - y;
+		if (y + h > maxVerticalScrolling() - d.bfa) {
+			if (y < maxVerticalScrolling() - d.bfa) {
+				rectangle(x, y, w, maxVerticalScrolling() - d.bfa - y, c);
+				rectangle(x, d.tfa, w, h - (maxVerticalScrolling() - d.bfa - y), c);
+				return;
+			} /*else {
+				y -= vsHeight();
+				goto start;
+			}*/
+		}
+	}
 	area(x, y, w, h);
 	cmd(0x2C);			// Memory Write
 	while (w--)
@@ -99,7 +122,13 @@ void tft_t::putch(char ch)
 {
 	area(x(), y(), WIDTH * zoom(), HEIGHT * zoom());
 	cmd(0x2C);			// Memory Write
-	for (uint8_t i = topMask(); i < HEIGHT * zoom() - bottomMask(); i++) {
+	for (uint8_t i = 0; i < HEIGHT * zoom(); i++) {
+		/*if (transform()) {
+			if (y() + i < upperEdge())
+				continue;
+			if (y() + i >= lowerEdge())
+				return;
+		}*/
 		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
 		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
@@ -144,6 +173,7 @@ void tft_t::setVerticalScrolling(const uint16_t vsp)
 {
 	cmd(0x37);	// Vertical Scrolling Start Address
 	write16(vsp);
+	d.vsp = vsp;
 }
 
 void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
@@ -153,6 +183,8 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 	write16(tfa);	// Top Fixed Area
 	write16(vsa);	// Vertical Scrolling Area
 	write16(bfa);	// Bottom Fixed Area
+	d.tfa = tfa;
+	d.bfa = bfa;
 }
 
 static tft_t *tft;
