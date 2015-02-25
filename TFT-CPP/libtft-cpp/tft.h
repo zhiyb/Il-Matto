@@ -43,9 +43,9 @@ public:
 	inline void setBGLight(bool e) {_setBGLight(e);}
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
+	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
 
 	// Vertical scrolling related functions
-	inline uint16_t maxVerticalScrolling(void) const;
 	// Vertical scrolling pointer
 	void setVerticalScrolling(const uint16_t vsp);
 	// Top fixed area, bottom fixed area
@@ -54,11 +54,12 @@ public:
 	inline bool transform(void) const {return d.tf;}
 	inline void setTransform(const bool on) {d.tf = on;}
 	// Vertical scrolling mode helper functions
+	inline uint16_t vsMaximum(void) const;
 	inline uint16_t topFixedArea(void) const {return d.tfa;}
 	inline uint16_t bottomFixedArea(void) const {return d.bfa;}
 	inline uint16_t vsHeight(void) const {return bottomEdge() - topFixedArea();}
 	inline uint16_t topEdge(void) const {return topFixedArea();}
-	inline uint16_t bottomEdge(void) const {return maxVerticalScrolling() - bottomFixedArea();}
+	inline uint16_t bottomEdge(void) const {return vsMaximum() - bottomFixedArea();}
 	inline uint16_t upperEdge(void) const {return d.vsp;}
 	inline uint16_t lowerEdge(void) const {return upperEdge() == topFixedArea() ? bottomEdge() : upperEdge();}
 	// Vertical scrolling mode drawing coordinate transform
@@ -122,7 +123,7 @@ FILE *tftout(tft_t *hw);
 	(x) = (x) ^ (y); \
 }
 
-inline uint16_t tft_t::maxVerticalScrolling(void) const
+inline uint16_t tft_t::vsMaximum(void) const
 {
 	return SIZE_H;
 }

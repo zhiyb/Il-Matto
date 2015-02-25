@@ -11,8 +11,8 @@
 #define ITEM_NAME_X	16
 #define ITEM_NAME_Y	4
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
-#define DEF_TOP_AREA	(ITEM_HEIGHT * 0)
-#define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 0)
+#define DEF_TOP_AREA	(ITEM_HEIGHT * 2)
+#define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 1)
 
 void list::refresh(void)
 {

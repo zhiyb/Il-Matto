@@ -243,7 +243,7 @@ void tft_t::bmp(bool e)
 void tft_t::setVerticalScrolling(const uint16_t vsp)
 {
 	cmd(0x37);	// Vertical Scrolling Start Address
-	write16(vsp);
+	write16(flipped() ? vsMaximum() - vsp : vsp);
 	d.vsp = vsp;
 }
 
@@ -251,9 +251,15 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 {
 	uint16_t vsa = SIZE_H - tfa - bfa;
 	cmd(0x33);	// Vertical Scrolling Definition
-	write16(tfa);	// Top Fixed Area
-	write16(vsa);	// Vertical Scrolling Area
-	write16(bfa);	// Bottom Fixed Area
+	if (flipped()) {
+		write16(bfa);	// Top Fixed Area
+		write16(vsa);	// Vertical Scrolling Area
+		write16(tfa);	// Bottom Fixed Area
+	} else {
+		write16(tfa);	// Top Fixed Area
+		write16(vsa);	// Vertical Scrolling Area
+		write16(bfa);	// Bottom Fixed Area
+	}
 	d.tfa = tfa;
 	d.bfa = bfa;
 }

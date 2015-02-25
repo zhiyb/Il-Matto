@@ -13,7 +13,7 @@ void init(void)
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
 	tft.init();
-	tft.setOrient(tft.Portrait);
+	tft.setOrient(tft.FlipPortrait);
 	tft.setBackground(0x0000);
 	tft.setForeground(0x667F);
 	tft.clean();
@@ -36,7 +36,6 @@ int main(void)
 	tft.rectangle(0, tft.topEdge() - 1, tft.width(), 1, 0xF800);
 
 	uint16_t max = l.maxScroll(), v = 0;
-	v = max - 1;
 inc:
 	l.setScroll(v);
 	_delay_ms(10);
