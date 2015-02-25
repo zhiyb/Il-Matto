@@ -7,7 +7,7 @@ MCU_FREQ=12000000
 PROJECTNAME=liblist
 
 # Source files
-PRJSRC=list.cpp
+PRJSRC=portraitlist.cpp
 
 # Optimization level, 
 OPTLEVEL=s

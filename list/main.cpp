@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
-#include <list.h>
+#include <portraitlist.h>
 #include "menu.h"
 
 tft_t tft;
-list l(&tft);
+PortraitList l(&tft);
 
 void init(void)
 {

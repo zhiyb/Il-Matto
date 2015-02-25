@@ -1,4 +1,4 @@
-#include "list.h"
+#include "portraitlist.h"
 #include <rgbconv.h>
 #include <util/delay.h>
 
@@ -14,14 +14,14 @@
 #define DEF_TOP_AREA	(ITEM_HEIGHT * 2)
 #define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 1)
 
-void list::refresh(void)
+void PortraitList::refresh(void)
 {
 	tft->clean();
 	tft->setZoom(ZOOM);
 	display();
 }
 
-void list::display(listItem *item)
+void PortraitList::display(listItem *item)
 {
 	tft->setVerticalScrollingArea(DEF_TOP_AREA, DEF_BOTTOM_AREA);
 	if (!item) {
@@ -45,7 +45,7 @@ void list::display(listItem *item)
 	displayItems(currentItem()->items);
 }
 
-uint16_t list::countItems(const listItem **items) const
+uint16_t PortraitList::countItems(const listItem **items) const
 {
 	if (!items)
 		items = currentItem()->items;
@@ -55,7 +55,7 @@ uint16_t list::countItems(const listItem **items) const
 	return i;
 }
 
-void list::displayItem(const listItem *item, const uint16_t index) const
+void PortraitList::displayItem(const listItem *item, const uint16_t index) const
 {
 	uint16_t ys = tft->y();
 	if (index != (uint16_t)-1) {
@@ -83,7 +83,7 @@ disp:
 	*tft << (item ? item->name : "** EMPTY **");
 }
 
-void list::displayItems(const listItem **items, uint16_t index, uint16_t last) const
+void PortraitList::displayItems(const listItem **items, uint16_t index, uint16_t last) const
 {
 	tft->setTransform(true);
 	uint16_t first = scroll() / ITEM_HEIGHT;
@@ -102,7 +102,7 @@ void list::displayItems(const listItem **items, uint16_t index, uint16_t last) c
 	tft->setTransform(false);
 }
 
-void list::scrollTo(const uint16_t s)
+void PortraitList::scrollTo(const uint16_t s)
 {
 	if (!maxScroll())
 		scr = 0;
@@ -112,7 +112,7 @@ void list::scrollTo(const uint16_t s)
 		scr = s;
 }
 
-void list::setScroll(uint16_t s)
+void PortraitList::setScroll(uint16_t s)
 {
 	if (s == scroll())
 		return;
@@ -122,7 +122,7 @@ void list::setScroll(uint16_t s)
 		scrollUp(scroll() - s);
 }
 
-void list::scrollDown(uint16_t s)
+void PortraitList::scrollDown(uint16_t s)
 {
 	uint16_t index = (scroll() + SCROLL_AREA) / ITEM_HEIGHT;
 	uint16_t scrbak = scroll();
@@ -138,7 +138,7 @@ void list::scrollDown(uint16_t s)
 	displayItems(items, index);
 }
 
-void list::scrollUp(uint16_t s)
+void PortraitList::scrollUp(uint16_t s)
 {
 	uint16_t last = scroll() / ITEM_HEIGHT + 1;
 	uint16_t scrbak = scroll();
