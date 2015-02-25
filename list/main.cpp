@@ -36,10 +36,11 @@ int main(void)
 	tft.rectangle(0, tft.topEdge() - 1, tft.width(), 1, 0xF800);
 
 	uint16_t max = l.maxScroll(), v = 0;
+	v = max - 1;
 inc:
 	l.setScroll(v);
 	_delay_ms(10);
-	if (v++ < max)
+	if (++v < max)
 		goto inc;
 	_delay_ms(1000);
 dec:

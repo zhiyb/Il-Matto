@@ -11,8 +11,8 @@
 #define ITEM_NAME_X	16
 #define ITEM_NAME_Y	4
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
-#define DEF_TOP_AREA	(ITEM_HEIGHT)
-#define DEF_BOTTOM_AREA	(ITEM_HEIGHT)
+#define DEF_TOP_AREA	(ITEM_HEIGHT * 0)
+#define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 0)
 
 void list::refresh(void)
 {
@@ -59,16 +59,16 @@ void list::displayItem(const listItem *item, const uint16_t index) const
 {
 	uint16_t ys = tft->y();
 	if (index != (uint16_t)-1) {
-		uint16_t y = index * ITEM_HEIGHT;	// Relative to TOP_AREA
-		if (y + ITEM_HEIGHT < scroll())		// Out of scroll area
+		uint16_t y = index * ITEM_HEIGHT;		// Relative to TOP_AREA
+		if (y + ITEM_HEIGHT < scroll())			// Out of scroll area
 			return;
-		if (y < scroll()) {			// Above TOP_AREA
+		if (y < scroll()) {				// Above TOP_AREA
 			ys = TOP_AREA - (scroll() - y);
 			tft->setY(tft->vsTransform(ys + ITEM_NAME_Y));
 			goto disp;
 		}
-		y -= scroll();				// Relative to upperEdge
-		if (y >= tft->vsHeight())		// Out of scroll area
+		y -= scroll();					// Relative to upperEdge
+		if (y >= tft->vsHeight())			// Out of scroll area
 			return;
 		ys = tft->vsTransform(y + tft->topEdge());
 		tft->setY(tft->vsTransform(y + tft->topEdge() + ITEM_NAME_Y));

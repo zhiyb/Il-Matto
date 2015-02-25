@@ -101,7 +101,8 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 		return;
 	if (transform()) {
 		uint16_t yt = vsTransformBack(y);
-		if (yt < topEdge() && yt + h >= topEdge()) {		// Top edge clipping
+		if ((int16_t)yt < (int16_t)topEdge() && \
+			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
 			h -= topEdge() - yt;
 			y = upperEdge();
 			yt = vsTransformBack(y);
@@ -144,7 +145,8 @@ void tft_t::putch(char ch)
 
 	if (transform()) {
 		uint16_t yt = vsTransformBack(yy);
-		if (yt < topEdge() && yt + h >= topEdge()) {		// Top edge clipping
+		if ((int16_t)yt < (int16_t)topEdge() && \
+			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
 			start = topEdge() - yt;
 			yy = upperEdge();
 			y0 = yy - start;
