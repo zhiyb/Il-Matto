@@ -1,4 +1,4 @@
-/* 
+/*
  * Author: Yubo Zhi (yz39g13@soton.ac.uk)
  */
 
@@ -44,25 +44,31 @@ public:
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
 
+	// Vertical scrolling related functions
 	inline uint16_t maxVerticalScrolling(void) const;
 	// Vertical scrolling pointer
 	void setVerticalScrolling(const uint16_t vsp);
 	// Top fixed area, bottom fixed area
 	void setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa);
-	//inline void setPartialMode(const bool e) {cmd(e ? 0x12 : 0x13);}
 	// Vertical scrolling mode drawing auto transform
 	inline bool transform(void) const {return d.tf;}
 	inline void setTransform(const bool on) {d.tf = on;}
 	// Vertical scrolling mode helper functions
+	inline uint16_t topFixedArea(void) const {return d.tfa;}
+	inline uint16_t bottomFixedArea(void) const {return d.bfa;}
+	inline uint16_t vsHeight(void) const {return bottomEdge() - topFixedArea();}
+	inline uint16_t topEdge(void) const {return topFixedArea();}
+	inline uint16_t bottomEdge(void) const {return maxVerticalScrolling() - bottomFixedArea();}
 	inline uint16_t upperEdge(void) const {return d.vsp;}
-	inline uint16_t lowerEdge(void) const
-	{return (d.vsp == d.tfa) ? maxVerticalScrolling() - d.bfa : d.vsp;}
-	inline uint16_t vsHeight(void) const
-	{return maxVerticalScrolling() - d.bfa - d.tfa;}
-	//inline uint8_t topMask(void) const {return d.topMask;}
-	//inline void setTopMask(const uint8_t lm) {d.topMask = lm;}
-	//inline uint8_t bottomMask(void) const {return d.bottomMask;}
-	//inline void setBottomMask(const uint8_t lm) {d.bottomMask = lm;}
+	inline uint16_t lowerEdge(void) const {return upperEdge() == topFixedArea() ? bottomEdge() : upperEdge();}
+	// Vertical scrolling mode drawing coordinate transform
+	uint16_t vsTransform(uint16_t y) const;
+	uint16_t vsTransformBack(uint16_t y) const;
+	// Refresh region mask, not transformed
+	inline uint16_t topMask(void) const {return d.topMask;}
+	inline void setTopMask(const uint16_t lm) {d.topMask = lm;}
+	inline uint16_t bottomMask(void) const {return d.bottomMask;}
+	inline void setBottomMask(const uint16_t lm) {d.bottomMask = lm;}
 
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
@@ -79,7 +85,7 @@ public:
 
 	inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	inline void all(void) {area(0, 0, width(), height());}
-	static inline void start(void) {cmd(0x2C);}
+	static inline void start(void) {cmd(0x2C);}	// Memory write
 	static inline void write16(uint16_t c) {data(c / 0x0100); data(c % 0x0100);}
 
 private:
@@ -92,9 +98,9 @@ private:
 
 	struct {
 		bool tf;
-		uint8_t zoom, orient, tabSize, topMask, bottomMask;
+		uint8_t zoom, orient, tabSize;
 		uint16_t x, y, w, h, fgc, bgc;
-		uint16_t vsp, tfa, bfa;
+		uint16_t vsp, tfa, bfa, topMask, bottomMask;
 	} d;
 };
 
@@ -152,7 +158,7 @@ inline void tft_t::shiftUp(const uint16_t l)
 		cmd(0x2B);		// Page Address Set
 		write16(r);
 		write16(r);
-		cmd(0x2C);		// Write
+		start();
 		while (b--)
 			data(buff[b]);
 	}
@@ -160,7 +166,7 @@ inline void tft_t::shiftUp(const uint16_t l)
 	cmd(0x2B);		// Page Address Set
 	write16(height() - l);
 	write16(height() - 1);
-	cmd(0x2C);
+	start();
 	while (r++ < height())
 		for (uint16_t c = width(); c; c--)
 			write16(background());
@@ -196,7 +202,7 @@ inline class tft_t& tft_t::operator<<(const char *str)
 inline void tft_t::point(uint16_t x, uint16_t y, uint16_t c)
 {
 	area(x, y, 1, 1);
-	start();			// Memory Write
+	start();
 	write16(c);
 }
 
@@ -220,7 +226,7 @@ inline void tft_t::fill(uint16_t clr)
 	uint8_t ch = clr / 0x0100, cl = clr % 0x0100;
 	uint16_t x = width(), y;
 	all();
-	start();			// Memory Write
+	start();
 	while (x--) {
 		y = height();
 		while (y--) {

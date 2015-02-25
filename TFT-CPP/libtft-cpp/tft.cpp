@@ -1,4 +1,4 @@
-/* 
+/*
  * Author: Yubo Zhi (yz39g13@soton.ac.uk)
  */
 
@@ -31,6 +31,8 @@ tft_t::tft_t(void)
 	d.tfa = 0;
 	d.bfa = 0;
 	d.vsp = 0;
+	setTopMask(0);
+	setBottomMask(0);
 	setTransform(false);
 	setZoom(1);
 	d.orient = Portrait;
@@ -93,42 +95,87 @@ void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 	}
 }
 
-void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
-		uint16_t c)
+void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c)
 {
-//start:
+	if (!h || !w)
+		return;
 	if (transform()) {
-		if (y < lowerEdge() && y + h > lowerEdge())
-			h = lowerEdge() - y;
-		if (y + h > maxVerticalScrolling() - d.bfa) {
-			if (y < maxVerticalScrolling() - d.bfa) {
-				rectangle(x, y, w, maxVerticalScrolling() - d.bfa - y, c);
-				rectangle(x, d.tfa, w, h - (maxVerticalScrolling() - d.bfa - y), c);
+		uint16_t yt = vsTransformBack(y);
+		if (yt < topEdge() && yt + h >= topEdge()) {		// Top edge clipping
+			h -= topEdge() - yt;
+			y = upperEdge();
+			yt = vsTransformBack(y);
+		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
+			h = bottomEdge() - yt;
+		if (y + h > bottomEdge())				// Transform edge split
+			if (y < bottomEdge()) {
+				rectangle(x, y, w, bottomEdge() - y, c);
+				rectangle(x, topFixedArea(), w, h - (bottomEdge() - y), c);
 				return;
-			} /*else {
-				y -= vsHeight();
-				goto start;
-			}*/
+			}
+
+		if (yt < topMask()) {
+			if (yt + h < topMask())
+				return;
+			h -= topMask() - yt;
+			y = vsTransform(topMask());
 		}
+
+		uint16_t bMask = height() - bottomMask();
+		if (yt >= bMask)
+			return;
+		if (yt + h > bMask)
+			h -= yt + h - bMask;
 	}
+
 	area(x, y, w, h);
-	cmd(0x2C);			// Memory Write
-	while (w--)
-		for (y = 0; y < h; y++)
+	start();
+	while (h--)
+		for (uint16_t xx = x; xx < w; xx++)
 			write16(c);
 }
 
 void tft_t::putch(char ch)
 {
-	area(x(), y(), WIDTH * zoom(), HEIGHT * zoom());
-	cmd(0x2C);			// Memory Write
-	for (uint8_t i = 0; i < HEIGHT * zoom(); i++) {
-		/*if (transform()) {
-			if (y() + i < upperEdge())
-				continue;
-			if (y() + i >= lowerEdge())
+	// Display y coordinate, start y coordinate
+	uint16_t yy = y(), y0 = y();
+	uint8_t h = FONT_HEIGHT * zoom();
+	uint8_t start = 0, end = h;
+
+	if (transform()) {
+		uint16_t yt = vsTransformBack(yy);
+		if (yt < topEdge() && yt + h >= topEdge()) {		// Top edge clipping
+			start = topEdge() - yt;
+			yy = upperEdge();
+			y0 = yy - start;
+			yt = vsTransformBack(yy);
+		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
+			end = bottomEdge() - yt;
+
+		if (yt < topMask()) {
+			if (yt + end - start < topMask())
 				return;
-		}*/
+			yy = vsTransform(topMask());
+			start += topMask() - yt;
+			y0 = yy - start;
+		}
+
+		uint16_t bMask = height() - bottomMask();
+		if (yt >= bMask)
+			return;
+		if (yt + end - start > bMask)
+			end -= yt + end - start - bMask;
+	}
+
+	area(x(), yy, WIDTH * zoom(), h);
+	this->start();
+	bool transformed = false;
+	for (uint8_t i = start; i < end; i++) {
+		if (transform() && !transformed && y0 < bottomEdge() && y0 + i >= bottomEdge()) {
+			area(x(), topFixedArea(), WIDTH * zoom(), h);
+			this->start();
+			transformed = true;
+		}
 		unsigned char c;
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
 		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
@@ -159,6 +206,28 @@ void tft_t::setOrient(uint8_t o)
 	setY(0);
 	d.orient = o;
 	_setOrient(o);
+}
+
+uint16_t tft_t::vsTransform(uint16_t y) const
+{
+	if (y < topEdge() || y >= bottomEdge())
+		return y;
+	y -= topEdge();		// Relative to upperEdge
+	y += upperEdge();	// Relative to 0
+	if (y >= bottomEdge())	// Transform edge
+		y -= vsHeight();
+	return y;
+}
+
+uint16_t tft_t::vsTransformBack(uint16_t y) const
+{
+	if (y < topEdge() || y >= bottomEdge())
+		return y;
+	if (y < upperEdge())
+		y += vsHeight();
+	y -= upperEdge();	// Relative to upperEdge
+	y += topEdge();		// Relative to 0
+	return y;
 }
 
 void tft_t::bmp(bool e)
