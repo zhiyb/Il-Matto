@@ -132,7 +132,7 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 	area(x, y, w, h);
 	start();
 	while (h--)
-		for (uint16_t xx = x; xx < w; xx++)
+		for (uint16_t xx = 0; xx < w; xx++)
 			write16(c);
 }
 

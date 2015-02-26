@@ -64,7 +64,6 @@ start:
 	tft.line(260, 200, 260, 0, 0x001F);
 	puts("Draw lines test");
 
-	tft.setPartialMode(false);
 	tft.setVerticalScrollingArea(64, 32);
 	uint16_t max = 320 - 32;
 	uint16_t v = 64;
