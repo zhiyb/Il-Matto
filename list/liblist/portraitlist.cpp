@@ -1,16 +1,15 @@
 #include "portraitlist.h"
-#include <rgbconv.h>
-#include <util/delay.h>
 
 #define ZOOM		2
 #define TOP_AREA	(tft->topFixedArea())
 #define BOTTOM_AREA	(tft->bottomFixedArea())
-#define MAX_AREA	(tft->maxVerticalScrolling())
+#define MAX_AREA	(tft->vsMaximum())
 #define SCROLL_AREA	(tft->vsHeight())
 
 #define ITEM_NAME_X	16
 #define ITEM_NAME_Y	4
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
+
 #define DEF_TOP_AREA	(ITEM_HEIGHT * 2)
 #define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 1)
 
@@ -140,7 +139,7 @@ void PortraitList::scrollDown(uint16_t s)
 
 void PortraitList::scrollUp(uint16_t s)
 {
-	uint16_t last = scroll() / ITEM_HEIGHT + 1;
+	uint16_t last = (scroll() + ITEM_HEIGHT - 1) / ITEM_HEIGHT;
 	uint16_t scrbak = scroll();
 	scrollTo(scroll() - s);
 	if ((s = scrbak - scroll()) == 0)

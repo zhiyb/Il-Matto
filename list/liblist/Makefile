@@ -7,13 +7,15 @@ MCU_FREQ=12000000
 PROJECTNAME=liblist
 
 # Source files
-PRJSRC=portraitlist.cpp
+PRJSRC=portraitlist.cpp landscapelist.cpp
 
 # Optimization level, 
 OPTLEVEL=s
 
+DEFS ?=	-DF_CPU=$(MCU_FREQ)
+
 # compiler
-override CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \
+override CFLAGS=-I. $(INC) -g -mmcu=$(MCU) $(DEFS) -O$(OPTLEVEL) \
 	-Wall                                   \
 	-funsigned-bitfields -funsigned-char    \
 	-fpack-struct -fshort-enums             \
@@ -21,7 +23,7 @@ override CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \
 	-I../libtft-cpp				\
 	-Wa,-ahlms=$(firstword                  \
 	$(filter %.lst, $(<:.c=.lst)))
-override CXXFLAGS=-I. $(INC) -g -mmcu=$(MCU) -DF_CPU=$(MCU_FREQ) -O$(OPTLEVEL) \
+override CXXFLAGS=-I. $(INC) -g -mmcu=$(MCU) $(DEFS) -O$(OPTLEVEL) \
 	-Wall                                   \
 	-funsigned-bitfields -funsigned-char    \
 	-fpack-struct -fshort-enums             \
