@@ -3,6 +3,7 @@
  */
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <ctype.h>
 #include "ascii.h"
 #include "ili9341.h"
@@ -20,17 +21,13 @@
 	(x) = (x) ^ (y); \
 }
 
-#include <avr/pgmspace.h>
-
 tft_t::tft_t(void)
 {
 	setX(0);
 	setY(0);
-	//setTopMask(0);
-	//setBottomMask(0);
 	d.tfa = 0;
 	d.bfa = 0;
-	d.vsp = 0;
+	d.vsp = SIZE_H;
 	setTopMask(0);
 	setBottomMask(0);
 	setTransform(false);
@@ -99,37 +96,57 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 {
 	if (!h || !w)
 		return;
-	if (transform()) {
-		uint16_t yt = vsTransformBack(y);
-		if ((int16_t)yt < (int16_t)topEdge() && \
-			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
-			h -= topEdge() - yt;
-			y = upperEdge();
-			yt = vsTransformBack(y);
-		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
-			h = bottomEdge() - yt;
-		if (y + h > bottomEdge())				// Transform edge split
-			if (y < bottomEdge()) {
-				rectangle(x, y, w, bottomEdge() - y, c);
-				rectangle(x, topFixedArea(), w, h - (bottomEdge() - y), c);
-				return;
-			}
 
-		if (yt < topMask()) {
-			if (yt + h < topMask())
-				return;
-			h -= topMask() - yt;
-			y = vsTransform(topMask());
-		}
+	uint16_t yt, bMask;
+	if (!transform())
+		goto disp;
 
-		uint16_t bMask = height() - bottomMask();
-		if (yt >= bMask)
-			return;
-		if (yt + h > bMask)
-			h -= yt + h - bMask;
+	if (!portrait()) {
+		swap(x, y);
+		swap(w, h);
 	}
 
+	yt = vsTransformBack(y);
+	if ((int16_t)yt < (int16_t)topEdge() && \
+		(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
+		h -= topEdge() - yt;
+		y = upperEdge();
+		yt = vsTransformBack(y);
+	} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
+		h = bottomEdge() - yt;
+	if (y + h > bottomEdge())				// Transform edge split
+		if (y < bottomEdge()) {
+			if (!portrait()) {
+				rectangle(y, x, bottomEdge() - y, w, c);
+				rectangle(topEdge(), x, h - (bottomEdge() - y), w, c);
+			} else {
+				rectangle(x, y, w, bottomEdge() - y, c);
+				rectangle(x, topEdge(), w, h - (bottomEdge() - y), c);
+			}
+			return;
+		}
+
+	if (yt < topMask()) {
+		if (yt + h < topMask())
+			return;
+		h -= topMask() - yt;
+		y = vsTransform(topMask());
+	}
+
+	bMask = vsMaximum() - bottomMask();
+	if (yt >= bMask)
+		return;
+	if (yt + h > bMask)
+		h -= yt + h - bMask;
+
+	if (!portrait()) {
+		area(y, x, h, w);
+		goto draw;
+	}
+
+disp:
 	area(x, y, w, h);
+draw:
 	start();
 	while (h--)
 		for (uint16_t xx = 0; xx < w; xx++)
@@ -138,49 +155,107 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 
 void tft_t::putch(char ch)
 {
-	// Display y coordinate, start y coordinate
+#ifndef NO_CHECK
+	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
+		return;
+#endif
+	if ((int16_t)(x() + FONT_WIDTH * zoom()) < 0)
+		return;
+	uint8_t h = FONT_HEIGHT * zoom(), w = FONT_WIDTH * zoom();
+	// Display coordinate, start coordinate
+	uint16_t xx = x(), x0 = x();
 	uint16_t yy = y(), y0 = y();
-	uint8_t h = FONT_HEIGHT * zoom();
-	uint8_t start = 0, end = h;
+	uint8_t xStart = 0, xStop = w;
+	uint8_t yStart = 0, yStop = h;
 
+#if 1
 	if (transform()) {
+		if (!portrait()) {
+			yy = xx;
+			y0 = x0;
+			yStop = xStop;
+			swap(w, h);
+		}
+
 		uint16_t yt = vsTransformBack(yy);
 		if ((int16_t)yt < (int16_t)topEdge() && \
 			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
-			start = topEdge() - yt;
+			yStart = topEdge() - yt;
 			yy = upperEdge();
-			y0 = yy - start;
+			y0 = yy - yStart;
 			yt = vsTransformBack(yy);
 		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
-			end = bottomEdge() - yt;
+			yStop = bottomEdge() - yt;
 
 		if (yt < topMask()) {
-			if (yt + end - start < topMask())
+			if (yt + yStop - yStart < topMask())
 				return;
 			yy = vsTransform(topMask());
-			start += topMask() - yt;
-			y0 = yy - start;
+			yStart += topMask() - yt;
+			y0 = yy - yStart;
 		}
 
-		uint16_t bMask = height() - bottomMask();
+		uint16_t bMask = vsMaximum() - bottomMask();
 		if (yt >= bMask)
 			return;
-		if (yt + end - start > bMask)
-			end -= yt + end - start - bMask;
-	}
+		if (yt + yStop - yStart > bMask)
+			yStop -= yt + yStop - yStart - bMask;
 
-	area(x(), yy, WIDTH * zoom(), h);
-	this->start();
-	bool transformed = false;
-	for (uint8_t i = start; i < end; i++) {
-		if (transform() && !transformed && y0 < bottomEdge() && y0 + i >= bottomEdge()) {
-			area(x(), topFixedArea(), WIDTH * zoom(), h);
-			this->start();
-			transformed = true;
+		if (!portrait()) {
+			swap(w, h);
+			xx = yy;
+			x0 = y0;
+			xStart = yStart;
+			xStop = yStop;
+			yy = y();
+			y0 = y();
+			yStart = 0;
+			yStop = h;
+		}
+	}
+#else
+	if (transform()) {
+		uint16_t xt = vsTransformBack(xx);
+		if ((int16_t)xt < (int16_t)topEdge() && \
+			(int16_t)(xt + w) >= (int16_t)topEdge()) {	// Top edge clipping
+			xStart = topEdge() - xt;
+			xx = upperEdge();
+			x0 = xx - xStart;
+			xt = vsTransformBack(xx);
+		} else if (xt < bottomEdge() && xt + w >= bottomEdge())	// Bottom edge clipping
+			xStop = bottomEdge() - xt;
+
+		if (xt < topMask()) {
+			if (xt + xStop - xStart < topMask())
+				return;
+			xx = vsTransform(topMask());
+			xStart += topMask() - xt;
+			x0 = xx - xStart;
+		}
+
+		uint16_t bMask = vsMaximum() - bottomMask();
+		if (xt >= bMask)
+			return;
+		if (xt + xStop - xStart > bMask)
+			xStop -= xt + xStop - xStart - bMask;
+	}
+#endif
+
+	bool xTransform = transform() && !portrait() && x0 < bottomEdge() && x0 + xStop - xStart > bottomEdge();
+	bool yTransform = transform() && portrait() && y0 < bottomEdge() && y0 + yStop - yStart > bottomEdge();
+	uint8_t xEnd = xTransform ? bottomEdge() - xx : xStop;
+draw:
+	area(xx, yy, xEnd - xStart, h);
+	start();
+	for (uint8_t i = yStart; i < yStop; i++) {
+		if (yTransform && y0 + i == bottomEdge()) {
+			area(x(), topEdge(), w, h);
+			start();
+			yTransform = false;
 		}
 		unsigned char c;
-		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
-		for (uint8_t j = 0; j < WIDTH * zoom(); j++) {
+		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()])) << (xStart / zoom());
+		for (uint8_t j = xStart; j < xEnd; j++) {
 			if (c & 0x80)
 				write16(foreground());
 			else
@@ -188,6 +263,13 @@ void tft_t::putch(char ch)
 			if (j % zoom() == zoom() - 1)
 				c <<= 1;
 		}
+	}
+	if (xTransform) {
+		xx = topEdge();
+		xStart = xEnd;
+		xEnd = xStop;
+		xTransform = false;
+		goto draw;
 	}
 }
 
@@ -212,6 +294,10 @@ void tft_t::setOrient(uint8_t o)
 
 uint16_t tft_t::vsTransform(uint16_t y) const
 {
+#ifndef NO_CHECK
+	if ((int16_t)y < 0)
+		return y;
+#endif
 	if (y < topEdge() || y >= bottomEdge())
 		return y;
 	y -= topEdge();		// Relative to upperEdge
@@ -223,6 +309,10 @@ uint16_t tft_t::vsTransform(uint16_t y) const
 
 uint16_t tft_t::vsTransformBack(uint16_t y) const
 {
+#ifndef NO_CHECK
+	if ((int16_t)y < 0)
+		return y;
+#endif
 	if (y < topEdge() || y >= bottomEdge())
 		return y;
 	if (y < upperEdge())

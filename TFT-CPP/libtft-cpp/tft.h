@@ -44,6 +44,7 @@ public:
 	inline void setTabSize(uint8_t t) {d.tabSize = t;}
 	inline uint8_t tabSize(void) const {return d.tabSize;}
 	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
+	inline bool portrait(void) const {return orient() == Portrait || orient() == FlipPortrait;}
 
 	// Vertical scrolling related functions
 	// Vertical scrolling pointer
@@ -97,6 +98,9 @@ private:
 	inline void next(void);
 	inline void tab(void);
 
+	template <typename Type>
+	static inline void swap(Type &a, Type &b);
+
 	struct {
 		bool tf;
 		uint8_t zoom, orient, tabSize;
@@ -106,8 +110,6 @@ private:
 };
 
 FILE *tftout(tft_t *hw);
-
-//extern class tft_t tft;
 
 // Defined as inline to execute faster
 
@@ -121,6 +123,14 @@ FILE *tftout(tft_t *hw);
 	(x) = (x) ^ (y); \
 	(y) = (x) ^ (y); \
 	(x) = (x) ^ (y); \
+}
+
+template <typename Type>
+inline void tft_t::swap(Type &a, Type &b)
+{
+	Type tmp = a;
+	a = b;
+	b = tmp;
 }
 
 inline uint16_t tft_t::vsMaximum(void) const
@@ -193,9 +203,20 @@ inline class tft_t& tft_t::operator<<(const char c)
 
 inline class tft_t& tft_t::operator<<(const char *str)
 {
+	uint16_t xt = 0;
+	bool clip = transform() && !portrait();
+	if (clip) {
+		xt = vsTransformBack(x());
+		clip = xt < bottomEdge();
+	}
+
 	while (*str) {
-		*this << *str;
-		str++;
+		*this << *str++;
+		if (clip) {
+			xt += FONT_WIDTH * zoom();
+			if (xt >= bottomEdge())
+				break;
+		}
 	}
 	return *this;
 }
@@ -249,9 +270,14 @@ inline void tft_t::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 
 inline void tft_t::next(void)
 {
-	setX(x() + WIDTH * zoom());
-	if (x() + WIDTH * zoom() > width())
-		newline();
+	if (transform() && !portrait()) {
+		uint16_t xt = vsTransformBack(x());
+		setX(vsTransform(xt + FONT_WIDTH * zoom()));
+	} else {
+		setX(x() + FONT_WIDTH * zoom());
+		if (x() + FONT_WIDTH * zoom() > width())
+			newline();
+	}
 }
 
 inline void tft_t::tab(void)

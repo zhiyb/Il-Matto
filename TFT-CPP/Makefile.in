@@ -8,6 +8,8 @@ DEFS	+=
 LIBS	+= $(addprefix -L./,$(LIBDIR)) $(addprefix -l$,$(LIB))
 INCS	+= $(addprefix -I./,$(LIBDIR))
 
+export DEFS
+
 TARFLAGS	= -jc
 ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 
