@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
-#include "tft.h"
+#include <tft.h>
 
 class tft_t tft;
 
