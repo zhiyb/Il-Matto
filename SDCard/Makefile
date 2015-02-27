@@ -3,6 +3,7 @@
 PRG	= SDCard
 SRC	= dirent.cpp errno.cpp fat32.cpp file.cpp main.cpp sd.cpp
 LIB	= tft-cpp
+LIBDIR	= ../lib
 VERSION	= 0.0.1
 
 PRGER	= usbasp
@@ -19,4 +20,4 @@ LFUSE	= 0xE7
 
 LOG	= ~/.make_avr.log
 
-include Makefile.in
+include ../Makefile.in

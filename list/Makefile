@@ -3,6 +3,7 @@
 PRG	= list
 SRC	= main.cpp menu.cpp
 LIB	= tft-cpp list
+LIBDIR	= ../lib
 VERSION	= 0.0.1
 
 PRGER	= usbasp
@@ -19,4 +20,4 @@ LFUSE	= 0xE7
 
 LOG	= ~/.make_avr.log
 
-include Makefile.in
+include ../Makefile.in
