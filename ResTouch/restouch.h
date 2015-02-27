@@ -1,6 +1,8 @@
 #ifndef RESTOUCH_H
 #define RESTOUCH_H
 
+#include <tft.h>
+
 #define RESTOUCH_DDRP	DDRA
 #define RESTOUCH_PINP	PINA
 #define RESTOUCH_PORTP	PORTA
@@ -14,12 +16,31 @@
 #define RESTOUCH_YP	(1 << 7)
 #define RESTOUCH_YC	6
 
-namespace ResTouch {
+class ResTouch
+{
+public:
 	enum Functions {Detection, ReadX, ReadY};
 
-	void init(void);
-	void mode(Functions func);
-	uint16_t function(Functions func);
-}
+	ResTouch(tft_t *tft);
+	static void init(void);
+	void calibration(void);
+	static bool detect(void) {return function(Detection);}
+
+	struct result_t {
+		int16_t x, y;
+	};
+
+	static result_t read(void);
+
+private:
+	static void mode(const Functions func);
+	static uint16_t function(const Functions func);
+
+	struct {
+		result_t data[4];
+	} cal;
+
+	tft_t *tft;
+};
 
 #endif

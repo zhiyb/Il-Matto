@@ -10,7 +10,8 @@ PRGER	= usbasp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 
-DEFS	+= -DF_CPU=12000000
+# FAST define: no checks etc
+DEFS	+= -DF_CPU=12000000 -DFAST
 LIBS	+=
 INCS	+=
 
