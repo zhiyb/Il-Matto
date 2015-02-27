@@ -1,6 +1,6 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= TFT-CPP
+PRG	= ResTouch
 SRC	= main.cpp restouch.cpp
 LIB	= tft-cpp
 LIBDIR	= ../lib
