@@ -2,7 +2,7 @@
 
 PRG	= list
 SRC	= main.cpp menu.cpp
-LIB	= tft-cpp list
+LIB	= tft-cpp list ResTouch common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 

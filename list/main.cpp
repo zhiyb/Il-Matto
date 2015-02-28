@@ -4,11 +4,14 @@
 #include <tft.h>
 #include <portraitlist.h>
 #include <landscapelist.h>
+#include <restouch.h>
+#include <eemem.h>
 #include "menu.h"
 
-#define LANDSCAPE
+//#define LANDSCAPE
 
 tft_t tft;
+ResTouch touch(&tft);
 #ifdef LANDSCAPE
 LandscapeList l(&tft);
 #else
@@ -29,7 +32,10 @@ void init(void)
 	tft.setForeground(0x667F);
 	tft.clean();
 	stdout = tftout(&tft);
+	touch.init();
 	tft.setBGLight(true);
+	touch.calibrate();
+	eeprom_first_done();
 }
 
 int main(void)
@@ -41,6 +47,21 @@ int main(void)
 
 	l.refresh();
 	l.display(&menuRoot);
+
+	ResTouch::coord_t prev = {-1, -1};
+pool:
+	if (touch.detect()) {
+		ResTouch::coord_t res = touch.read();
+		if (!touch.detect()) {
+			prev.x = -1;
+			goto pool;
+		}
+		if (prev.x > 0 && (int16_t)l.scroll() - res.y + prev.y > 0)
+			l.setScroll((int16_t)l.scroll() - res.y + prev.y);
+		prev = res;
+	} else
+		prev.x = -1;
+	goto pool;
 
 #if 0
 #ifdef LANDSCAPE
