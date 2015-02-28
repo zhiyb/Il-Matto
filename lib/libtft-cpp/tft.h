@@ -223,6 +223,8 @@ inline class tft_t& tft_t::operator<<(const char *str)
 
 inline void tft_t::point(uint16_t x, uint16_t y, uint16_t c)
 {
+	if (x >= width() || y >= height())
+		return;
 	area(x, y, 1, 1);
 	start();
 	write16(c);
