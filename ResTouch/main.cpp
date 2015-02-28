@@ -35,7 +35,11 @@ start:
 loop:
 	if (touch.detect()) {
 		ResTouch::coord_t res = touch.read();
-		if (touch.detect())
+		if (!touch.detect())
+			goto loop;
+		if (res.x > (int16_t)(tft.width() + 20))
+			tft.clean();
+		else
 			tft.point(res.x, res.y, 0xFFFF);
 			//printf("TE: %u\t%u\n", res.x, res.y);
 	}
