@@ -1,5 +1,6 @@
 #include "landscapelist.h"
 #include <rgbconv.h>
+#include <colours.h>
 #include <util/delay.h>
 
 #define ZOOM		2
@@ -109,7 +110,8 @@ void LandscapeList::displayItem(const listItem *item, const uint16_t index) cons
 	tft->setX(tft->vsTransform(xs + ITEM_NAME_X));
 	xs = tft->vsTransform(xs);
 
-	static uint16_t c[] = {0xF800, 0x07E0, 0x001F, 0xFFE0, 0x07FF, 0xF81F};
+	using namespace colours::b16;
+	static uint16_t c[] = {Red, Green, Blue, Yellow, Cyan, Magenta};
 disp:
 	tft->setBackground(c[index % (sizeof(c) / sizeof(c[1]))]);
 	tft->rectangle(xs, ys, ITEM_WIDTH, ITEM_HEIGHT, tft->background());
@@ -153,7 +155,7 @@ void LandscapeList::scrollTo(const uint16_t s)
 
 void LandscapeList::setScroll(uint16_t s)
 {
-	if (s == scroll())
+	if (s == scroll() || (int16_t)s < 0)
 		return;
 	else if (s > scroll())
 		scrollDown(s - scroll());
