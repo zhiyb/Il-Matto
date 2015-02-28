@@ -21,14 +21,14 @@ extern "C" {
 #include <inttypes.h>
 
 typedef struct {
-	uint32_t x[5], xfb[5];
-	uint32_t y[5], yfb[5];
+	uint16_t x[5], xfb[5];
+	uint16_t y[5], yfb[5];
 	// Pointercal: xscale, xymix, xoffset, yxmix, yscale, yoffset, divider
 	// xoffset, xscale, xymix, yoffset, yxmix, yscale, divider
 	int32_t a[7];
 } calibration;
 
-int8_t perform_calibration(calibration *cal);
+uint8_t perform_calibration(calibration *cal);
 
 #ifdef __cplusplus
 }

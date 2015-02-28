@@ -53,6 +53,12 @@ void LandscapeList::display(listItem *item)
 	displayItems(currentItem()->items);
 }
 
+/*void LandscapeList::setFocus(uint16_t index) const
+{
+	if (focus != (uint16_t) -1)
+		lostFocus(focus);
+}*/
+
 uint16_t LandscapeList::countItems(const listItem **items) const
 {
 	if (!items)
@@ -62,6 +68,15 @@ uint16_t LandscapeList::countItems(const listItem **items) const
 		items++;
 	return i;
 }
+
+/*listItem *itemAt(uint16_t index) const
+{
+	const listItem **items = curItem->items;
+	if (count() <= index)
+		items += count();
+	else
+		items += index;
+}*/
 
 uint16_t LandscapeList::itemAt(const uint16_t s, const uint16_t y) const
 {

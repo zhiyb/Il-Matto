@@ -1,6 +1,6 @@
 #include "ts_calibrate.h"
 
-int8_t perform_calibration(calibration *cal)
+uint8_t perform_calibration(calibration *cal)
 {
 	uint8_t j;
 	float n, x, y, x2, y2, xy, z, zx, zy;
@@ -13,9 +13,9 @@ int8_t perform_calibration(calibration *cal)
 		n += 1.0;
 		x += (float)cal->x[j];
 		y += (float)cal->y[j];
-		x2 += (float)(cal->x[j]*cal->x[j]);
-		y2 += (float)(cal->y[j]*cal->y[j]);
-		xy += (float)(cal->x[j]*cal->y[j]);
+		x2 += (float)((uint32_t)cal->x[j]*(uint32_t)cal->x[j]);
+		y2 += (float)((uint32_t)cal->y[j]*(uint32_t)cal->y[j]);
+		xy += (float)((uint32_t)cal->x[j]*(uint32_t)cal->y[j]);
 	}
 
 // Get determinant of matrix -- check if determinant is too small
@@ -37,8 +37,8 @@ int8_t perform_calibration(calibration *cal)
 	z = zx = zy = 0;
 	for(j=0;j<5;j++) {
 		z += (float)cal->xfb[j];
-		zx += (float)(cal->xfb[j]*cal->x[j]);
-		zy += (float)(cal->xfb[j]*cal->y[j]);
+		zx += (float)((uint32_t)cal->xfb[j]*(uint32_t)cal->x[j]);
+		zy += (float)((uint32_t)cal->xfb[j]*(uint32_t)cal->y[j]);
 	}
 
 // Now multiply out to get the calibration for framebuffer x coord
@@ -56,8 +56,8 @@ int8_t perform_calibration(calibration *cal)
 	z = zx = zy = 0;
 	for(j=0;j<5;j++) {
 		z += (float)cal->yfb[j];
-		zx += (float)(cal->yfb[j]*cal->x[j]);
-		zy += (float)(cal->yfb[j]*cal->y[j]);
+		zx += (float)((uint32_t)cal->yfb[j]*(uint32_t)cal->x[j]);
+		zy += (float)((uint32_t)cal->yfb[j]*(uint32_t)cal->y[j]);
 	}
 
 // Now multiply out to get the calibration for framebuffer y coord

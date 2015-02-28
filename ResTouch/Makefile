@@ -1,8 +1,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= ResTouch
-SRC	= main.cpp restouch.cpp adc.cpp ts_calibrate.c
-LIB	= tft-cpp
+SRC	= main.cpp ts_calibrate.c
+LIB	= tft-cpp ResTouch common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 
@@ -12,7 +12,7 @@ OPTIMIZE	= -Os
 
 # FAST define: no checks etc
 DEFS	+= -DF_CPU=12000000 -DFAST
-LIBS	+=
+LIBS	+= -lm
 INCS	+=
 
 EFUSE	= 0xFF

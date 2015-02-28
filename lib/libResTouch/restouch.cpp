@@ -1,7 +1,8 @@
 #include <avr/io.h>
-#include "adc.h"
+#include <adc.h>
 #include "restouch.h"
 #include "ts_calibrate.h"
+#include "eemem.h"
 
 // Interface functions
 // Ports	PORTA		PORTB
@@ -13,9 +14,13 @@
 // Calibration cross size
 #define CALIB_SIZE	10
 
+int32_t EEMEM ResTouch::NVcal[sizeof(ResTouch::cal) / sizeof(ResTouch::cal[0])];
+
 ResTouch::ResTouch(tft_t *tft)
 {
 	this->tft = tft;
+	prevRead.x = 0;
+	prevRead.y = 0;
 	calibrated = false;
 }
 
@@ -52,8 +57,8 @@ void ResTouch::mode(Functions func)
 		RESTOUCH_PORTP |= RESTOUCH_YP;
 		DIDR0 &= ~RESTOUCH_YP;
 		DIDR0 |= RESTOUCH_XP;
-		adc::init(RESTOUCH_YC);
-		adc::start();
+		adc_init(RESTOUCH_YC);
+		adc_start();
 		break;
 	case ReadX:
 		RESTOUCH_DDRM |= RESTOUCH_XM;
@@ -67,8 +72,8 @@ void ResTouch::mode(Functions func)
 		RESTOUCH_PORTP &= ~RESTOUCH_YP;
 		DIDR0 &= ~RESTOUCH_XP;
 		DIDR0 |= RESTOUCH_YP;
-		adc::init(RESTOUCH_XC);
-		adc::start();
+		adc_init(RESTOUCH_XC);
+		adc_start();
 		break;
 	};
 }
@@ -80,17 +85,31 @@ uint16_t ResTouch::function(Functions func)
 		return !(RESTOUCH_PINP & RESTOUCH_XP);
 	case ReadX:
 	case ReadY:
-		return adc::read();
+		return adc_read();
 	};
 	return 0;
 }
 
 const ResTouch::coord_t ResTouch::coordTranslate(coord_t pos) const
 {
-	pos.x = (cal.ax * (int32_t)pos.x + \
-		cal.bx * (int32_t)pos.y + cal.dx) / cal.scale;
-	pos.y = (cal.ay * (int32_t)pos.y + \
-		cal.by * (int32_t)pos.y + cal.dy) / cal.scale;
+	pos.x = (cal[0] * (int32_t)pos.x + \
+		cal[1] * (int32_t)pos.y + cal[2]) / cal[6];
+	pos.y = (cal[3] * (int32_t)pos.y + \
+		cal[4] * (int32_t)pos.y + cal[5]) / cal[6];
+#ifndef RESTOUCH_SWAPXY
+	if (tft->portrait()) {
+#else
+	if (!tft->portrait()) {
+#endif
+		int16_t tmp = pos.x;
+#ifndef RESTOUCH_SWAPXY
+		pos.x = tft->width() - pos.y;
+		pos.y = tmp;
+#else
+		pos.x = pos.y;
+		pos.y = tft->height() - tmp;
+#endif
+	}
 	if (tft->flipped()) {
 		pos.x = (int16_t)tft->width() - pos.x;
 		pos.y = (int16_t)tft->height() - pos.y;
@@ -98,14 +117,19 @@ const ResTouch::coord_t ResTouch::coordTranslate(coord_t pos) const
 	return pos;
 }
 
-const ResTouch::coord_t ResTouch::read(void) const
+const ResTouch::coord_t ResTouch::read(void)
 {
 	coord_t res;
+readxy:
 	mode(ReadY);
 	res.y = function(ReadY);
 	mode(ReadX);
 	res.x = function(ReadX);
 	mode(Detection);
+	coord_t prev = prevRead;
+	prevRead = res;
+	if (abs(res.x - prev.x) + abs(res.y - prev.y) > RESTOUCH_DELTA)
+		goto readxy;
 	if (calibrated)
 		return coordTranslate(res);
 	return res;
@@ -135,7 +159,7 @@ const ResTouch::coord_t ResTouch::calibrationPoint(const uint8_t index)
 	return pos;
 }
 
-const ResTouch::coord_t ResTouch::waitForPress(void) const
+const ResTouch::coord_t ResTouch::waitForPress(void)
 {
 	coord_t pos, posnew;
 	while (!detect());
@@ -148,6 +172,11 @@ const ResTouch::coord_t ResTouch::waitForPress(void) const
 
 void ResTouch::calibrate(void)
 {
+	if (!eeprom_first()) {
+		eeprom_read_block(cal, NVcal, sizeof(cal));
+		calibrated = true;
+		return;
+	}
 	tft->setBackground(0x0000);
 	tft->setForeground(0x667F);
 	tft->clean();
@@ -156,7 +185,11 @@ void ResTouch::calibrate(void)
 	tft->setXY((tft->width() - FONT_WIDTH * tft->zoom() * 11) / 2, \
 		   (tft->height() - FONT_HEIGHT * tft->zoom() ) / 3);
 	(*tft) << "Calibration";
+#ifndef RESTOUCH_SWAPXY
 	tft->setOrient(tft_t::Landscape);
+#else
+	tft->setOrient(tft_t::Portrait);
+#endif
 
 	calibration caldata;
 	calibrated = false;
@@ -177,13 +210,14 @@ recalibrate:
 
 	tft->setOrient(orient);
 
-	// xoffset, xscale, xymix, yoffset, yxmix, yscale, divider
-	cal.ax = caldata.a[1];
-	cal.bx = caldata.a[2];
-	cal.dx = caldata.a[0];
-	cal.ay = caldata.a[4];
-	cal.by = caldata.a[5];
-	cal.dy = caldata.a[3];
-	cal.scale = caldata.a[6];
+	cal[0] = caldata.a[1];	// xscale
+	cal[1] = caldata.a[2];	// xymix
+	cal[2] = caldata.a[0];	// xoffset
+	cal[3] = caldata.a[4];	// yxmix
+	cal[4] = caldata.a[5];	// yscale
+	cal[5] = caldata.a[3];	// yoffset
+	cal[6] = caldata.a[6];	// scale
 	calibrated = true;
+
+	eeprom_update_block(cal, NVcal, sizeof(cal));
 }

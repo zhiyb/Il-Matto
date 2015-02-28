@@ -1,6 +1,7 @@
 #ifndef RESTOUCH_H
 #define RESTOUCH_H
 
+#include <avr/eeprom.h>
 #include <tft.h>
 
 #define RESTOUCH_DDRP	DDRA
@@ -16,6 +17,9 @@
 #define RESTOUCH_XC	7
 #define RESTOUCH_YC	6
 
+#define RESTOUCH_SWAPXY
+#define RESTOUCH_DELTA	5
+
 class ResTouch
 {
 public:
@@ -28,8 +32,8 @@ public:
 	ResTouch(tft_t *tft);
 	static void init(void);
 	static bool detect(void) {return function(Detection);}
-	const coord_t read(void) const;
-	const coord_t waitForPress(void) const;
+	const coord_t read(void);
+	const coord_t waitForPress(void);
 	void calibrate(void);
 
 private:
@@ -40,11 +44,9 @@ private:
 	const coord_t coordTranslate(coord_t pos) const;
 
 	bool calibrated;
-	struct {
-		int32_t ax, bx, dx;
-		int32_t ay, by, dy;
-		uint32_t scale;
-	} cal;
+	int32_t cal[7];
+	static int32_t EEMEM NVcal[sizeof(ResTouch::cal) / sizeof(ResTouch::cal[0])];
+	coord_t prevRead;
 
 	tft_t *tft;
 };
