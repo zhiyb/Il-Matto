@@ -1,0 +1,72 @@
+# Name of target controller 
+LIBDIR		?= ..
+
+MCU_TARGET	?= atmega644p
+MCU_FREQ	?= 12000000 
+
+OPTIMIZE	?= -Os
+DEFS		?= -DF_CPU=$(MCU_FREQ)
+
+LIBDIRS	= $(addprefix $(LIBDIR)/lib,$(LIBLIST) $(LIB))
+SUBDIRS += $(LIBDIRS)
+
+LIBS	+= $(addprefix -L./,$(LIBDIRS)) $(addprefix -l$,$(LIB))
+INCS	+= $(addprefix -I./,$(LIBDIRS))
+
+# compiler
+override CFLAGS=$(INCS) -g $(DEFS)           \
+	-mmcu=$(MCU_TARGET) $(OPTIMIZE) -Wall   \
+	-funsigned-bitfields -funsigned-char    \
+	-fpack-struct -fshort-enums             \
+	-Wa,-ahlms=$(firstword                  \
+	$(filter %.lst, $(<:.c=.lst)))
+override CXXFLAGS=$(INCS) -g $(DEFS)         \
+	-mmcu=$(MCU_TARGET) $(OPTIMIZE) -Wall   \
+	-funsigned-bitfields -funsigned-char    \
+	-fpack-struct -fshort-enums             \
+	-Wa,-ahlms=$(firstword                  \
+	$(filter %.lst, $(<:.cpp=.lst)))
+
+# Archiver
+ARFLAGS=rcs
+
+##### executables ####
+CC=avr-gcc
+CXX=avr-g++
+AR=avr-ar
+REMOVE=rm -f
+
+##### automatic target names ####
+LIBTRG=$(LIBNAME).a
+
+# List all object files we need to create
+CFILES=$(filter %.c, $(LIBSRC))
+CPPFILES=$(filter %.cpp, $(LIBSRC))
+OBJDEPS=$(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+
+# Define all lst files.
+LST=$(filter %.lst, $(OBJDEPS:.o=.lst))
+
+.SUFFIXES : .cpp .c .o .h
+
+.PHONY: clean
+
+# Make targets:
+all: $(LIBTRG)
+
+$(LIBTRG): $(OBJDEPS) 
+	$(AR) $(ARFLAGS) $(LIBTRG) $(OBJDEPS)
+
+#### Generating object files ####
+.c.o: 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+#### Cleanup ####
+clean:
+	$(REMOVE) $(LIBTRG)
+	$(REMOVE) $(OBJDEPS)
+	$(REMOVE) $(LST)
+
