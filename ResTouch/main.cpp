@@ -15,10 +15,11 @@ void init(void)
 	tft.setOrient(tft.FlipLandscape);
 	tft.setBackground(0x667F);
 	tft.setForeground(0x0000);
-	tft.clean();
 	stdout = tftout(&tft);
 	touch.init();
 	tft.setBGLight(true);
+	touch.calibrate();
+	tft.clean();
 }
 
 int main(void)
@@ -33,9 +34,10 @@ start:
 
 loop:
 	if (touch.detect()) {
-		ResTouch::result_t res = ResTouch::read();
+		ResTouch::coord_t res = touch.read();
 		if (touch.detect())
-			printf("TE: %u\t%u\n", res.x, res.y);
+			tft.point(res.x, res.y, 0xFFFF);
+			//printf("TE: %u\t%u\n", res.x, res.y);
 	}
 	goto loop;
 	goto start;

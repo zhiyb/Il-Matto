@@ -1,7 +1,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= ResTouch
-SRC	= main.cpp restouch.cpp
+SRC	= main.cpp restouch.cpp adc.cpp ts_calibrate.c
 LIB	= tft-cpp
 LIBDIR	= ../lib
 VERSION	= 0.0.1
