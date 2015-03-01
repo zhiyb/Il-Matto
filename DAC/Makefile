@@ -1,8 +1,9 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= DAC
-SRC	= dac.c main.c
+SRC	= main.c dac.c
 LIB	= 
+LIBDIR	= ../lib
 VERSION	= 0.0.1
 
 PRGER	= usbasp

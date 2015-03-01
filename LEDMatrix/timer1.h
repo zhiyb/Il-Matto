@@ -10,7 +10,7 @@
 
 namespace timer1
 {
-	static void init(void);
+	static inline void init(void);
 	//static inline void start(void);
 	static inline void stop(void);
 	static inline bool over(void);
@@ -54,7 +54,7 @@ static inline void timer1::clear(void)
 	TIFR1 |= _BV(OCF1A);
 }
 
-static void timer1::init(void)
+static inline void timer1::init(void)
 {
 	TCCR1A = 0;
 	TCCR1C = 0;

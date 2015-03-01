@@ -5,12 +5,12 @@
 
 namespace pwm
 {
-	static void init(void);
+	static inline void init(void);
 	static inline void enable(const bool e);
 	static inline void set(const uint8_t d) {OCR2A = d;}
 }
 
-static void pwm::init(void)
+static inline void pwm::init(void)
 {
 	DDRD |= _BV(PD7);
 

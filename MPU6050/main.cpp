@@ -4,18 +4,18 @@
 #include <tft.h>
 #include <mpu6050.h>
 
-class tfthw tft;
+tft_t tft;
 
 void init(void)
 {
 	MPU6050::init();
 	tft.init();
-	tft /= tft.Portrait;
+	tft.setOrient(tft.Portrait);
 	tft.setForeground(0x667F);
 	tft.setBackground(0x0000);
 	tft.clean();
 	stdout = tftout(&tft);
-	tft++;
+	tft.setBGLight(true);
 }
 
 int main(void)
@@ -24,7 +24,7 @@ int main(void)
 	init();
 
 	tft.clean();
-	tft *= 1;
+	tft.setZoom(1);
 
 start:
 	tft.setXY(0, 0);
