@@ -161,7 +161,7 @@ draw:
 
 void tft_t::putch(char ch)
 {
-#ifdef TFT_CHECK
+#ifdef TFT_CHECKING
 	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
 		return;
 #endif
@@ -288,7 +288,7 @@ void tft_t::setOrient(uint8_t o)
 #ifdef TFT_VERTICALSCROLLING
 uint16_t tft_t::vsTransform(uint16_t y) const
 {
-#ifdef TFT_CHECK
+#ifdef TFT_CHECKING
 	if ((int16_t)y < 0)
 		return y;
 #endif
@@ -303,7 +303,7 @@ uint16_t tft_t::vsTransform(uint16_t y) const
 
 uint16_t tft_t::vsTransformBack(uint16_t y) const
 {
-#ifdef TFT_CHECK
+#ifdef TFT_CHECKING
 	if ((int16_t)y < 0)
 		return y;
 #endif

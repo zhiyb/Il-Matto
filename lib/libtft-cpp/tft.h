@@ -5,9 +5,14 @@
 #ifndef TFT_H
 #define TFT_H
 
-#define FONT_WIDTH 6
-#define FONT_HEIGHT 8
+// TFT is connected using port BD instead of port AC
+//#define TFT_USE_PORT_BD
+// Use shifting up instead of clean screen after screen full
 //#define TFT_SCROLL
+// Enable vertical scrolling functions
+//#define TFT_VERTICALSCROLLING
+// Enable (unnecessary) draw in range checking
+//#define TFT_CHECKING
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>

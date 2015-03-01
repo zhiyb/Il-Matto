@@ -1,5 +1,5 @@
 LIBNAME		= libtft-cpp
-LIBSRC		= ascii.cpp tft.cpp
+LIBSRC		= ascii.c tft.cpp
 
 LIB		= 
 
