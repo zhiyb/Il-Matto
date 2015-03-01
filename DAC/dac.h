@@ -1,6 +1,10 @@
 #ifndef DAC_H
 #define DAC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
 
 #define DAC_CHANNEL	0
@@ -13,5 +17,9 @@
 
 void init_dac(void);
 void set_dac(uint8_t data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
