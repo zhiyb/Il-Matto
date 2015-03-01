@@ -173,7 +173,7 @@ const rTouch::coord_t rTouch::waitForPress(void)
 void rTouch::calibrate(void)
 {
 	if (!eeprom_first()) {
-		eeprom_read_block(cal, NVcal, sizeof(cal));
+		eeprom_read_block(cal, NVcal, sizeof(NVcal));
 		calibrated = true;
 		return;
 	}
@@ -219,5 +219,5 @@ recalibrate:
 	cal[6] = caldata.a[6];	// scale
 	calibrated = true;
 
-	eeprom_update_block(cal, NVcal, sizeof(cal));
+	eeprom_update_block(cal, NVcal, sizeof(NVcal));
 }
