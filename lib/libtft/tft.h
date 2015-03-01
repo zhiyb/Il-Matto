@@ -1,8 +1,6 @@
 #ifndef TFT_H
 #define TFT_H
 
-#define FONT_WIDTH 6
-#define FONT_HEIGHT 8
 //#define TFT_SCROLL
 
 #include <avr/io.h>
