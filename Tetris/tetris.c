@@ -2,6 +2,7 @@
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <util/delay.h>
+#include <eemem.h>
 #include "tetris.h"
 #include "tft.h"
 #include "display.h"
@@ -9,7 +10,6 @@
 #include "rand.h"
 #include "timer.h"
 #include "rotary.h"
-#include "eemem.h"
 
 #define NO_ERROR 0
 #define OUT_OF_RANGE 1
@@ -26,13 +26,23 @@
 
 uint8_t err;
 uint16_t board[Tetris_W][Tetris_H], next[4][4];
-struct tetrix object;
+struct tetris object;
 
-const uint8_t type[7] PROGMEM = {
+static uint16_t EEMEM NVhighScore;
+static uint16_t EEMEM NVsaveValid;
+static uint16_t EEMEM NVboard[Tetris_W][Tetris_H];
+static struct tetris EEMEM NVobject;
+static uint16_t EEMEM NVnext[4][4];
+static uint16_t EEMEM NVtimerCnt;
+static uint16_t EEMEM NVtimerMax;
+static uint8_t EEMEM NVquick;
+static uint8_t EEMEM NVoverflow;
+
+const uint8_t PROGMEM type[7] = {
 //	I	J	L	O	S	T	Z
 	0xF0,	0x47,	0x17,	0x66,	0x36,	0x27,	0x63,
 };
-const uint16_t colour[7] PROGMEM = {
+const uint16_t PROGMEM colour[7] = {
 //	I	J	L	O	S	T	Z
 	0x07FF,	0x001F,	0xFBE0,	0xFFE0,	0x07E0,	0x781F,	0xF800,
 };
@@ -49,79 +59,47 @@ void load(void);
 
 uint16_t Tetris_getsavevalid(void)
 {
-	return eeprom_read_word(EE_TETRIS_SAVE);
+	return eeprom_read_word(&NVsaveValid);
 }
 
 uint16_t Tetris_getsavescore(void)
 {
-	uint8_t *p = (uint8_t *)EE_TETRIS_SAVE;
-	p += 2 + (Tetris_H * Tetris_W) * 2 + \
-	     (uint8_t *)&object.score - (uint8_t *)&object;
-	return eeprom_read_word((uint16_t *)p);
+	return eeprom_read_word(&NVobject.score);
 }
 
 void save(void)
 {
-	uint8_t x, y, *o = (uint8_t *)&object;
-	uint16_t *p = EE_TETRIS_SAVE;
-
 	// Save valid sign
-	eeprom_update_word(p++, 1);
-
+	eeprom_update_word(&NVsaveValid, 1);
 	// Save board
-	for (y = 0; y < Tetris_H; y++)
-		for (x = 0; x < Tetris_W; x++)
-			eeprom_update_word(p++, board[x][y]);
-
+	eeprom_update_block(board, NVboard, sizeof(NVboard));
 	// Save object
-	for (x = 0; x < sizeof(object); x++) {
-		eeprom_update_byte(((uint8_t *)p) + x % 2, *o++);
-		p += x % 2;
-	}
-	if (sizeof(object) % 2)
-		p++;
-
+	eeprom_update_block(&object, &NVobject, sizeof(NVobject));
 	// Save next unit
-	for (y = 0; y < 4; y++)
-		for (x = 0; x < 4; x++)
-			eeprom_update_word(p++, next[x][y]);
-
+	eeprom_update_block(&next, &NVnext, sizeof(NVnext));
 	// Timer
-	eeprom_update_word(p++, counter);
-	eeprom_update_word(p++, maximum);
-	eeprom_update_byte((uint8_t *)p, quick);
-	eeprom_update_byte(((uint8_t *)p) + 1, overflow);
+	eeprom_update_word(&NVtimerCnt, counter);
+	eeprom_update_word(&NVtimerMax, maximum);
+	eeprom_update_byte(&NVquick, quick);
+	eeprom_update_byte(&NVoverflow, overflow);
 }
 
 void load(void)
 {
-	uint8_t x, y, *o = (uint8_t *)&object;
-	uint16_t *p = EE_TETRIS_SAVE + 1, highbak = object.high;
+	uint16_t highbak = object.high;
 
 	// Load board
-	for (y = 0; y < Tetris_H; y++)
-		for (x = 0; x < Tetris_W; x++)
-			board[x][y] = eeprom_read_word(p++);
-
+	eeprom_read_block(board, NVboard, sizeof(NVboard));
 	// Load object
-	for (x = 0; x < sizeof(object); x++) {
-		*o++ = eeprom_read_byte(((uint8_t *)p) + x % 2);
-		p += x % 2;
-	}
+	eeprom_read_block(&object, &NVobject, sizeof(NVobject));
 	object.high = highbak;
-	if (sizeof(object) % 2)
-		p++;
-
 	// Load next unit
-	for (y = 0; y < 4; y++)
-		for (x = 0; x < 4; x++)
-			next[x][y] = eeprom_read_word(p++);
-
+	eeprom_read_block(next, NVnext, sizeof(NVnext));
 	// Timer
-	counter = eeprom_read_word(p++);
-	maximum = eeprom_read_word(p++);
-	quick = eeprom_read_byte((uint8_t *)p);
-	overflow = eeprom_read_byte(((uint8_t *)p) + 1);
+	counter = eeprom_read_word(&NVtimerCnt);
+	maximum = eeprom_read_word(&NVtimerMax);
+	quick = eeprom_read_byte(&NVquick);
+	overflow = eeprom_read_byte(&NVoverflow);
 }
 
 uint8_t saveload(uint8_t index)
@@ -133,7 +111,7 @@ uint8_t saveload(uint8_t index)
 	save();
 	return 1;
 load:	// Load
-	if (eeprom_read_word(EE_TETRIS_SAVE) == 0) {
+	if (Tetris_getsavevalid() == 0) {
 		Print_failed(1);
 		while (1)
 			switch (ROE_get()) {
@@ -154,9 +132,9 @@ load:	// Load
 
 void Tetris_mem_init(void)
 {
-	if (EEPROM_first()) {
-		eeprom_update_word(EE_TETRIS_HIGH, 0);
-		eeprom_update_word(EE_TETRIS_SAVE, 0);
+	if (eeprom_first()) {
+		eeprom_update_word(&NVhighScore, 0);
+		eeprom_update_word(&NVsaveValid, 0);
 	}
 }
 
@@ -207,7 +185,7 @@ void Tetris_pause(void)
 	Timer_disable();
 	Print_pause();
 	TFT_backgroundLight(1);
-	eeprom_update_word(EE_TETRIS_HIGH, object.high);
+	eeprom_update_word(&NVhighScore, object.high);
 	while (ROE_get() == ROE_SW1);	// Wait for button 1 release
 get:
 	switch (ROE_get()) {
@@ -229,7 +207,7 @@ void Tetris_gameover(void)
 {
 	Timer_disable();
 	Print_gameover();
-	eeprom_update_word(EE_TETRIS_HIGH, object.high);
+	eeprom_update_word(&NVhighScore, object.high);
 	while (ROE_get() != ROE_SW1);
 	while (ROE_get() == ROE_SW1);
 	Tetris_init();
@@ -492,7 +470,7 @@ void Tetris_init(void)
 			board[x][y] = Colour_Unit_Empty;
 	object.score = 0;
 	object.restart = 1;
-	object.high = eeprom_read_word(EE_TETRIS_HIGH);
+	object.high = eeprom_read_word(&NVhighScore);
 	object.seed = rand();
 	Tetris_generate();
 	Tetris_generate();

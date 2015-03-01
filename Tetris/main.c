@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <eemem.h>
 #include "rotary.h"
 #include "tft.h"
 #include "sound.h"
@@ -23,15 +24,8 @@ void init(void)
 	Print_frame();
 	Tetris_mem_init();
 	Tetris_init();
-/*	#define BAUD 115200
-	#include <util/setbaud.h>
-	UBRR0H = UBRRH_VALUE;
-	UBRR0L = UBRRL_VALUE;
-	UCSR0A = USE_2X << U2X0;
-	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
-	UCSR0C = _BV(UCSZ00) | _BV(UCSZ01);
-	putstr("Hello, world!");
-*/}
+	eeprom_first_done();
+}
 
 int main(void)
 {

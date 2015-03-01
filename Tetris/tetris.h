@@ -7,7 +7,7 @@
 
 #include <avr/io.h>
 
-struct tetrix {
+struct tetris {
 	uint16_t space[4][4];
 	int8_t x, y;
 	uint8_t restart;
@@ -16,7 +16,7 @@ struct tetrix {
 };
 
 extern uint16_t board[Tetris_W][Tetris_H], next[4][4];
-extern struct tetrix object;
+extern struct tetris object;
 
 void Tetris_init(void);
 uint8_t Tetris_generate(void);
