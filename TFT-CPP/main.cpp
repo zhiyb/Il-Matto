@@ -64,6 +64,7 @@ start:
 	tft.line(260, 200, 260, 0, 0x001F);
 	puts("Draw lines test");
 
+#ifdef TFT_VERTICALSCROLLING
 	tft.setVerticalScrollingArea(64, 32);
 	uint16_t max = 320 - 32;
 	uint16_t v = 64;
@@ -72,6 +73,9 @@ loop:
 	if (max == ++v)
 		v = 64;
 	_delay_ms(10);
+#else
+loop:
+#endif
 	goto loop;
 	goto start;
 

@@ -1,23 +1,25 @@
-#ifndef RESTOUCH_H
-#define RESTOUCH_H
+#ifndef RTOUCH_H
+#define RTOUCH_H
 
 #include <avr/eeprom.h>
 #include <tft.h>
 
-#define RESTOUCH_DDRP	DDRA
-#define RESTOUCH_PINP	PINA
-#define RESTOUCH_PORTP	PORTA
-#define RESTOUCH_DDRM	DDRB
-#define RESTOUCH_PINM	PINB
-#define RESTOUCH_PORTM	PORTB
-#define RESTOUCH_XM	(1 << 5)
-#define RESTOUCH_YM	(1 << 4)
-#define RESTOUCH_XP	(1 << 6)
-#define RESTOUCH_YP	(1 << 7)
-#define RESTOUCH_XC	7
-#define RESTOUCH_YC	6
+//#define RTOUCH_SAFE
 
-#define RESTOUCH_DELTA	5
+#define RTOUCH_DDRP	DDRA
+#define RTOUCH_PINP	PINA
+#define RTOUCH_PORTP	PORTA
+#define RTOUCH_DDRM	DDRB
+#define RTOUCH_PINM	PINB
+#define RTOUCH_PORTM	PORTB
+#define RTOUCH_XM	(1 << 5)
+#define RTOUCH_YM	(1 << 4)
+#define RTOUCH_XP	(1 << 6)
+#define RTOUCH_YP	(1 << 7)
+#define RTOUCH_XC	7
+#define RTOUCH_YC	6
+
+#define RTOUCH_DELTA	5
 
 class rTouch
 {

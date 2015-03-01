@@ -35,44 +35,44 @@ void rTouch::mode(Functions func)
 	switch (func) {
 	case Detection:
 		ADCSRA &= ~_BV(ADEN);
-		RESTOUCH_DDRM &= ~RESTOUCH_XM;
-		RESTOUCH_DDRM |= RESTOUCH_YM;
-		RESTOUCH_PORTM &= ~(RESTOUCH_XM | RESTOUCH_YM);
-		RESTOUCH_DDRP &= ~(RESTOUCH_XP | RESTOUCH_YP);
-		RESTOUCH_PORTP |= RESTOUCH_XP;
-		RESTOUCH_PORTP &= ~RESTOUCH_YP;
-		DIDR0 &= ~RESTOUCH_XP;
-		DIDR0 |= RESTOUCH_YP;
+		RTOUCH_DDRM &= ~RTOUCH_XM;
+		RTOUCH_DDRM |= RTOUCH_YM;
+		RTOUCH_PORTM &= ~(RTOUCH_XM | RTOUCH_YM);
+		RTOUCH_DDRP &= ~(RTOUCH_XP | RTOUCH_YP);
+		RTOUCH_PORTP |= RTOUCH_XP;
+		RTOUCH_PORTP &= ~RTOUCH_YP;
+		DIDR0 &= ~RTOUCH_XP;
+		DIDR0 |= RTOUCH_YP;
 		_delay_us(10);
 		break;
 	case ReadY:
-#ifndef FAST
-		RESTOUCH_DDRM &= ~RESTOUCH_XM;
-		RESTOUCH_DDRM |= RESTOUCH_YM;
-		RESTOUCH_PORTM &= ~(RESTOUCH_XM | RESTOUCH_YM);
-		RESTOUCH_DDRP &= ~RESTOUCH_XP;
+#ifdef RTOUCH_SAFE
+		RTOUCH_DDRM &= ~RTOUCH_XM;
+		RTOUCH_DDRM |= RTOUCH_YM;
+		RTOUCH_PORTM &= ~(RTOUCH_XM | RTOUCH_YM);
+		RTOUCH_DDRP &= ~RTOUCH_XP;
 #endif
-		RESTOUCH_DDRP |= RESTOUCH_YP;
-		RESTOUCH_PORTP &= ~RESTOUCH_XP;
-		RESTOUCH_PORTP |= RESTOUCH_YP;
-		DIDR0 &= ~RESTOUCH_YP;
-		DIDR0 |= RESTOUCH_XP;
-		adc_init(RESTOUCH_YC);
+		RTOUCH_DDRP |= RTOUCH_YP;
+		RTOUCH_PORTP &= ~RTOUCH_XP;
+		RTOUCH_PORTP |= RTOUCH_YP;
+		DIDR0 &= ~RTOUCH_YP;
+		DIDR0 |= RTOUCH_XP;
+		adc_init(RTOUCH_YC);
 		adc_start();
 		break;
 	case ReadX:
-		RESTOUCH_DDRM |= RESTOUCH_XM;
-		RESTOUCH_DDRM &= ~RESTOUCH_YM;
-#ifndef FAST
-		RESTOUCH_PORTM &= ~(RESTOUCH_XM | RESTOUCH_YM);
+		RTOUCH_DDRM |= RTOUCH_XM;
+		RTOUCH_DDRM &= ~RTOUCH_YM;
+#ifdef RTOUCH_SAFE
+		RTOUCH_PORTM &= ~(RTOUCH_XM | RTOUCH_YM);
 #endif
-		RESTOUCH_DDRP |= RESTOUCH_XP;
-		RESTOUCH_DDRP &= ~RESTOUCH_YP;
-		RESTOUCH_PORTP |= RESTOUCH_XP;
-		RESTOUCH_PORTP &= ~RESTOUCH_YP;
-		DIDR0 &= ~RESTOUCH_XP;
-		DIDR0 |= RESTOUCH_YP;
-		adc_init(RESTOUCH_XC);
+		RTOUCH_DDRP |= RTOUCH_XP;
+		RTOUCH_DDRP &= ~RTOUCH_YP;
+		RTOUCH_PORTP |= RTOUCH_XP;
+		RTOUCH_PORTP &= ~RTOUCH_YP;
+		DIDR0 &= ~RTOUCH_XP;
+		DIDR0 |= RTOUCH_YP;
+		adc_init(RTOUCH_XC);
 		adc_start();
 		break;
 	};
@@ -82,7 +82,7 @@ uint16_t rTouch::function(Functions func)
 {
 	switch (func) {
 	case Detection:
-		return !(RESTOUCH_PINP & RESTOUCH_XP);
+		return !(RTOUCH_PINP & RTOUCH_XP);
 	case ReadX:
 	case ReadY:
 		return adc_read();
@@ -96,13 +96,13 @@ const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
 		cal[1] * (int32_t)pos.y + cal[2]) / cal[6];
 	pos.y = (cal[3] * (int32_t)pos.y + \
 		cal[4] * (int32_t)pos.y + cal[5]) / cal[6];
-#ifndef RESTOUCH_SWAPXY
+#ifndef RTOUCH_SWAPXY
 	if (tft->portrait()) {
 #else
 	if (!tft->portrait()) {
 #endif
 		int16_t tmp = pos.x;
-#ifndef RESTOUCH_SWAPXY
+#ifndef RTOUCH_SWAPXY
 		pos.x = tft->width() - pos.y;
 		pos.y = tmp;
 #else
@@ -128,7 +128,7 @@ readxy:
 	mode(Detection);
 	coord_t prev = prevRead;
 	prevRead = res;
-	if (abs(res.x - prev.x) + abs(res.y - prev.y) > RESTOUCH_DELTA)
+	if (abs(res.x - prev.x) + abs(res.y - prev.y) > RTOUCH_DELTA)
 		goto readxy;
 	if (calibrated)
 		return coordTranslate(res);
@@ -185,7 +185,7 @@ void rTouch::calibrate(void)
 	tft->setXY((tft->width() - FONT_WIDTH * tft->zoom() * 11) / 2, \
 		   (tft->height() - FONT_HEIGHT * tft->zoom() ) / 3);
 	(*tft) << "Calibration";
-#ifndef RESTOUCH_SWAPXY
+#ifndef RTOUCH_SWAPXY
 	tft->setOrient(tft_t::Landscape);
 #else
 	tft->setOrient(tft_t::Portrait);

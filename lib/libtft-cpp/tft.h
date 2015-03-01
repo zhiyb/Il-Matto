@@ -46,6 +46,7 @@ public:
 	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
 	inline bool portrait(void) const {return orient() == Portrait || orient() == FlipPortrait;}
 
+#ifdef TFT_VERTICALSCROLLING
 	// Vertical scrolling related functions
 	// Vertical scrolling pointer
 	void setVerticalScrolling(const uint16_t vsp);
@@ -71,7 +72,7 @@ public:
 	inline void setTopMask(const uint16_t lm) {d.topMask = lm;}
 	inline uint16_t bottomMask(void) const {return d.bottomMask;}
 	inline void setBottomMask(const uint16_t lm) {d.bottomMask = lm;}
-
+#endif
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
@@ -102,10 +103,12 @@ private:
 	static inline void swap(Type &a, Type &b);
 
 	struct {
-		bool tf;
 		uint8_t zoom, orient, tabSize;
 		uint16_t x, y, w, h, fgc, bgc;
+#ifdef TFT_VERTICALSCROLLING
 		uint16_t vsp, tfa, bfa, topMask, bottomMask;
+		bool tf;
+#endif
 	} d;
 };
 
@@ -133,10 +136,12 @@ inline void tft_t::swap(Type &a, Type &b)
 	b = tmp;
 }
 
+#ifdef TFT_VERTICALSCROLLING
 inline uint16_t tft_t::vsMaximum(void) const
 {
 	return SIZE_H;
 }
+#endif
 
 inline void tft_t::shiftUp(const uint16_t l)
 {
@@ -203,20 +208,24 @@ inline class tft_t& tft_t::operator<<(const char c)
 
 inline class tft_t& tft_t::operator<<(const char *str)
 {
+#ifdef TFT_VERTICALSCROLLING
 	uint16_t xt = 0;
 	bool clip = transform() && !portrait();
 	if (clip) {
 		xt = vsTransformBack(x());
 		clip = xt < bottomEdge();
 	}
+#endif
 
 	while (*str) {
 		*this << *str++;
+#ifdef TFT_VERTICALSCROLLING
 		if (clip) {
 			xt += FONT_WIDTH * zoom();
 			if (xt >= bottomEdge())
 				break;
 		}
+#endif
 	}
 	return *this;
 }
@@ -272,14 +281,18 @@ inline void tft_t::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 
 inline void tft_t::next(void)
 {
+#ifdef TFT_VERTICALSCROLLING
 	if (transform() && !portrait()) {
 		uint16_t xt = vsTransformBack(x());
 		setX(vsTransform(xt + FONT_WIDTH * zoom()));
 	} else {
+#endif
 		setX(x() + FONT_WIDTH * zoom());
 		if (x() + FONT_WIDTH * zoom() > width())
 			newline();
+#ifdef TFT_VERTICALSCROLLING
 	}
+#endif
 }
 
 inline void tft_t::tab(void)

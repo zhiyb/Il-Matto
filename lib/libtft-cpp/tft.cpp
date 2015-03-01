@@ -25,12 +25,14 @@ tft_t::tft_t(void)
 {
 	setX(0);
 	setY(0);
+#ifdef TFT_VERTICALSCROLLING
 	d.tfa = 0;
 	d.bfa = 0;
 	d.vsp = SIZE_H;
 	setTopMask(0);
 	setBottomMask(0);
 	setTransform(false);
+#endif
 	setZoom(1);
 	d.orient = Portrait;
 	setTabSize(4);
@@ -97,6 +99,7 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 	if (!h || !w)
 		return;
 
+#ifdef TFT_VERTICALSCROLLING
 	uint16_t yt, bMask;
 	if (!transform())
 		goto disp;
@@ -145,8 +148,11 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 	}
 
 disp:
+#endif
 	area(x, y, w, h);
+#ifdef TFT_VERTICALSCROLLING
 draw:
+#endif
 	start();
 	while (h--)
 		for (uint16_t xx = 0; xx < w; xx++)
@@ -155,13 +161,14 @@ draw:
 
 void tft_t::putch(char ch)
 {
-#ifndef NO_CHECK
+#ifdef TFT_CHECK
 	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
 		return;
 #endif
 	if ((int16_t)(x() + FONT_WIDTH * zoom()) < 0)
 		return;
 	uint8_t h = FONT_HEIGHT * zoom(), w = FONT_WIDTH * zoom();
+#ifdef TFT_VERTICALSCROLLING
 	// Display coordinate, start coordinate
 	uint16_t xx = x(), x0 = x();
 	uint16_t yy = y(), y0 = y();
@@ -218,16 +225,28 @@ void tft_t::putch(char ch)
 	uint8_t xEnd = xTransform ? bottomEdge() - xx : xStop;
 draw:
 	area(xx, yy, xEnd - xStart, h);
+#else
+	area(x(), y(), w, h);
+#endif
 	start();
+#ifdef TFT_VERTICALSCROLLING
 	for (uint8_t i = yStart; i < yStop; i++) {
 		if (yTransform && y0 + i == bottomEdge()) {
 			area(x(), topEdge(), w, h);
 			start();
 			yTransform = false;
 		}
+#else
+	for (uint8_t i = 0; i < h; i++) {
+#endif
 		unsigned char c;
+#ifdef TFT_VERTICALSCROLLING
 		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()])) << (xStart / zoom());
 		for (uint8_t j = xStart; j < xEnd; j++) {
+#else
+		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
+		for (uint8_t j = 0; j < w; j++) {
+#endif
 			if (c & 0x80)
 				write16(foreground());
 			else
@@ -236,6 +255,7 @@ draw:
 				c <<= 1;
 		}
 	}
+#ifdef TFT_VERTICALSCROLLING
 	if (xTransform) {
 		xx = topEdge();
 		xStart = xEnd;
@@ -243,6 +263,7 @@ draw:
 		xTransform = false;
 		goto draw;
 	}
+#endif
 }
 
 void tft_t::setOrient(uint8_t o)
@@ -264,9 +285,10 @@ void tft_t::setOrient(uint8_t o)
 	_setOrient(o);
 }
 
+#ifdef TFT_VERTICALSCROLLING
 uint16_t tft_t::vsTransform(uint16_t y) const
 {
-#ifndef NO_CHECK
+#ifdef TFT_CHECK
 	if ((int16_t)y < 0)
 		return y;
 #endif
@@ -281,7 +303,7 @@ uint16_t tft_t::vsTransform(uint16_t y) const
 
 uint16_t tft_t::vsTransformBack(uint16_t y) const
 {
-#ifndef NO_CHECK
+#ifdef TFT_CHECK
 	if ((int16_t)y < 0)
 		return y;
 #endif
@@ -293,6 +315,7 @@ uint16_t tft_t::vsTransformBack(uint16_t y) const
 	y += topEdge();		// Relative to 0
 	return y;
 }
+#endif
 
 void tft_t::bmp(bool e)
 {
@@ -302,6 +325,7 @@ void tft_t::bmp(bool e)
 		_setOrient(orient());
 }
 
+#ifdef TFT_VERTICALSCROLLING
 void tft_t::setVerticalScrolling(const uint16_t vsp)
 {
 	cmd(0x37);	// Vertical Scrolling Start Address
@@ -325,6 +349,7 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 	d.tfa = tfa;
 	d.bfa = bfa;
 }
+#endif
 
 static tft_t *tft;
 
