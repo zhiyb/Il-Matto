@@ -173,7 +173,7 @@ void Print_frame(void)
 	// Text: startup counter
 	TFT_puts(XT, YT_START, "* Startup *", \
 			Colour_Text_Start, Colour_Text_Start_BG);
-	TFT_putint16(XT, YT_STARTNUM, eeprom_read_dword(EE_RAND_SEED), \
+	TFT_putint16(XT, YT_STARTNUM, eeprom_read_dword(&NVrandSeed), \
 			Colour_Text_StartNum, Colour_Text_StartNum_BG);
 }
 

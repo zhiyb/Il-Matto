@@ -1,8 +1,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= Tetris
-SRC	= ascii.c display.c eemem.c ili9341.c main.c rand.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
-LIB	= 
+PRG	= Tetris_UART
+SRC	= ascii.c display.c ili9341.c main.c rand.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
+LIB	= common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 

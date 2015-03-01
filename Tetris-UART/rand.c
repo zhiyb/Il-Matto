@@ -1,14 +1,16 @@
 #include <avr/eeprom.h>
 #include <stdlib.h>
-#include "eemem.h"
+#include <eemem.h>
+
+uint32_t EEMEM NVrandSeed;
 
 void Rand_init(void)
 {
-	if (EEPROM_first()) {
+	if (eeprom_first()) {
 		srand(0);
-		eeprom_update_dword(EE_RAND_SEED, 1);
+		eeprom_update_dword(&NVrandSeed, 1);
 		return;
 	}
-	srand(eeprom_read_dword(EE_RAND_SEED));
-	eeprom_update_dword(EE_RAND_SEED, eeprom_read_dword(EE_RAND_SEED) + 1);
+	srand(eeprom_read_dword(&NVrandSeed));
+	eeprom_update_dword(&NVrandSeed, eeprom_read_dword(&NVrandSeed) + 1);
 }
