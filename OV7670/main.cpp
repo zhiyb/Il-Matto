@@ -4,18 +4,18 @@
 #include <tft.h>
 #include <ov7670.h>
 
-tfthw tft;
+tft_t tft;
 
 void init(void)
 {
 	OV7670::init();
 	tft.init();
-	tft /= tft.Portrait;
+	tft.setOrient(tft.Portrait);
 	tft.setForeground(0x667F);
 	tft.setBackground(0x0000);
 	tft.clean();
 	stdout = tftout(&tft);
-	tft++;
+	tft.setBGLight(true);
 }
 
 #if 0
@@ -66,13 +66,13 @@ int main(void)
 
 start:
 	tft.clean();
-	tft *= 1;
+	tft.setZoom(1);
 	puts("*** OV7670 ***");
 	//settings();
 	//OV7670::startCapture();
 	for (uint8_t i = 0; i < 0x80; i++)
 		printf("%02X/%02X\t", i, OV7670::read(i));
-	tft /= tft.FlipLandscape;
+	tft.setOrient(tft.FlipLandscape);
 
 	while (1) {
 		tft.all();
@@ -82,13 +82,13 @@ start:
 			for (uint16_t x = 0; x < 320; x++) {
 				uint16_t c = (uint16_t)OV7670::readFIFO() << 8;
 				c |= OV7670::readFIFO();
-				tft.write(c);
+				tft.write16(c);
 			}
 		OV7670::enableFIFO(false);
 		//_delay_ms(1000);
 	}
 
-	tft /= tft.Portrait;
+	tft.setOrient(tft.Portrait);
 	tft.setXY(0, 0);
 	while (1);
 	goto start;
