@@ -4,14 +4,15 @@
 #include <tft.h>
 #include <portraitlist.h>
 #include <landscapelist.h>
-#include <restouch.h>
+#include <rtouch.h>
 #include <eemem.h>
+#include <colours.h>
 #include "menu.h"
 
 //#define LANDSCAPE
 
 tft_t tft;
-ResTouch touch(&tft);
+rTouch touch(&tft);
 #ifdef LANDSCAPE
 LandscapeList l(&tft);
 #else
@@ -47,46 +48,42 @@ int main(void)
 
 	l.refresh();
 	l.display(&menuRoot);
+	l.setScroll(260);
+	//l.refresh();
 
-	ResTouch::coord_t prev = {-1, -1};
+	rTouch::coord_t prev = {-1, -1};
 pool:
 	if (touch.detect()) {
-		ResTouch::coord_t res = touch.read();
+		rTouch::coord_t res = touch.read();
 		if (!touch.detect()) {
 			prev.x = -1;
+			prev.y = -1;
 			goto pool;
 		}
+#ifdef LANDSCAPE
+		if (prev.y > 0 && (int16_t)l.scroll() - res.x + prev.x > 0)
+			l.setScroll((int16_t)l.scroll() - res.x + prev.x);
+#else
 		if (prev.x > 0 && (int16_t)l.scroll() - res.y + prev.y > 0)
 			l.setScroll((int16_t)l.scroll() - res.y + prev.y);
+#endif
 		prev = res;
-	} else
-		prev.x = -1;
-	goto pool;
-
-#if 0
+	} else {
+		using namespace colours::b16;
+#ifdef DEBUG
 #ifdef LANDSCAPE
-	tft.rectangle(tft.topEdge() - 1, 0, 1, tft.height(), 0xF800);
-	tft.rectangle(tft.bottomEdge(), 0, 1, tft.height(), 0xF800);
+		tft.rectangle(tft.topEdge() - 1, 0, 1, tft.height(), White);
+		tft.rectangle(tft.bottomEdge(), 0, 1, tft.height(), White);
 #else
-	tft.rectangle(0, tft.topEdge() - 1, tft.width(), 1, 0xF800);
-	tft.rectangle(0, tft.bottomEdge(), tft.width(), 1, 0xF800);
+		tft.rectangle(0, tft.topEdge() - 1, tft.width(), 1, White);
+		tft.rectangle(0, tft.bottomEdge(), tft.width(), 1, White);
+		tft.rectangle(0, tft.bottomEdge() - 1, tft.width(), 1, Black);
 #endif
 #endif
-
-	uint16_t max = l.maxScroll(), v = 0;
-inc:
-	l.setScroll(v);
-	_delay_ms(10);
-	if (++v < max)
-		goto inc;
-	_delay_ms(1000);
-dec:
-	l.setScroll(v);
-	_delay_ms(10);
-	if (--v > 0)
-		goto dec;
-	_delay_ms(1000);
-	goto inc;
+		prev.x = -1;
+		prev.y = -1;
+	}
+	goto pool;
 
 	return 1;
 }

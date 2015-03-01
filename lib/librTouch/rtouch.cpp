@@ -1,8 +1,8 @@
 #include <avr/io.h>
 #include <adc.h>
-#include "restouch.h"
+#include <eemem.h>
+#include "rtouch.h"
 #include "ts_calibrate.h"
-#include "eemem.h"
 
 // Interface functions
 // Ports	PORTA		PORTB
@@ -14,9 +14,9 @@
 // Calibration cross size
 #define CALIB_SIZE	10
 
-int32_t EEMEM ResTouch::NVcal[sizeof(ResTouch::cal) / sizeof(ResTouch::cal[0])];
+int32_t EEMEM rTouch::NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
 
-ResTouch::ResTouch(tft_t *tft)
+rTouch::rTouch(tft_t *tft)
 {
 	this->tft = tft;
 	prevRead.x = 0;
@@ -24,13 +24,13 @@ ResTouch::ResTouch(tft_t *tft)
 	calibrated = false;
 }
 
-void ResTouch::init(void)
+void rTouch::init(void)
 {
 	mode(Detection);
 }
 
 // For FAST operation, Detection -> ReadY -> ReadX -> Detection ONLY!
-void ResTouch::mode(Functions func)
+void rTouch::mode(Functions func)
 {
 	switch (func) {
 	case Detection:
@@ -78,7 +78,7 @@ void ResTouch::mode(Functions func)
 	};
 }
 
-uint16_t ResTouch::function(Functions func)
+uint16_t rTouch::function(Functions func)
 {
 	switch (func) {
 	case Detection:
@@ -90,7 +90,7 @@ uint16_t ResTouch::function(Functions func)
 	return 0;
 }
 
-const ResTouch::coord_t ResTouch::coordTranslate(coord_t pos) const
+const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
 {
 	pos.x = (cal[0] * (int32_t)pos.x + \
 		cal[1] * (int32_t)pos.y + cal[2]) / cal[6];
@@ -117,7 +117,7 @@ const ResTouch::coord_t ResTouch::coordTranslate(coord_t pos) const
 	return pos;
 }
 
-const ResTouch::coord_t ResTouch::read(void)
+const rTouch::coord_t rTouch::read(void)
 {
 	coord_t res;
 readxy:
@@ -135,13 +135,13 @@ readxy:
 	return res;
 }
 
-void ResTouch::drawCross(const coord_t pos, uint16_t c)
+void rTouch::drawCross(const coord_t pos, uint16_t c)
 {
 	tft->rectangle(pos.x - CALIB_SIZE, pos.y, CALIB_SIZE * 2, 1, c);
 	tft->rectangle(pos.x, pos.y - CALIB_SIZE, 1, CALIB_SIZE * 2, c);
 }
 
-const ResTouch::coord_t ResTouch::calibrationPoint(const uint8_t index)
+const rTouch::coord_t rTouch::calibrationPoint(const uint8_t index)
 {
 	coord_t pos;
 	if (index == 0 || index == 2)
@@ -159,7 +159,7 @@ const ResTouch::coord_t ResTouch::calibrationPoint(const uint8_t index)
 	return pos;
 }
 
-const ResTouch::coord_t ResTouch::waitForPress(void)
+const rTouch::coord_t rTouch::waitForPress(void)
 {
 	coord_t pos, posnew;
 	while (!detect());
@@ -170,7 +170,7 @@ const ResTouch::coord_t ResTouch::waitForPress(void)
 	return pos;
 }
 
-void ResTouch::calibrate(void)
+void rTouch::calibrate(void)
 {
 	if (!eeprom_first()) {
 		eeprom_read_block(cal, NVcal, sizeof(cal));

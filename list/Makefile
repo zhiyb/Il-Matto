@@ -2,7 +2,7 @@
 
 PRG	= list
 SRC	= main.cpp menu.cpp
-LIB	= tft-cpp list ResTouch common
+LIB	= tft-cpp list rTouch common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 
@@ -10,7 +10,7 @@ PRGER	= usbasp
 MCU_TARGET	= atmega644p
 OPTIMIZE	= -Os
 
-DEFS	+= -DF_CPU=12000000 -DNO_CHECK
+DEFS	+= -DF_CPU=12000000 -DNO_CHECK -DDEBUG
 LIBS	+=
 INCS	+=
 

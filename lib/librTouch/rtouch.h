@@ -17,10 +17,9 @@
 #define RESTOUCH_XC	7
 #define RESTOUCH_YC	6
 
-#define RESTOUCH_SWAPXY
 #define RESTOUCH_DELTA	5
 
-class ResTouch
+class rTouch
 {
 public:
 	enum Functions {Detection, ReadX, ReadY};
@@ -29,7 +28,7 @@ public:
 		int16_t x, y;
 	};
 
-	ResTouch(tft_t *tft);
+	rTouch(tft_t *tft);
 	static void init(void);
 	static bool detect(void) {return function(Detection);}
 	const coord_t read(void);
@@ -45,7 +44,7 @@ private:
 
 	bool calibrated;
 	int32_t cal[7];
-	static int32_t EEMEM NVcal[sizeof(ResTouch::cal) / sizeof(ResTouch::cal[0])];
+	static int32_t EEMEM NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
 	coord_t prevRead;
 
 	tft_t *tft;

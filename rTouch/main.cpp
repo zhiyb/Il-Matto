@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
-#include "restouch.h"
-#include "eemem.h"
+#include <rtouch.h>
+#include <eemem.h>
 
 tft_t tft;
-ResTouch touch(&tft);
+rTouch touch(&tft);
 
 void init(void)
 {
@@ -36,7 +36,7 @@ start:
 	uint16_t clr = 0xFFFF;
 loop:
 	if (touch.detect()) {
-		ResTouch::coord_t res = touch.read();
+		rTouch::coord_t res = touch.read();
 		if (!touch.detect())
 			goto loop;
 		if (res.x <= -20) {

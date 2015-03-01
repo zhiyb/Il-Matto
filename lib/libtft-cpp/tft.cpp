@@ -168,7 +168,6 @@ void tft_t::putch(char ch)
 	uint8_t xStart = 0, xStop = w;
 	uint8_t yStart = 0, yStop = h;
 
-#if 1
 	if (transform()) {
 		if (!portrait()) {
 			yy = xx;
@@ -213,33 +212,6 @@ void tft_t::putch(char ch)
 			yStop = h;
 		}
 	}
-#else
-	if (transform()) {
-		uint16_t xt = vsTransformBack(xx);
-		if ((int16_t)xt < (int16_t)topEdge() && \
-			(int16_t)(xt + w) >= (int16_t)topEdge()) {	// Top edge clipping
-			xStart = topEdge() - xt;
-			xx = upperEdge();
-			x0 = xx - xStart;
-			xt = vsTransformBack(xx);
-		} else if (xt < bottomEdge() && xt + w >= bottomEdge())	// Bottom edge clipping
-			xStop = bottomEdge() - xt;
-
-		if (xt < topMask()) {
-			if (xt + xStop - xStart < topMask())
-				return;
-			xx = vsTransform(topMask());
-			xStart += topMask() - xt;
-			x0 = xx - xStart;
-		}
-
-		uint16_t bMask = vsMaximum() - bottomMask();
-		if (xt >= bMask)
-			return;
-		if (xt + xStop - xStart > bMask)
-			xStop -= xt + xStop - xStart - bMask;
-	}
-#endif
 
 	bool xTransform = transform() && !portrait() && x0 < bottomEdge() && x0 + xStop - xStart > bottomEdge();
 	bool yTransform = transform() && portrait() && y0 < bottomEdge() && y0 + yStop - yStart > bottomEdge();

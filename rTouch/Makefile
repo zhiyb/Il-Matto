@@ -1,8 +1,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= ResTouch
+PRG	= rTouch
 SRC	= main.cpp
-LIB	= tft-cpp ResTouch common
+LIB	= tft-cpp rTouch common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 
@@ -12,6 +12,7 @@ OPTIMIZE	= -Os
 
 # FAST define: no checks etc
 DEFS	+= -DF_CPU=12000000 -DFAST
+DEFS	+= -DRESTOUCH_SWAPXY
 LIBS	+= -lm
 INCS	+=
 

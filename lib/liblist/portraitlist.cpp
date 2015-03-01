@@ -129,7 +129,7 @@ void PortraitList::scrollDown(uint16_t s)
 	if ((s = scroll() - scrbak) == 0)
 		return;
 	tft->setTopMask(s > tft->vsHeight() ? tft->topEdge() : tft->bottomEdge() - s);
-	tft->setBottomMask(tft->height() - tft->bottomEdge());
+	tft->setBottomMask(tft->vsMaximum() - tft->bottomEdge());
 	tft->setVerticalScrolling(TOP_AREA + scroll() % SCROLL_AREA);
 	const listItem **items = curItem->items;
 	for (uint16_t i = 0; i < index && *items != 0; i++)
@@ -145,7 +145,7 @@ void PortraitList::scrollUp(uint16_t s)
 	if ((s = scrbak - scroll()) == 0)
 		return;
 	tft->setTopMask(tft->topEdge());
-	tft->setBottomMask(tft->height() - (s > tft->vsHeight() ? tft->bottomEdge() : tft->topEdge() + s));
+	tft->setBottomMask(tft->vsMaximum() - (s > tft->vsHeight() ? tft->bottomEdge() : tft->topEdge() + s));
 	tft->setVerticalScrolling(TOP_AREA + scroll() % SCROLL_AREA);
 	uint16_t first = scroll() / ITEM_HEIGHT;
 	const listItem **items = curItem->items;

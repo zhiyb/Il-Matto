@@ -1,5 +1,5 @@
-LIBNAME		= libResTouch
-LIBSRC		= restouch.cpp ts_calibrate.c
+LIBNAME		= librTouch
+LIBSRC		= rtouch.cpp ts_calibrate.c
 
 LIB		= tft-cpp common
 
