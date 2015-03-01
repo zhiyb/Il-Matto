@@ -1,5 +1,5 @@
 #include <avr/interrupt.h>
-#include "libtft/tft.h"
+#include <tft.h>
 #include "rotary.h"
 #include "timer.h"
 #include "bar.h"

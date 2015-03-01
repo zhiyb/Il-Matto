@@ -1,5 +1,5 @@
 #include <avr/eeprom.h>
-#include "libtft/tft.h"
+#include <tft.h>
 #include "bar.h"
 #include "box.h"
 #include "timer.h"

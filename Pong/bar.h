@@ -1,7 +1,7 @@
 #ifndef BAR_H
 #define BAR_H
 
-#include "libtft/tft.h"
+#include <tft.h>
 #include "game.h"
 
 #define BAR0_INITH	50
