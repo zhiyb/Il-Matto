@@ -1,8 +1,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= Pong
-SRC	= eemem.c game.c main.c rotary.c sound.c
-LIB	= tft
+SRC	= game.c main.c rotary.c sound.c
+LIB	= tft common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 

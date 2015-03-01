@@ -1,5 +1,6 @@
 #include <avr/eeprom.h>
 #include <tft.h>
+#include <eemem.h>
 #include "bar.h"
 #include "box.h"
 #include "timer.h"
@@ -7,11 +8,12 @@
 #include "game.h"
 #include "connect.h"
 #include "sound.h"
-#include "eemem.h"
 
 #define ENABLE_CHEAT
 
 struct game_struct game;
+
+static uint16_t EEMEM NVScore[2], NVOverCnt[2];
 
 uint8_t game_master(void);
 void game_slave(void);
@@ -315,31 +317,32 @@ void game_connFailed(void)
 static inline void game_record(uint8_t i)
 {
 	static uint8_t first = 1;
-	if ((first && EEPROM_first()) || i == 2) {
+	if ((first && eeprom_first()) || i == 2) {
 		first = 0;
-		eeprom_update_word(EE_PONG_SCORE0, game.score[0]);
-		eeprom_update_word(EE_PONG_SCORE1, game.score[1]);
+		eeprom_update_word(&NVScore[0], game.score[0]);
+		eeprom_update_word(&NVScore[1], game.score[1]);
 		if (i == 0) {
-			eeprom_update_word(EE_PONG_OVERREC0, 1);
-			eeprom_update_word(EE_PONG_OVERREC1, 0);
+			eeprom_update_word(&NVOverCnt[0], 1);
+			eeprom_update_word(&NVOverCnt[1], 0);
 		} else if (i == 1) {
-			eeprom_update_word(EE_PONG_OVERREC0, 0);
-			eeprom_update_word(EE_PONG_OVERREC1, 1);
+			eeprom_update_word(&NVOverCnt[0], 0);
+			eeprom_update_word(&NVOverCnt[1], 1);
 		} else if (i == 2) {
-			eeprom_update_word(EE_PONG_OVERREC0, 0);
-			eeprom_update_word(EE_PONG_OVERREC1, 0);
+			eeprom_update_word(&NVOverCnt[0], 0);
+			eeprom_update_word(&NVOverCnt[1], 0);
 		}
+		eeprom_first_done();
 	} else {
-		if (eeprom_read_word(EE_PONG_SCORE0) < game.score[0])
-			eeprom_update_word(EE_PONG_SCORE0, game.score[0]);
-		if (eeprom_read_word(EE_PONG_SCORE1) < game.score[1])
-			eeprom_update_word(EE_PONG_SCORE1, game.score[1]);
+		if (eeprom_read_word(&NVScore[0]) < game.score[0])
+			eeprom_update_word(&NVScore[0], game.score[0]);
+		if (eeprom_read_word(&NVScore[1]) < game.score[1])
+			eeprom_update_word(&NVScore[1], game.score[1]);
 		if (i == 0)
-			eeprom_update_word(EE_PONG_OVERREC0, \
-				eeprom_read_word(EE_PONG_OVERREC0) + 1);
+			eeprom_update_word(&NVOverCnt[0], \
+				eeprom_read_word(&NVOverCnt[0]) + 1);
 		else
-			eeprom_update_word(EE_PONG_OVERREC1, \
-				eeprom_read_word(EE_PONG_OVERREC1) + 1);
+			eeprom_update_word(&NVOverCnt[1], \
+				eeprom_read_word(&NVOverCnt[1]) + 1);
 	};
 }
 
@@ -397,14 +400,14 @@ void game_over(uint8_t i)
 	tft_print_string(" LOST");
 	tft_setXY(GAME_OVER_HIGH_X, GAME_OVER_HIGH_Y);
 	tft_setColour(GAME_OVER_HIGH_FGC, GAME_OVER_HIGH_BGC);
-	tft_print_uint16(eeprom_read_word(EE_PONG_SCORE0));
+	tft_print_uint16(eeprom_read_word(&NVScore[0]));
 	tft_print_string("/");
-	tft_print_uint16(eeprom_read_word(EE_PONG_SCORE1));
+	tft_print_uint16(eeprom_read_word(&NVScore[1]));
 	tft_setXY(GAME_OVER_REC_X, GAME_OVER_REC_Y);
 	tft_setColour(GAME_OVER_REC_FGC, GAME_OVER_REC_BGC);
-	tft_print_uint16(eeprom_read_word(EE_PONG_OVERREC0));
+	tft_print_uint16(eeprom_read_word(&NVOverCnt[0]));
 	tft_print_string("/");
-	tft_print_uint16(eeprom_read_word(EE_PONG_OVERREC1));
+	tft_print_uint16(eeprom_read_word(&NVOverCnt[1]));
 	STRING(GAME_OVER_CLN);
 get:
 	switch (ROE_get()) {
