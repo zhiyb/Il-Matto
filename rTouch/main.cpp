@@ -1,9 +1,11 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
 #include <rtouch.h>
 #include <eemem.h>
+#include <adc.h>
 
 tft_t tft;
 rTouch touch(&tft);
@@ -12,12 +14,16 @@ void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
+	adc_init();
+	adc_enable();
 	tft.init();
 	tft.setOrient(tft.Portrait);
 	tft.setBackground(0x0000);
 	tft.setForeground(0x667F);
 	stdout = tftout(&tft);
 	touch.init();
+	sei();
+
 	tft.setBGLight(true);
 	touch.calibrate();
 	tft.clean();
@@ -30,15 +36,13 @@ int main(void)
 
 start:
 	tft.clean();
-	tft.setZoom(2);
+	tft.setZoom(1);
 	puts("*** Touch ***");
 
 	uint16_t clr = 0xFFFF;
 loop:
-	if (touch.detect()) {
-		rTouch::coord_t res = touch.read();
-		if (!touch.detect())
-			goto loop;
+	if (touch.pressed()) {
+		rTouch::coord_t res = touch.position();
 		if (res.x <= -20) {
 #if 1
 			int16_t spl = tft.height() / 7;
@@ -64,7 +68,6 @@ loop:
 			tft.clean();
 		else
 			tft.point(res.x, res.y, clr);
-			//printf("TE: %u\t%u\n", res.x, res.y);
 	}
 	goto loop;
 	goto start;

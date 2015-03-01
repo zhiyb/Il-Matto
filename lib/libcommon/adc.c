@@ -1,28 +1,86 @@
+#include <avr/interrupt.h>
+#include <stdlib.h>
 #include "adc.h"
 
-void adc_init(uint8_t channel)
+// Vref: AREF, Right adjust
+#define ADC_SET_CHANNEL(channel)	ADMUX = channel
+#define ADC_BUSY()			(ADCSRA & _BV(ADSC))
+
+static struct handler_t
 {
-	ADMUX = channel;
-	// Sample rate F_CPU / 128 ~ 84kHz (< 200kHz)
-	ADCSRA = _BV(ADIF) | 7;
-	adc_enable(1);
+	void (*handler)(uint8_t channel, uint16_t result);
+	struct handler_t *next;
+} *handlers = 0;
+
+static struct request_t
+{
+	uint8_t channel;
+	struct request_t *next;
+} *requests = 0;
+
+static struct request_t *request_dequeue(void)
+{
+	struct request_t *s = requests;
+	if (!s)
+		return 0;
+	requests = s->next;
+	return s;
 }
 
-void adc_start(void)
+void adc_init(void)
 {
-	ADCSRA |= _BV(ADSC);
+	// Clear interrupt, Interrupt enable
+	// Clock rate F_CPU / 128 ~ 84kHz (< 200kHz)
+	ADCSRA = _BV(ADIF) | _BV(ADIE) | 7;
 }
 
-void adc_enable(const uint8_t e)
+void adc_register_ISR(void (*handler)(uint8_t channel, uint16_t result))
 {
-	if (e)
-		ADCSRA |= _BV(ADEN);
-	else
-		ADCSRA &= ~_BV(ADEN);
+	struct handler_t **p = &handlers;
+	struct handler_t *s = malloc(sizeof(struct handler_t));
+	s->next = 0;
+	s->handler = handler;
+	while (*p)
+		p = &(*p)->next;
+	*p = s;
 }
 
-uint16_t adc_read(void)
+static void adc_start(void)
 {
-	while (ADCSRA & _BV(ADSC));
-	return ADC;
+	struct request_t *req = request_dequeue();
+	if (req) {
+		ADC_SET_CHANNEL(req->channel);
+		free(req);
+		ADCSRA |= _BV(ADSC);
+	}
+}
+
+void adc_request(uint8_t channel)
+{
+	if (!requests && !ADC_BUSY()) {
+		ADC_SET_CHANNEL(channel);
+		ADCSRA |= _BV(ADSC);
+		return;
+	}
+	struct request_t **p = &requests;
+	struct request_t *s = malloc(sizeof(struct request_t));
+	s->next = 0;
+	s->channel = channel;
+	while (*p)
+		p = &(*p)->next;
+	*p = s;
+	if (!ADC_BUSY())
+		adc_start();
+}
+
+ISR(ADC_vect, ISR_NOBLOCK)
+{
+	adc_start();
+	uint16_t result = ADC;
+	uint8_t ch = ADMUX & 0x1F;
+	struct handler_t *p = handlers;
+	while (p) {
+		p->handler(ch, result);
+		p = p->next;
+	}
 }

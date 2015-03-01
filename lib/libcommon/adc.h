@@ -7,10 +7,12 @@ extern "C" {
 
 #include <avr/io.h>
 
-void adc_init(uint8_t channel);
-void adc_enable(const uint8_t e);
-void adc_start(void);
-uint16_t adc_read(void);
+#define adc_enable()	ADCSRA |= _BV(ADEN)
+#define adc_disable()	ADCSRA &= ~_BV(ADEN)
+
+void adc_init(void);
+void adc_register_ISR(void (*handler)(uint8_t channel, uint16_t result));
+void adc_request(uint8_t channel);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 LIBNAME		= libcommon
-LIBSRC		= eemem.c adc.c
+LIBSRC		= eemem.c adc.c pcint.c
 
 LIB		= 
 

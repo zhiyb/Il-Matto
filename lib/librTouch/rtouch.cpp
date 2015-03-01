@@ -1,6 +1,8 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <adc.h>
 #include <eemem.h>
+#include <pcint.h>
 #include "rtouch.h"
 #include "ts_calibrate.h"
 
@@ -14,7 +16,16 @@
 // Calibration cross size
 #define CALIB_SIZE	10
 
+#define RTOUCH_DETECT()	(!(RTOUCH_PINP & RTOUCH_XP))
+
 int32_t EEMEM rTouch::NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
+static rTouch *touch;
+static volatile struct {
+	bool pressed;
+	rTouch::coord_t pos, postmp;
+} ts;
+
+void rTouchADCISR(uint8_t channel, uint16_t result);
 
 rTouch::rTouch(tft_t *tft)
 {
@@ -27,6 +38,10 @@ rTouch::rTouch(tft_t *tft)
 void rTouch::init(void)
 {
 	mode(Detection);
+	pcint_set(RTOUCH_PCMSK, RTOUCH_XP);
+	pcint_enable(RTOUCH_PCMSK);
+	adc_register_ISR(rTouchADCISR);
+	touch = this;
 }
 
 // For FAST operation, Detection -> ReadY -> ReadX -> Detection ONLY!
@@ -34,7 +49,6 @@ void rTouch::mode(Functions func)
 {
 	switch (func) {
 	case Detection:
-		ADCSRA &= ~_BV(ADEN);
 		RTOUCH_DDRM &= ~RTOUCH_XM;
 		RTOUCH_DDRM |= RTOUCH_YM;
 		RTOUCH_PORTM &= ~(RTOUCH_XM | RTOUCH_YM);
@@ -43,7 +57,6 @@ void rTouch::mode(Functions func)
 		RTOUCH_PORTP &= ~RTOUCH_YP;
 		DIDR0 &= ~RTOUCH_XP;
 		DIDR0 |= RTOUCH_YP;
-		_delay_us(10);
 		break;
 	case ReadY:
 #ifdef RTOUCH_SAFE
@@ -57,8 +70,7 @@ void rTouch::mode(Functions func)
 		RTOUCH_PORTP |= RTOUCH_YP;
 		DIDR0 &= ~RTOUCH_YP;
 		DIDR0 |= RTOUCH_XP;
-		adc_init(RTOUCH_YC);
-		adc_start();
+		adc_request(RTOUCH_YC);
 		break;
 	case ReadX:
 		RTOUCH_DDRM |= RTOUCH_XM;
@@ -72,22 +84,9 @@ void rTouch::mode(Functions func)
 		RTOUCH_PORTP &= ~RTOUCH_YP;
 		DIDR0 &= ~RTOUCH_XP;
 		DIDR0 |= RTOUCH_YP;
-		adc_init(RTOUCH_XC);
-		adc_start();
+		adc_request(RTOUCH_XC);
 		break;
 	};
-}
-
-uint16_t rTouch::function(Functions func)
-{
-	switch (func) {
-	case Detection:
-		return !(RTOUCH_PINP & RTOUCH_XP);
-	case ReadX:
-	case ReadY:
-		return adc_read();
-	};
-	return 0;
 }
 
 const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
@@ -117,22 +116,10 @@ const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
 	return pos;
 }
 
-const rTouch::coord_t rTouch::read(void)
+const rTouch::coord_t rTouch::position(void)
 {
-	coord_t res;
-readxy:
-	mode(ReadY);
-	res.y = function(ReadY);
-	mode(ReadX);
-	res.x = function(ReadX);
-	mode(Detection);
-	coord_t prev = prevRead;
-	prevRead = res;
-	if (abs(res.x - prev.x) + abs(res.y - prev.y) > RTOUCH_DELTA)
-		goto readxy;
-	if (calibrated)
-		return coordTranslate(res);
-	return res;
+	coord_t res = {ts.pos.x, ts.pos.y};
+	return calibrated ? coordTranslate(res) : res;
 }
 
 void rTouch::drawCross(const coord_t pos, uint16_t c)
@@ -159,15 +146,16 @@ const rTouch::coord_t rTouch::calibrationPoint(const uint8_t index)
 	return pos;
 }
 
+bool rTouch::pressed(void)
+{
+	return ts.pressed;
+}
+
 const rTouch::coord_t rTouch::waitForPress(void)
 {
-	coord_t pos, posnew;
-	while (!detect());
-	while (detect()) {
-		pos = posnew;
-		posnew = read();
-	}
-	return pos;
+	while (!pressed());
+	while (pressed());
+	return position();
 }
 
 void rTouch::calibrate(void)
@@ -220,4 +208,41 @@ recalibrate:
 	calibrated = true;
 
 	eeprom_update_block(cal, NVcal, sizeof(NVcal));
+}
+
+// Detection -> ReadY -> ReadX -> Detection
+void rTouchADCISR(uint8_t channel, uint16_t result)
+{
+	if (channel == RTOUCH_YC) {
+		ts.postmp.y = result;
+		rTouch::mode(rTouch::ReadX);
+		adc_request(RTOUCH_XC);
+	} else if (channel == RTOUCH_XC) {
+		ts.postmp.x = result;
+		rTouch::mode(rTouch::Detection);
+		if (RTOUCH_DETECT()) {
+			ts.pressed = true;
+			ts.pos.x = ts.postmp.x;
+			ts.pos.y = ts.postmp.y;
+			rTouch::mode(rTouch::ReadY);
+			adc_request(RTOUCH_YC);
+		} else {
+			ts.pressed = false;
+			pcint_enable(RTOUCH_PCMSK);
+		}
+	}
+}
+
+void rTouchPCIISR(void)
+{
+	if (RTOUCH_DETECT()) {
+		pcint_disable(RTOUCH_PCMSK);
+		rTouch::mode(rTouch::ReadY);
+		adc_request(RTOUCH_YC);
+	}
+}
+
+ISR(RTOUCH_PCMSKV)
+{
+	rTouchPCIISR();
 }
