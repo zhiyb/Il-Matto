@@ -85,7 +85,7 @@ disp:
 	tft->setBackground(c[index % (sizeof(c) / sizeof(c[1]))]);
 	tft->rectangle(0, ys, tft->width(), ITEM_HEIGHT, tft->background());
 	tft->setX(ITEM_NAME_X);
-	*tft << (item ? item->name : "** EMPTY **");
+	tft->putString(item ? item->name : "** EMPTY **", true);
 }
 
 void PortraitList::displayItems(const listItem **items, uint16_t index, uint16_t last) const

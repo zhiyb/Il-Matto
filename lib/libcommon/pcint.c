@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include "pcint.h"
 
 void pcint_set(uint8_t group, uint8_t pins)

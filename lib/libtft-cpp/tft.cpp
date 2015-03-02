@@ -42,6 +42,30 @@ tft_t::tft_t(void)
 	setBackground(DEF_BGC);
 }
 
+void tft_t::putString(const char *str, bool progMem)
+{
+#ifdef TFT_VERTICALSCROLLING
+	uint16_t xt = 0;
+	bool clip = transform() && !portrait();
+	if (clip) {
+		xt = vsTransformBack(x());
+		clip = xt < bottomEdge();
+	}
+#endif
+
+	char c;
+	while ((c = pgm_read_byte(str++)) != '\0') {
+		*this << c;
+#ifdef TFT_VERTICALSCROLLING
+		if (clip) {
+			xt += FONT_WIDTH * zoom();
+			if (xt >= bottomEdge())
+				break;
+		}
+#endif
+	}
+}
+
 void tft_t::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint8_t s, uint16_t c)
 {

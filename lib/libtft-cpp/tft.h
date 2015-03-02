@@ -53,7 +53,7 @@ public:
 	inline uint8_t tabSize(void) const {return d.tabSize;}
 	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
 	inline bool portrait(void) const {return orient() == Portrait || orient() == FlipPortrait;}
-//	void putString
+	void putString(const char *str, bool progMem = false);
 
 #ifdef TFT_VERTICALSCROLLING
 	// Vertical scrolling related functions
@@ -205,25 +205,7 @@ inline class tft_t& tft_t::operator<<(const char c)
 
 inline class tft_t& tft_t::operator<<(const char *str)
 {
-#ifdef TFT_VERTICALSCROLLING
-	uint16_t xt = 0;
-	bool clip = transform() && !portrait();
-	if (clip) {
-		xt = vsTransformBack(x());
-		clip = xt < bottomEdge();
-	}
-#endif
-
-	while (*str) {
-		*this << *str++;
-#ifdef TFT_VERTICALSCROLLING
-		if (clip) {
-			xt += FONT_WIDTH * zoom();
-			if (xt >= bottomEdge())
-				break;
-		}
-#endif
-	}
+	putString(str);
 	return *this;
 }
 

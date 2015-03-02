@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef LIBTFT_CPP_CONNECTION_H
 #define LIBTFT_CPP_CONNECTION_H
 

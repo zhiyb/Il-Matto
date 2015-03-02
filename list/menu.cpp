@@ -3,6 +3,7 @@
  */
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <list.h>
 #include "menu.h"
 
@@ -38,15 +39,15 @@ static void offLED2(void)
 
 static listItem item[40] = {
 	// name, items, parent, func
-	{"Item 1", 0, 0, 0},
-	{"LED ON", 0, 0, onLED},
-	{"Item 3", 0, 0, 0},
-	{"Item 4", 0, 0, 0},
-	{"Item 5", 0, 0, 0},
-	{"LED Toggle", 0, 0, toggleLED},
-	{"Item 7", 0, 0, 0},
-	{"Item 8", 0, 0, 0},
-	{"LED2 ON", 0, 0, onLED2},
+	{PSTR("Item 1"), 0, 0, 0},
+	{PSTR("LED ON"), 0, 0, onLED},
+	{PSTR("Item 3"), 0, 0, 0},
+	{PSTR("Item 4"), 0, 0, 0},
+	{PSTR("Item 5"), 0, 0, 0},
+	{PSTR("LED Toggle"), 0, 0, toggleLED},
+	{PSTR("Item 7"), 0, 0, 0},
+	{PSTR("Item 8"), 0, 0, 0},
+/*	{"LED2 ON", 0, 0, onLED2},
 	{"Item 10", 0, 0, 0},
 	{"Item 11", 0, 0, 0},
 	{"Item 12", 0, 0, 0},
@@ -77,7 +78,7 @@ static listItem item[40] = {
 	{"Item 37", 0, 0, 0},
 	{"Item 38", 0, 0, 0},
 	{"Item 39", 0, 0, 0},
-	{"Item 40", 0, 0, 0},
+	{"Item 40", 0, 0, 0},*/
 };
 
 static const listItem *rootItems[] = {
@@ -94,4 +95,4 @@ static const listItem *rootItems[] = {
 	0};
 
 // name, items, parent, func
-listItem menuRoot = {"Root", rootItems, 0, 0};
+listItem menuRoot = {PSTR("Root"), rootItems, 0, 0};
