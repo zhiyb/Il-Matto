@@ -37,8 +37,8 @@ PHONYTRGS	+= elf lst map
 
 CLEAN_FILES	+= $(OBJS)
 $(PRG).elf: $(OBJS) $(LIBFILES)
-	$(LD) $(LDFLAGS) -o $(PRG).elf $(OBJS) $(LIBS)
-	$(SIZE) $(PRG).elf
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(SIZE) $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
