@@ -37,48 +37,89 @@ static void offLED2(void)
 	PORTD &= ~_BV(6);
 }
 
+const char PROGMEM item01[] = "Item 1";
+const char PROGMEM item02[] = "LED ON";
+const char PROGMEM item03[] = "Item 3";
+const char PROGMEM item04[] = "Item 4";
+const char PROGMEM item05[] = "Item 5";
+const char PROGMEM item06[] = "LED Toggle";
+const char PROGMEM item07[] = "Item 7";
+const char PROGMEM item08[] = "Item 8";
+const char PROGMEM item09[] = "LED2 ON";
+const char PROGMEM item10[] = "Item 10";
+const char PROGMEM item11[] = "Item 11";
+const char PROGMEM item12[] = "Item 12";
+const char PROGMEM item13[] = "LED2 Toggle";
+const char PROGMEM item14[] = "Item 14";
+const char PROGMEM item15[] = "Item 15";
+const char PROGMEM item16[] = "LED2 OFF";
+const char PROGMEM item17[] = "Item 17";
+const char PROGMEM item18[] = "Item 18";
+const char PROGMEM item19[] = "Item 19";
+const char PROGMEM item20[] = "LED OFF";
+const char PROGMEM item21[] = "Item 21";
+const char PROGMEM item22[] = "Item 22";
+const char PROGMEM item23[] = "Item 23";
+const char PROGMEM item24[] = "Item 24";
+const char PROGMEM item25[] = "Item 25";
+const char PROGMEM item26[] = "Item 26";
+const char PROGMEM item27[] = "Item 27";
+const char PROGMEM item28[] = "Item 28";
+const char PROGMEM item29[] = "Item 29";
+const char PROGMEM item30[] = "Item 30";
+const char PROGMEM item31[] = "Item 31";
+const char PROGMEM item32[] = "Item 32";
+const char PROGMEM item33[] = "Item 33";
+const char PROGMEM item34[] = "Item 34";
+const char PROGMEM item35[] = "Item 35";
+const char PROGMEM item36[] = "Item 36";
+const char PROGMEM item37[] = "Item 37";
+const char PROGMEM item38[] = "Item 38";
+const char PROGMEM item39[] = "Item 39";
+const char PROGMEM item40[] = "Item 40";
+
 static listItem item[40] = {
 	// name, items, parent, func
-	{PSTR("Item 1"), 0, 0, 0},
-	{PSTR("LED ON"), 0, 0, onLED},
-	{PSTR("Item 3"), 0, 0, 0},
-	{PSTR("Item 4"), 0, 0, 0},
-	{PSTR("Item 5"), 0, 0, 0},
-	{PSTR("LED Toggle"), 0, 0, toggleLED},
-	{PSTR("Item 7"), 0, 0, 0},
-	{PSTR("Item 8"), 0, 0, 0},
-/*	{"LED2 ON", 0, 0, onLED2},
-	{"Item 10", 0, 0, 0},
-	{"Item 11", 0, 0, 0},
-	{"Item 12", 0, 0, 0},
-	{"LED2 Toggle", 0, 0, toggleLED2},
-	{"Item 14", 0, 0, 0},
-	{"Item 15", 0, 0, 0},
-	{"LED2 OFF", 0, 0, offLED2},
-	{"Item 17", 0, 0, 0},
-	{"Item 18", 0, 0, 0},
-	{"Item 19", 0, 0, 0},
-	{"LED OFF", 0, 0, offLED},
-	{"Item 21", 0, 0, 0},
-	{"Item 22", 0, 0, 0},
-	{"Item 23", 0, 0, 0},
-	{"Item 24", 0, 0, 0},
-	{"Item 25", 0, 0, 0},
-	{"Item 26", 0, 0, 0},
-	{"Item 27", 0, 0, 0},
-	{"Item 28", 0, 0, 0},
-	{"Item 29", 0, 0, 0},
-	{"Item 30", 0, 0, 0},
-	{"Item 31", 0, 0, 0},
-	{"Item 32", 0, 0, 0},
-	{"Item 33", 0, 0, 0},
-	{"Item 34", 0, 0, 0},
-	{"Item 35", 0, 0, 0},
-	{"Item 36", 0, 0, 0},
-	{"Item 37", 0, 0, 0},
-	{"Item 38", 0, 0, 0},
-	{"Item 39", 0, 0, 0},
-	{"Item 40", 0, 0, 0},*/
+	{item01, 0, 0, 0},
+	{item02, 0, 0, onLED},
+	{item03, 0, 0, 0},
+	{item04, 0, 0, 0},
+	{item05, 0, 0, 0},
+	{item06, 0, 0, toggleLED},
+	{item07, 0, 0, 0},
+	{item08, 0, 0, 0},
+	{item09, 0, 0, onLED2},
+	{item10, 0, 0, 0},
+	{item11, 0, 0, 0},
+	{item12, 0, 0, 0},
+	{item13, 0, 0, toggleLED2},
+	{item14, 0, 0, 0},
+	{item15, 0, 0, 0},
+	{item16, 0, 0, offLED2},
+	{item17, 0, 0, 0},
+	{item18, 0, 0, 0},
+	{item19, 0, 0, 0},
+	{item20, 0, 0, offLED},
+	{item21, 0, 0, 0},
+	{item22, 0, 0, 0},
+	{item23, 0, 0, 0},
+	{item24, 0, 0, 0},
+	{item25, 0, 0, 0},
+	{item26, 0, 0, 0},
+	{item27, 0, 0, 0},
+	{item28, 0, 0, 0},
+	{item29, 0, 0, 0},
+	{item30, 0, 0, 0},
+	{item31, 0, 0, 0},
+	{item32, 0, 0, 0},
+	{item33, 0, 0, 0},
+	{item34, 0, 0, 0},
+	{item35, 0, 0, 0},
+	{item36, 0, 0, 0},
+	{item37, 0, 0, 0},
+	{item38, 0, 0, 0},
+	{item39, 0, 0, 0},
+	{item40, 0, 0, 0},
 };
 
 static const listItem *rootItems[] = {
@@ -95,4 +136,5 @@ static const listItem *rootItems[] = {
 	0};
 
 // name, items, parent, func
-listItem menuRoot = {PSTR("Root"), rootItems, 0, 0};
+const char PROGMEM rootName[] = "Root";
+listItem menuRoot = {rootName, rootItems, 0, 0};
