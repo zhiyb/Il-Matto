@@ -7,7 +7,7 @@
 #include <eemem.h>
 #include <adc.h>
 
-//#define AUTO_COLOUR
+#define AUTO_COLOUR
 
 tft_t tft;
 rTouch touch(&tft);
@@ -37,6 +37,7 @@ int main(void)
 	init();
 
 start:
+	tft.setOrient(tft.Portrait);
 	tft.clean();
 	tft.setZoom(1);
 	puts("*** Touch ***");

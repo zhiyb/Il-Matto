@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <adc.h>
@@ -36,9 +40,11 @@ static void rTouchADCISR(uint8_t channel, uint16_t result);
 rTouch::rTouch(tft_t *tft)
 {
 	this->tft = tft;
-	prevRead.x = 0;
-	prevRead.y = 0;
 	calibrated = false;
+	stat.prev.x = 0;
+	stat.prev.y = 0;
+	stat.moved = false;
+	stat.pressed = false;
 }
 
 void rTouch::init(void)
@@ -122,6 +128,26 @@ const rTouch::coord_t rTouch::waitForPress(void)
 	while (!pressed());
 	while (pressed());
 	return position();
+}
+
+rTouch::Status rTouch::status(void)
+{
+	if (!pressed()) {
+		stat.pressed = false;
+		return Idle;
+	}
+	coord_t res = position();
+	if (!stat.pressed) {
+		stat.prev.x = res.x;
+		stat.prev.y = res.y;
+		stat.moved = false;
+		stat.pressed = true;
+		return Pressed;
+	}
+	if (!stat.moved && abs(stat.prev.x - res.x) + abs(stat.prev.y - res.y) < RTOUCH_MOVETH)
+		return Pressed;
+	stat.moved = true;
+	return Moved;
 }
 
 void rTouch::calibrate(void)
@@ -244,7 +270,7 @@ static inline bool rTouchAverager(uint16_t x, uint16_t y)
 // Detection -> ReadY -> ReadX -> Detection
 static void rTouchADCISR(uint8_t channel, uint16_t result)
 {
-	PINB |= _BV(7);
+	//PINB |= _BV(7);
 	if (channel == RTOUCH_YC) {
 		ts.postmp.y = result;
 		rTouchMode(ReadX);

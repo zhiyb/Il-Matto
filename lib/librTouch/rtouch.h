@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef RTOUCH_H
 #define RTOUCH_H
 
@@ -41,9 +45,16 @@
 #define RTOUCH_AVERAGER	32
 #endif
 
+// Press / move threshold
+#ifndef RTOUCH_MOVETH
+#define RTOUCH_MOVETH	8
+#endif
+
 class rTouch
 {
 public:
+	enum Status {Idle, Pressed, Moved};
+
 	struct coord_t {
 		int16_t x, y;
 	};
@@ -55,16 +66,21 @@ public:
 	void calibrate(void);
 	void recalibrate(void) {calibrated = false; calibrate();}
 	static bool pressed(void);
+	Status status(void);
 
 private:
 	void drawCross(const coord_t pos, uint16_t c);
 	const coord_t calibrationPoint(const uint8_t index);
 	const coord_t coordTranslate(coord_t pos) const;
 
+	struct {
+		bool pressed, moved;
+		coord_t prev;
+	} stat;
+
 	bool calibrated;
 	int32_t cal[7];
 	static int32_t EEMEM NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
-	coord_t prevRead;
 
 	tft_t *tft;
 };
