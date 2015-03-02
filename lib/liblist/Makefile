@@ -1,7 +1,7 @@
 LIBNAME		= liblist
 LIBSRC		= landscapelist.cpp portraitlist.cpp
 
-LIB		= tft-cpp
+LIB		= tft-cpp rTouch
 
 MCU_TARGET	?= atmega644p
 MCU_FREQ	?= 12000000 

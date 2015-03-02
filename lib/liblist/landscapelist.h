@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef LANDSCAPELIST_H
 #define LANDSCALELIST_H
 

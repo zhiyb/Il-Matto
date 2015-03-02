@@ -1,3 +1,7 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -23,8 +27,10 @@ PortraitList l(&tft);
 
 void init(void)
 {
-	DDRB |= 0x80;			// LED
-	PORTB |= 0x80;
+	DDRB |= _BV(7);			// LED
+	PORTB |= _BV(7);
+	DDRD |= _BV(6);
+	PORTD |= _BV(6);
 	adc_init();
 	adc_enable();
 	tft.init();
@@ -54,41 +60,9 @@ int main(void)
 
 	l.refresh();
 	l.display(&menuRoot);
-	l.setScroll(260);
-	//l.refresh();
 
-	rTouch::coord_t prev = {-1, -1};
 pool:
-	if (touch.pressed()) {
-		rTouch::coord_t res = touch.position();
-		if (!touch.pressed()) {
-			prev.x = -1;
-			prev.y = -1;
-			goto pool;
-		}
-#ifdef LANDSCAPE
-		if (prev.y > 0 && (int16_t)l.scroll() - res.x + prev.x > 0)
-			l.setScroll((int16_t)l.scroll() - res.x + prev.x);
-#else
-		if (prev.x > 0 && (int16_t)l.scroll() - res.y + prev.y > 0)
-			l.setScroll((int16_t)l.scroll() - res.y + prev.y);
-#endif
-		prev = res;
-	} else {
-		using namespace colours::b16;
-#ifdef DEBUG
-#ifdef LANDSCAPE
-		tft.rectangle(tft.topEdge() - 1, 0, 1, tft.height(), White);
-		tft.rectangle(tft.bottomEdge(), 0, 1, tft.height(), White);
-#else
-		tft.rectangle(0, tft.topEdge() - 1, tft.width(), 1, White);
-		tft.rectangle(0, tft.bottomEdge(), tft.width(), 1, White);
-		tft.rectangle(0, tft.bottomEdge() - 1, tft.width(), 1, Black);
-#endif
-#endif
-		prev.x = -1;
-		prev.y = -1;
-	}
+	l.pool(&touch);
 	goto pool;
 
 	return 1;

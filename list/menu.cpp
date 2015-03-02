@@ -1,28 +1,63 @@
-#include "menu.h"
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
+#include <avr/io.h>
 #include <list.h>
+#include "menu.h"
+
+static void onLED(void)
+{
+	PORTB |= _BV(7);
+}
+
+static void toggleLED(void)
+{
+	PINB |= _BV(7);
+}
+
+static void offLED(void)
+{
+	PORTB &= ~_BV(7);
+}
+
+static void onLED2(void)
+{
+	PORTD |= _BV(6);
+}
+
+static void toggleLED2(void)
+{
+	PIND |= _BV(6);
+}
+
+static void offLED2(void)
+{
+	PORTD &= ~_BV(6);
+}
 
 static listItem item[40] = {
 	// name, items, parent, func
 	{"Item 1", 0, 0, 0},
-	{"Item 2", 0, 0, 0},
+	{"LED ON", 0, 0, onLED},
 	{"Item 3", 0, 0, 0},
 	{"Item 4", 0, 0, 0},
 	{"Item 5", 0, 0, 0},
-	{"Item 6", 0, 0, 0},
+	{"LED Toggle", 0, 0, toggleLED},
 	{"Item 7", 0, 0, 0},
 	{"Item 8", 0, 0, 0},
-	{"Item 9", 0, 0, 0},
+	{"LED2 ON", 0, 0, onLED2},
 	{"Item 10", 0, 0, 0},
 	{"Item 11", 0, 0, 0},
 	{"Item 12", 0, 0, 0},
-	{"Item 13", 0, 0, 0},
+	{"LED2 Toggle", 0, 0, toggleLED2},
 	{"Item 14", 0, 0, 0},
 	{"Item 15", 0, 0, 0},
-	{"Item 16", 0, 0, 0},
+	{"LED2 OFF", 0, 0, offLED2},
 	{"Item 17", 0, 0, 0},
 	{"Item 18", 0, 0, 0},
 	{"Item 19", 0, 0, 0},
-	{"Item 20", 0, 0, 0},
+	{"LED OFF", 0, 0, offLED},
 	{"Item 21", 0, 0, 0},
 	{"Item 22", 0, 0, 0},
 	{"Item 23", 0, 0, 0},

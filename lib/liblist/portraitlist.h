@@ -1,13 +1,18 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #ifndef PORTRAITLIST_H
 #define PORTRAITLIST_H
 
 #include <tft.h>
+#include <rtouch.h>
 #include "list.h"
 
 class PortraitList
 {
 public:
-	PortraitList(tft_t *tft) : curItem(0) {this->tft = tft;}
+	PortraitList(tft_t *tft) : curItem(0), pressed(false) {this->tft = tft;}
 
 	listItem *currentItem(void) const {return curItem;}
 	void setCurrentItem(listItem *item) {curItem = item;}
@@ -18,16 +23,25 @@ public:
 	void setScroll(uint16_t s);
 	void scrollUp(uint16_t s);
 	void scrollDown(uint16_t s);
-	uint16_t countItems(const listItem **items = 0) const;
+	uint16_t count(void) const {return cnt;}
+	// Not transformed coordinate
+	void clickOn(uint16_t x, uint16_t y);
+	void activate(uint16_t index);
+	void pool(rTouch *touch);
 
 private:
 	void scrollTo(const uint16_t s);
+	uint16_t countItems(const listItem **items = 0) const;
+	uint16_t itemAt(const uint16_t s, const uint16_t y) const;
+	const listItem **itemsAt(const uint16_t index);
 	// tft->y() specify(index = -1) should not transform
 	void displayItem(const listItem *item, const uint16_t index = -1) const;
 	void displayItems(const listItem **items, uint16_t index = 0, uint16_t last = 0) const;
 
-	uint16_t scr, max;
 	listItem *curItem;
+	bool pressed;
+	rTouch::coord_t prev;
+	uint16_t scr, max, cnt;
 	tft_t *tft;
 };
 

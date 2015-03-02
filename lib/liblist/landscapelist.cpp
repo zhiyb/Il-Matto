@@ -1,7 +1,10 @@
-#include "landscapelist.h"
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include <rgbconv.h>
 #include <colours.h>
-#include <util/delay.h>
+#include "landscapelist.h"
 
 #define ZOOM		2
 #define TOP_AREA	(tft->topFixedArea())
