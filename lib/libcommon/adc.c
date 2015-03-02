@@ -8,41 +8,39 @@
 
 static struct handler_t
 {
-	void (*handler)(uint8_t channel, uint16_t result);
 	struct handler_t *next;
+	void (*handler)(uint8_t channel, uint16_t result);
 } *handlers = 0;
 
 static struct request_t
 {
-	uint8_t channel;
 	struct request_t *next;
+	uint8_t channel;
 } *requests = 0;
 
 static struct request_t *request_dequeue(void)
 {
 	struct request_t *s = requests;
-	if (!s)
-		return 0;
-	requests = s->next;
+	if (s)
+		requests = s->next;
 	return s;
 }
 
 void adc_init(void)
 {
 	// Clear interrupt, Interrupt enable
-	// Clock rate F_CPU / 128 ~ 84kHz (< 200kHz)
-	ADCSRA = _BV(ADIF) | _BV(ADIE) | 7;
+	// Clock rate F_CPU / 64 ~ 187kHz (< 200kHz)
+	ADCSRA = _BV(ADIF) | _BV(ADIE) | 6;
+	handlers = 0;
+	requests = 0;
 }
 
 void adc_register_ISR(void (*handler)(uint8_t channel, uint16_t result))
 {
-	struct handler_t **p = &handlers;
 	struct handler_t *s = malloc(sizeof(struct handler_t));
-	s->next = 0;
+	s->next = handlers;
 	s->handler = handler;
-	while (*p)
-		p = &(*p)->next;
-	*p = s;
+	handlers = s;
 }
 
 static void adc_start(void)

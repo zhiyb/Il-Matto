@@ -6,6 +6,9 @@ MCU_FREQ	?= 12000000
 
 OPTIMIZE	?= -Os
 DEFS		?= -DF_CPU=$(MCU_FREQ)
+DEFS		+= -Wall -Werror
+DEFS		+= -fpack-struct -fshort-enums
+DEFS		+= -funsigned-bitfields -funsigned-char
 
 LIBDIRS	= $(addprefix $(LIBDIR)/lib,$(LIBLIST) $(LIB))
 SUBDIRS += $(LIBDIRS)
@@ -14,17 +17,13 @@ LIBS	+= $(addprefix -L./,$(LIBDIRS)) $(addprefix -l$,$(LIB))
 INCS	+= $(addprefix -I./,$(LIBDIRS))
 
 # compiler
-override CFLAGS=$(INCS) -g $(DEFS)           \
-	-mmcu=$(MCU_TARGET) $(OPTIMIZE) -Wall   \
-	-funsigned-bitfields -funsigned-char    \
-	-fpack-struct -fshort-enums             \
-	-Wa,-ahlms=$(firstword                  \
+override CFLAGS=$(INCS) -g $(DEFS)       \
+	-mmcu=$(MCU_TARGET) $(OPTIMIZE)  \
+	-Wa,-ahlms=$(firstword           \
 	$(filter %.lst, $(<:.c=.lst)))
-override CXXFLAGS=$(INCS) -g $(DEFS)         \
-	-mmcu=$(MCU_TARGET) $(OPTIMIZE) -Wall   \
-	-funsigned-bitfields -funsigned-char    \
-	-fpack-struct -fshort-enums             \
-	-Wa,-ahlms=$(firstword                  \
+override CXXFLAGS=$(INCS) -g $(DEFS)     \
+	-mmcu=$(MCU_TARGET) $(OPTIMIZE)  \
+	-Wa,-ahlms=$(firstword           \
 	$(filter %.lst, $(<:.cpp=.lst)))
 
 # Archiver

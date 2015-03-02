@@ -31,15 +31,19 @@
 #define RTOUCH_YP	(1 << 7)
 #define RTOUCH_YC	6
 
-#define RTOUCH_DELTA	5
+// Valid data variance
+#ifndef RTOUCH_DELTA
+#define RTOUCH_DELTA	10
+#endif
+
+// Averager level
+#ifndef RTOUCH_AVERAGER
+#define RTOUCH_AVERAGER	32
+#endif
 
 class rTouch
 {
-	friend void rTouchADCISR(uint8_t channel, uint16_t result);
-	friend void rTouchPCIISR(void);
 public:
-	enum Functions {Detection, ReadX, ReadY};
-
 	struct coord_t {
 		int16_t x, y;
 	};
@@ -49,10 +53,10 @@ public:
 	const coord_t position(void);
 	const coord_t waitForPress(void);
 	void calibrate(void);
+	void recalibrate(void) {calibrated = false; calibrate();}
 	static bool pressed(void);
 
 private:
-	static void mode(const Functions func);
 	void drawCross(const coord_t pos, uint16_t c);
 	const coord_t calibrationPoint(const uint8_t index);
 	const coord_t coordTranslate(coord_t pos) const;

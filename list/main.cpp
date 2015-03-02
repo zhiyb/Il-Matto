@@ -1,11 +1,13 @@
 #include <avr/io.h>
-#include <stdio.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
+#include <stdio.h>
 #include <tft.h>
 #include <portraitlist.h>
 #include <landscapelist.h>
 #include <rtouch.h>
 #include <eemem.h>
+#include <adc.h>
 #include <colours.h>
 #include "menu.h"
 
@@ -23,6 +25,8 @@ void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
+	adc_init();
+	adc_enable();
 	tft.init();
 #ifdef LANDSCAPE
 	tft.setOrient(tft.FlipLandscape);
@@ -34,6 +38,8 @@ void init(void)
 	tft.clean();
 	stdout = tftout(&tft);
 	touch.init();
+	sei();
+
 	tft.setBGLight(true);
 	touch.calibrate();
 	eeprom_first_done();
@@ -53,9 +59,9 @@ int main(void)
 
 	rTouch::coord_t prev = {-1, -1};
 pool:
-	if (touch.detect()) {
-		rTouch::coord_t res = touch.read();
-		if (!touch.detect()) {
+	if (touch.pressed()) {
+		rTouch::coord_t res = touch.position();
+		if (!touch.pressed()) {
 			prev.x = -1;
 			prev.y = -1;
 			goto pool;
