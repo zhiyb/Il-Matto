@@ -7,6 +7,8 @@
 #include <eemem.h>
 #include <adc.h>
 
+//#define AUTO_COLOUR
+
 tft_t tft;
 rTouch touch(&tft);
 
@@ -39,35 +41,38 @@ start:
 	tft.setZoom(1);
 	puts("*** Touch ***");
 
+#ifdef AUTO_COLOUR
+	bool pressed = false;
+	uint8_t cnt = 0;
+#endif
 	uint16_t clr = 0xFFFF;
+	static uint16_t c[] = {0xF800, 0x07E0, 0x001F, 0xFFE0, 0x07FF, 0xF81F, 0xFFFF, 0x0000};
 loop:
 	if (touch.pressed()) {
 		rTouch::coord_t res = touch.position();
 		if (res.x <= -20) {
 #if 1
 			int16_t spl = tft.height() / 7;
-			if (res.y < spl)
-				clr = 0xF800;
-			else if (res.y < spl * 2)
-				clr = 0x07E0;
-			else if (res.y < spl * 3)
-				clr = 0x001F;
-			else if (res.y < spl * 4)
-				clr = 0xFFE0;
-			else if (res.y < spl * 5)
-				clr = 0x07FF;
-			else if (res.y < spl * 6)
-				clr = 0xF81F;
-			else
-				clr = 0xFFFF;
+			clr = c[res.y / spl];
 #else
 			uint8_t mv = res.y * 16 / tft.height();
 			clr = (0x001F << mv) | (((uint32_t)0x001F << mv) >> 16);
 #endif
 		} else if (res.x > (int16_t)(tft.width() + 20))
 			tft.clean();
-		else
+		else {
+#ifdef AUTO_COLOUR
+			pressed = true;
+#endif
 			tft.point(res.x, res.y, clr);
+		}
+#ifdef AUTO_COLOUR
+	} else if (pressed) {
+		clr = c[cnt++];
+		if (cnt == 7)
+			cnt = 0;
+		pressed = false;
+#endif
 	}
 	goto loop;
 	goto start;
