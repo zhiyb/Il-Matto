@@ -80,8 +80,5 @@ $(LIBTRG): $(OBJS)
 
 #### Cleanup ####
 clean:
-	$(REMOVE) $(LIBTRG)
-	$(REMOVE) $(OBJS)
-	$(REMOVE) $(LST)
-	$(REMOVE) $(OBJS:.o=.d)
+	$(REMOVE) $(LIBTRG) $(OBJS) $(LST) $(OBJS:.o=.d)
 

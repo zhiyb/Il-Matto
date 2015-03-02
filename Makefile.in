@@ -36,10 +36,9 @@ all: elf lst text eeprom
 PHONYTRGS	+= elf lst map
 
 CLEAN_FILES	+= $(OBJS)
-
 $(PRG).elf: $(OBJS) $(LIBFILES)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
-	$(SIZE) $@
+	$(LD) $(LDFLAGS) -o $(PRG).elf $(OBJS) $(LIBS)
+	$(SIZE) $(PRG).elf
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -54,7 +53,10 @@ $(PRG).elf: $(OBJS) $(LIBFILES)
 	$(OBJDUMP) -h -S $< > $@
 
 # Libraries
-$(LIBFILES):
+BUILDLIBFILES	= $(LIBFILES:%=build-%)
+.PHONY: $(BUILDLIBFILES)
+
+$(LIBFILES): %: build-%
 	$(MAKE) -C $(dir $@)
 
 # Dependency
