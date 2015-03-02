@@ -1,8 +1,13 @@
+/*
+ * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
+#include <rgbconv.h>
 #include <rtouch.h>
 #include <eemem.h>
 #include <adc.h>

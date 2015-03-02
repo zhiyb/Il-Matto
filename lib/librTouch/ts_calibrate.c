@@ -1,3 +1,16 @@
+/*
+ *  tslib/tests/ts_calibrate.c
+ *
+ *  Copyright (C) 2001 Russell King.
+ *
+ * This file is placed under the GPL.  Please see the file
+ * COPYING for more details.
+ *
+ * $Id: ts_calibrate.c,v 1.8 2004/10/19 22:01:27 dlowder Exp $
+ * Modified by Yubo Zhi for D4 project
+ *
+ * Basic test program for touchscreen library.
+ */
 #include "ts_calibrate.h"
 
 uint8_t perform_calibration(calibration *cal)
@@ -74,7 +87,7 @@ uint8_t perform_calibration(calibration *cal)
 // If we got here, we're OK, so assign scaling to a[6] and return
 	cal->a[6] = (int32_t)scaling;
 	return 1;
-/*	
+/*
 // This code was here originally to just insert default values
 	for(j=0;j<7;j++) {
 		c->a[j]=0;
@@ -82,27 +95,4 @@ uint8_t perform_calibration(calibration *cal)
 	c->a[1] = c->a[5] = c->a[6] = 1;
 	return 1;
 */
-
 }
-
-#if 0
-int main(void)
-{
-	if (perform_calibration (&cal)) {
-		printf ("Calibration constants: ");
-		for (i = 0; i < 7; i++) printf("%d ", cal.a [i]);
-		printf("\n");
-		if ((calfile = getenv("TSLIB_CALIBFILE")) != NULL) {
-			cal_fd = open (calfile, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG | S_IRWXO);
-		} else {
-			cal_fd = open ("/etc/pointercal", O_CREAT | O_RDWR, S_IRWXU | S_IRWXG | S_IRWXO);
-		}
-		sprintf (cal_buffer,"%d %d %d %d %d %d %d",
-			 cal.a[1], cal.a[2], cal.a[0],
-			 cal.a[4], cal.a[5], cal.a[3], cal.a[6]);
-		write (cal_fd, cal_buffer, strlen (cal_buffer) + 1);
-		close (cal_fd);
-                i = 0;
-	}
-}
-#endif
