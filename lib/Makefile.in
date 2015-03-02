@@ -41,10 +41,10 @@ LIBTRG=$(LIBNAME).a
 # List all object files we need to create
 CFILES=$(filter %.c, $(LIBSRC))
 CPPFILES=$(filter %.cpp, $(LIBSRC))
-OBJDEPS=$(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+OBJS=$(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 # Define all lst files.
-LST=$(filter %.lst, $(OBJDEPS:.o=.lst))
+LST=$(filter %.lst, $(OBJS:.o=.lst))
 
 .SUFFIXES : .cpp .c .o .h
 
@@ -53,8 +53,8 @@ LST=$(filter %.lst, $(OBJDEPS:.o=.lst))
 # Make targets:
 all: $(LIBTRG)
 
-$(LIBTRG): $(OBJDEPS) 
-	$(AR) $(ARFLAGS) $(LIBTRG) $(OBJDEPS)
+$(LIBTRG): $(OBJS) 
+	$(AR) $(ARFLAGS) $(LIBTRG) $(OBJS)
 
 #### Generating object files ####
 .c.o: 
@@ -63,9 +63,25 @@ $(LIBTRG): $(OBJDEPS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+#### Dependency ####
+-include $(OBJS:.o=.d)
+
+%.d: %.c
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+%.d: %.cpp
+	@set -e; rm -f $@; \
+	$(CXX) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
 #### Cleanup ####
 clean:
 	$(REMOVE) $(LIBTRG)
-	$(REMOVE) $(OBJDEPS)
+	$(REMOVE) $(OBJS)
 	$(REMOVE) $(LST)
+	$(REMOVE) $(OBJS:.o=.d)
 

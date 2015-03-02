@@ -15,7 +15,7 @@ ARCHIVE	= $(PRG)-$(VERSION).tar.bz2
 
 # You should not have to change anything below here.
 
-OBJ	= $(subst .S,.o,$(subst .c,.o,$(subst .cpp,.o,$(SRC))))
+OBJS	= $(subst .S,.o,$(subst .c,.o,$(subst .cpp,.o,$(SRC))))
 
 AS	= avr-gcc
 CC	= avr-gcc
@@ -38,8 +38,8 @@ all: elf lst text eeprom
 .PHONY: elf
 elf: $(PRG).elf
 
-$(PRG).elf: subdirs $(OBJ)
-	$(LD) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
+$(PRG).elf: subdirs $(OBJS)
+	$(LD) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 	$(SIZE) $@
 
 .c.o:
@@ -61,7 +61,7 @@ $(SUBDIRS):
 
 # Dependency:
 
--include $(OBJ:.o=.d)
+-include $(OBJS:.o=.d)
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -165,7 +165,7 @@ TAR	= tar
 EXTRA_CLEAN_FILES	+= $(ARCHIVE)
 
 archive: hex ehex
-	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(OBJ:.o=.$(EXT)) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
+	$(TAR) $(TARFLAGS) -f $(ARCHIVE) $(SRC) *.h $(PRG).hex $(PRG)_eeprom.hex Makefile
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.
