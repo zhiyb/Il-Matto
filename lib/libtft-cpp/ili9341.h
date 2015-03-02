@@ -8,7 +8,6 @@
 #include "connection.h"
 
 #include <avr/io.h>
-//#include <avr/cpufunc.h>
 #define _NOP() __asm__ __volatile__("nop")
 #include <util/delay.h>
 

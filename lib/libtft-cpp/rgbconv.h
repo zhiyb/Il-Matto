@@ -5,6 +5,8 @@
 #ifndef RGBCONV_H
 #define RGBCONV_H
 
+#include <inttypes.h>
+
 namespace conv
 {
 	static inline uint16_t c16i(uint16_t c16);

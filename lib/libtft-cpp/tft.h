@@ -21,6 +21,9 @@
 #include "ili9341.h"
 #include "ascii.h"
 
+#define TFT_SIZE_HEIGHT	320
+#define TFT_SIZE_WIDTH	240
+
 class tft_t: public ili9341
 {
 public:
@@ -50,6 +53,7 @@ public:
 	inline uint8_t tabSize(void) const {return d.tabSize;}
 	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
 	inline bool portrait(void) const {return orient() == Portrait || orient() == FlipPortrait;}
+//	void putString
 
 #ifdef TFT_VERTICALSCROLLING
 	// Vertical scrolling related functions
@@ -121,18 +125,6 @@ FILE *tftout(tft_t *hw);
 
 // Defined as inline to execute faster
 
-#define WIDTH FONT_WIDTH
-#define HEIGHT FONT_HEIGHT
-#define SIZE_H 320
-#define SIZE_W 240
-#define DEF_FGC 0xFFFF
-#define DEF_BGC 0x0000
-#define SWAP(x, y) { \
-	(x) = (x) ^ (y); \
-	(y) = (x) ^ (y); \
-	(x) = (x) ^ (y); \
-}
-
 template <typename Type>
 inline void tft_t::swap(Type &a, Type &b)
 {
@@ -144,7 +136,7 @@ inline void tft_t::swap(Type &a, Type &b)
 #ifdef TFT_VERTICALSCROLLING
 inline uint16_t tft_t::vsMaximum(void) const
 {
-	return SIZE_H;
+	return TFT_SIZE_HEIGHT;
 }
 #endif
 
@@ -247,11 +239,11 @@ inline void tft_t::point(uint16_t x, uint16_t y, uint16_t c)
 inline void tft_t::newline(void)
 {
 	setX(0);
-	setY(y() + HEIGHT * zoom());
-	if (y() + HEIGHT * zoom() > height()) {
+	setY(y() + FONT_HEIGHT * zoom());
+	if (y() + FONT_HEIGHT * zoom() > height()) {
 #ifdef TFT_SCROLL
-		*this ^= HEIGHT * zoom;
-		y -= HEIGHT * zoom;
+		*this ^= FONT_HEIGHT * zoom;
+		y -= FONT_HEIGHT * zoom;
 #else
 		fill(background());
 		setY(0);
@@ -302,20 +294,11 @@ inline void tft_t::next(void)
 
 inline void tft_t::tab(void)
 {
-	if (x() % (WIDTH * zoom()))
-		setX(x() - x() % (WIDTH * zoom()));
+	if (x() % (FONT_WIDTH * zoom()))
+		setX(x() - x() % (FONT_WIDTH * zoom()));
 	do
 		next();
-	while ((x() / (WIDTH * zoom())) % tabSize());
+	while ((x() / (FONT_WIDTH * zoom())) % tabSize());
 }
-
-
-#undef WIDTH
-#undef HEIGHT
-#undef SIZE_H
-#undef SIZE_W
-#undef DEF_FGC
-#undef DEF_BGC
-#undef SWAP
 
 #endif
