@@ -375,6 +375,26 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 }
 #endif
 
+void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem)
+{
+	area(x, y, w, h);
+	start();
+	uint8_t i = 0, c = 0;
+	for (y = 0; y < h; y++)
+		for (x = 0; x < w; x++) {
+			if (i++ == 0)
+				c = progMem ? pgm_read_byte(ptr++) : *ptr++;
+			if (c & 0x80)
+				write16(foreground());
+			else
+				write16(background());
+			if (i == 8)
+				i = 0;
+			else
+				c <<= 1;
+		}
+}
+
 static tft_t *tft;
 
 inline int tftputch(const char c, FILE *stream)
