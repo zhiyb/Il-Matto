@@ -11,8 +11,9 @@
 #define MAX_AREA	(tft->vsMaximum())
 #define SCROLL_AREA	(tft->vsHeight())
 
-#define ITEM_NAME_X	16
-#define ITEM_NAME_Y	4
+#define ITEM_NAME_X	(ITEM_IMAGE_X + ITEM_IMAGE_SIZE + 16)
+#define ITEM_NAME_Y	8
+#define ITEM_IMAGE_X	16
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
 #define ITEM_EMPTY	"** EMPTY **"
 
@@ -86,12 +87,15 @@ disp:
 	tft->setBackground(c[index % (sizeof(c) / sizeof(c[1]))]);
 	tft->rectangle(0, ys, tft->width(), ITEM_HEIGHT, tft->background());
 	tft->setX(ITEM_NAME_X);
-	if (item)
+	if (item) {
+		if (item->image)
+			tft->drawImage2(item->image, ITEM_IMAGE_X, tft->y(), ITEM_IMAGE_SIZE, ITEM_IMAGE_SIZE, true);
 		tft->putString(item->name, true);
 #ifdef ITEM_EMPTY
-	else
+	} else {
 		tft->putString(PSTR(ITEM_EMPTY), true);
 #endif
+	}
 }
 
 void PortraitList::displayItems(const listItem **items, uint16_t index, uint16_t last) const
