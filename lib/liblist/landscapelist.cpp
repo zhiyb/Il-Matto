@@ -120,10 +120,10 @@ disp:
 	tft->rectangle(xs, ys, ITEM_WIDTH, ITEM_HEIGHT, tft->background());
 	tft->setY(ys + ITEM_NAME_Y);
 	if (item)
-		*tft << item->name;
+		tft->putString(item->name, true);
 #ifdef ITEM_EMPTY
 	else
-		*tft << ITEM_EMPTY;
+		tft->putString(PSTR(ITEM_EMPTY), true);
 #endif
 }
 

@@ -14,6 +14,7 @@
 #define ITEM_NAME_X	16
 #define ITEM_NAME_Y	4
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
+#define ITEM_EMPTY	"** EMPTY **"
 
 #define DEF_TOP_AREA	(ITEM_HEIGHT * 2)
 #define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 1)
@@ -85,7 +86,12 @@ disp:
 	tft->setBackground(c[index % (sizeof(c) / sizeof(c[1]))]);
 	tft->rectangle(0, ys, tft->width(), ITEM_HEIGHT, tft->background());
 	tft->setX(ITEM_NAME_X);
-	tft->putString(item ? item->name : "** EMPTY **", true);
+	if (item)
+		tft->putString(item->name, true);
+#ifdef ITEM_EMPTY
+	else
+		tft->putString(PSTR(ITEM_EMPTY), true);
+#endif
 }
 
 void PortraitList::displayItems(const listItem **items, uint16_t index, uint16_t last) const
