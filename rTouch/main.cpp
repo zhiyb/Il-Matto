@@ -45,7 +45,7 @@ start:
 	tft.setOrient(tft.Portrait);
 	tft.clean();
 	tft.setZoom(1);
-	puts("*** Touch ***");
+	puts_P(PSTR("*** Touch ***"));
 
 #ifdef AUTO_COLOUR
 	bool pressed = false;
