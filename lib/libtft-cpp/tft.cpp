@@ -54,7 +54,7 @@ void tft_t::putString(const char *str, bool progMem)
 #endif
 
 	char c;
-	while ((c = pgm_read_byte(str++)) != '\0') {
+	while ((c = progMem ? pgm_read_byte(str++) : *str++) != '\0') {
 		*this << c;
 #ifdef TFT_VERTICALSCROLLING
 		if (clip) {
