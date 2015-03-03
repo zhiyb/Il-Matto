@@ -48,7 +48,7 @@
 
 // Press / move threshold
 #ifndef RTOUCH_MOVETH
-#define RTOUCH_MOVETH	8
+#define RTOUCH_MOVETH	16
 #endif
 
 class rTouch
