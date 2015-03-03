@@ -1,9 +1,12 @@
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include "dac.h"
 
 int main(void)
 {
+	DDRB |= _BV(7);
 	init_dac();
+	sei();
 
 	uint8_t dac = 0;
 inc:
