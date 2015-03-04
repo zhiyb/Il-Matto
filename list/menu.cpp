@@ -9,13 +9,6 @@
 namespace menu
 {
 
-static tft_t *tft;
-
-void setTFT(tft_t *t)
-{
-	tft = t;
-}
-
 /****************** Miscellaneous item ******************/
 namespace misc
 {
