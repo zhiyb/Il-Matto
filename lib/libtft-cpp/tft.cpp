@@ -382,7 +382,8 @@ void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, u
 	// TODO: zooming support
 
 #ifdef TFT_VERTICALSCROLLING
-	uint16_t yt = 0, bMask;
+	uint16_t xt = 0, yt = 0, bMask;
+	uint8_t xs = 0, xe = 0;
 
 	if (!transform())
 		goto disp;
@@ -393,7 +394,7 @@ void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, u
 
 	// Top mask clipping
 	if (yt < topMask()) {
-		if (yt + h < topMask())
+		if (yt + h <= topMask())
 			return;
 		uint16_t s = topMask() - yt;
 		h -= s;
@@ -404,7 +405,7 @@ void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, u
 	}
 
 	// Bottom mask clipping
-	bMask = height() - bottomMask();
+	bMask = vsMaximum() - bottomMask();
 	if (yt >= bMask)
 		return;
 	if (yt + h > bMask)
@@ -416,6 +417,29 @@ void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, u
 	goto disp;
 
 landscape:
+	xt = vsTransformBack(x);
+
+	// Top mask clipping
+	if (xt < topMask()) {
+		if (xt + w <= topMask())
+			return;
+		xs = topMask() - xt;
+		xt = topMask();
+	}
+
+#if 0
+	// Bottom mask clipping
+	bMask = vsMaximum() - bottomMask();
+	if (xt >= bMask)
+		return;
+	if (xt + w > bMask)
+		xe = xt + w - bMask;
+#endif
+
+	// TODO: topEdge & bottomEdge clipping may need to implemented
+
+	x = vsTransform(xt);
+	w -= xs + xe;
 #endif
 
 #ifdef TFT_VERTICALSCROLLING
@@ -424,6 +448,7 @@ disp:
 	area(x, y, w, h);
 	start();
 #ifdef TFT_VERTICALSCROLLING
+	//bool xTransform = transform() && !portrait() && x < bottomEdge() && x + w - xs - xe > bottomEdge();
 	bool yTransform = transform() && portrait() && y < bottomEdge() && y + h > bottomEdge();
 #endif
 	for (uint8_t yy = 0; yy < h; yy++) {
@@ -432,6 +457,20 @@ disp:
 			area(x, topEdge(), w, h);
 			start();
 			yTransform = false;
+		}
+		uint8_t pi = i;
+		for (uint8_t xx = 0; xx < xs; xx++) {
+			if (i % 8 == 0)
+				c = progMem ? pgm_read_byte(ptr++) : *ptr++;
+			i++;
+		}
+		if (xs) {
+			//i += xs;
+			//ptr += (i + 1) / 8;
+			i = pi + xs;
+			i %= 8;
+			if (i)
+				c <<= i;
 		}
 #endif
 		for (uint8_t xx = 0; xx < w; xx++) {
