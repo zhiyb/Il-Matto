@@ -6,7 +6,7 @@ LIBFILES	= $(foreach lib,$(LIB),$(lib:%=$(LIBDIR)/lib%)/$(lib:%=lib%.a))
 
 export DEFS
 DEFS	+=
-LIBS	+= $(addprefix -L./,$(LIBDIRS)) $(addprefix -l$,$(LIB))
+NLIBS	+= $(addprefix -L./,$(LIBDIRS)) $(addprefix -l$,$(LIB))
 INCS	+= $(addprefix -I./,$(LIBDIRS))
 
 OBJS	= $(subst .S,.o,$(subst .c,.o,$(subst .cpp,.o,$(SRC))))
@@ -37,7 +37,7 @@ PHONYTRGS	+= elf lst map
 
 CLEAN_FILES	+= $(OBJS)
 $(PRG).elf: $(OBJS) $(LIBFILES)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(NLIBS) $(LIBS)
 	$(SIZE) $@
 
 %.o: %.c
