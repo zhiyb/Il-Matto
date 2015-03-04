@@ -183,113 +183,6 @@ draw:
 			write16(c);
 }
 
-void tft_t::putch(char ch)
-{
-#ifdef TFT_CHECKING
-	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
-		return;
-#endif
-	if ((int16_t)(x() + FONT_WIDTH * zoom()) < 0)
-		return;
-	uint8_t h = FONT_HEIGHT * zoom(), w = FONT_WIDTH * zoom();
-#ifdef TFT_VERTICALSCROLLING
-	// Display coordinate, start coordinate
-	uint16_t xx = x(), x0 = x();
-	uint16_t yy = y(), y0 = y();
-	uint8_t xStart = 0, xStop = w;
-	uint8_t yStart = 0, yStop = h;
-
-	if (transform()) {
-		if (!portrait()) {
-			yy = xx;
-			y0 = x0;
-			yStop = xStop;
-			swap(w, h);
-		}
-
-		uint16_t yt = vsTransformBack(yy);
-		if ((int16_t)yt < (int16_t)topEdge() && \
-			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
-			yStart = topEdge() - yt;
-			yy = upperEdge();
-			y0 = yy - yStart;
-			yt = vsTransformBack(yy);
-		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
-			yStop = bottomEdge() - yt;
-
-		if (yt < topMask()) {
-			if (yt + yStop - yStart < topMask())
-				return;
-			yy = vsTransform(topMask());
-			yStart += topMask() - yt;
-			y0 = yy - yStart;
-		}
-
-		uint16_t bMask = vsMaximum() - bottomMask();
-		if (yt >= bMask)
-			return;
-		if (yt + yStop - yStart > bMask)
-			yStop -= yt + yStop - yStart - bMask;
-
-		if (!portrait()) {
-			swap(w, h);
-			xx = yy;
-			x0 = y0;
-			xStart = yStart;
-			xStop = yStop;
-			yy = y();
-			y0 = y();
-			yStart = 0;
-			yStop = h;
-		}
-	}
-
-	bool xTransform = transform() && !portrait() && x0 < bottomEdge() && x0 + xStop - xStart > bottomEdge();
-	bool yTransform = transform() && portrait() && y0 < bottomEdge() && y0 + yStop - yStart > bottomEdge();
-	uint8_t xEnd = xTransform ? bottomEdge() - xx : xStop;
-draw:
-	area(xx, yy, xEnd - xStart, h);
-#else
-	area(x(), y(), w, h);
-#endif
-	start();
-#ifdef TFT_VERTICALSCROLLING
-	for (uint8_t i = yStart; i < yStop; i++) {
-		if (yTransform && y0 + i == bottomEdge()) {
-			area(x(), topEdge(), w, h);
-			start();
-			yTransform = false;
-		}
-#else
-	for (uint8_t i = 0; i < h; i++) {
-#endif
-		unsigned char c;
-#ifdef TFT_VERTICALSCROLLING
-		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()])) << (xStart / zoom());
-		for (uint8_t j = xStart; j < xEnd; j++) {
-#else
-		c = pgm_read_byte(&(ascii[ch - ' '][i / zoom()]));
-		for (uint8_t j = 0; j < w; j++) {
-#endif
-			if (c & 0x80)
-				write16(foreground());
-			else
-				write16(background());
-			if (j % zoom() == zoom() - 1)
-				c <<= 1;
-		}
-	}
-#ifdef TFT_VERTICALSCROLLING
-	if (xTransform) {
-		xx = topEdge();
-		xStart = xEnd;
-		xEnd = xStop;
-		xTransform = false;
-		goto draw;
-	}
-#endif
-}
-
 void tft_t::setOrient(uint8_t o)
 {
 	switch (o) {
@@ -375,13 +268,173 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 }
 #endif
 
+void tft_t::putch(char ch)
+{
+#ifdef TFT_CHECKING
+	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
+		return;
+#endif
+	if ((int16_t)(x() + FONT_WIDTH * zoom()) < 0)
+		return;
+	uint8_t h = FONT_HEIGHT * zoom(), w = FONT_WIDTH * zoom();
+#ifdef TFT_VERTICALSCROLLING
+	// Display coordinate, start coordinate
+	uint16_t xx = x();
+	uint16_t yy = y();
+	uint8_t xStart = 0, xStop = w;
+	uint8_t yStart = 0, yStop = h;
+
+	if (transform()) {
+		if (landscape()) {
+			yy = xx;
+			yStop = xStop;
+			swap(w, h);
+		}
+
+		uint16_t yt = vsTransformBack(yy);
+
+#if 0
+		if ((int16_t)yt < (int16_t)topEdge() && \
+			(int16_t)(yt + h) >= (int16_t)topEdge()) {	// Top edge clipping
+			yStart = topEdge() - yt;
+			yy = upperEdge();
+			yt = vsTransformBack(yy);
+		} else if (yt < bottomEdge() && yt + h >= bottomEdge())	// Bottom edge clipping
+			yStop = bottomEdge() - yt;
+#endif
+
+		// Top mask clipping
+		if (yt < topMask()) {
+			if (yt + yStop - yStart < topMask())
+				return;
+			yStart += topMask() - yt;
+			yt = topMask();
+			yy = vsTransform(yt);
+		}
+
+		// Bottom mask clipping
+		uint16_t bMask = vsMaximum() - bottomMask();
+		if (yt >= bMask)
+			return;
+		if (yt + yStop - yStart > bMask)
+			yStop -= yt + yStop - yStart - bMask;
+
+		if (landscape()) {
+			swap(w, h);
+			xx = yy;
+			xStart = yStart;
+			xStop = yStop;
+			yy = y();
+			yStart = 0;
+			yStop = h;
+		}
+	}
+
+	bool xTransform = transform() && !portrait() && xx < bottomEdge() && xx + xStop - xStart > bottomEdge();
+	bool yTransform = transform() && portrait() && yy < bottomEdge() && yy + yStop - yStart > bottomEdge();
+	uint8_t xEnd = xTransform ? bottomEdge() - xx : xStop;
+draw:
+	area(xx, yy, xEnd - xStart, h);
+#else
+	area(x(), y(), w, h);
+#endif
+	start();
+#ifdef TFT_VERTICALSCROLLING
+	for (uint8_t yi = yStart; yi < yStop; yi++) {
+		if (yTransform && yy + yi - yStart == bottomEdge()) {
+			area(x(), topEdge(), w, h);
+			start();
+			yTransform = false;
+		}
+#else
+	for (uint8_t yi = 0; yi < h; yi++) {
+#endif
+		unsigned char c;
+#ifdef TFT_VERTICALSCROLLING
+		c = pgm_read_byte(&(ascii[ch - ' '][yi / zoom()])) << (xStart / zoom());
+		for (uint8_t xi = xStart; xi < xEnd; xi++) {
+#else
+		c = pgm_read_byte(&(ascii[ch - ' '][yi / zoom()]));
+		for (uint8_t xi = 0; xi < w; xi++) {
+#endif
+			if (c & 0x80)
+				write16(foreground());
+			else
+				write16(background());
+			if ((xi + 1) % zoom() == 0)
+				c <<= 1;
+		}
+	}
+#ifdef TFT_VERTICALSCROLLING
+	if (xTransform) {
+		xx = topEdge();
+		xStart = xEnd;
+		xEnd = xStop;
+		xTransform = false;
+		goto draw;
+	}
+#endif
+}
+
 void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem)
 {
+	uint8_t i = 0, c = 0;
+	// TODO: zooming support
+
+#ifdef TFT_VERTICALSCROLLING
+	uint16_t yt = 0, bMask;
+
+	if (!transform())
+		goto disp;
+	if (landscape())
+		goto landscape;
+
+	yt = vsTransformBack(y);
+
+	// Top mask clipping
+	if (yt < topMask()) {
+		if (yt + h < topMask())
+			return;
+		uint16_t s = topMask() - yt;
+		h -= s;
+		yt = topMask();
+		ptr += s * w / 8;
+		i = (s * w) % 8;
+		c = *ptr << i;
+	}
+
+	// Bottom mask clipping
+	bMask = height() - bottomMask();
+	if (yt >= bMask)
+		return;
+	if (yt + h > bMask)
+		h -= yt + h - bMask;
+
+	// TODO: topEdge & bottomEdge clipping may need to implemented
+
+	y = vsTransform(yt);
+	goto disp;
+
+landscape:
+#endif
+
+#ifdef TFT_VERTICALSCROLLING
+disp:
+#endif
 	area(x, y, w, h);
 	start();
-	uint8_t i = 0, c = 0;
-	for (y = 0; y < h; y++)
-		for (x = 0; x < w; x++) {
+#ifdef TFT_VERTICALSCROLLING
+	bool yTransform = transform() && portrait() && y < bottomEdge() && y + h > bottomEdge();
+#endif
+	for (uint8_t yy = 0; yy < h; yy++) {
+#ifdef TFT_VERTICALSCROLLING
+		if (yTransform && y + yy == bottomEdge()) {
+			area(x, topEdge(), w, h);
+			start();
+			yTransform = false;
+		}
+#endif
+		for (uint8_t xx = 0; xx < w; xx++) {
 			if (i++ == 0)
 				c = progMem ? pgm_read_byte(ptr++) : *ptr++;
 			if (c & 0x80)
@@ -393,6 +446,7 @@ void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, u
 			else
 				c <<= 1;
 		}
+	}
 }
 
 static tft_t *tft;

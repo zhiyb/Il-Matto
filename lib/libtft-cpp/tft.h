@@ -53,6 +53,7 @@ public:
 	inline uint8_t tabSize(void) const {return d.tabSize;}
 	inline bool flipped(void) const {return orient() == FlipPortrait || orient() == FlipLandscape;}
 	inline bool portrait(void) const {return orient() == Portrait || orient() == FlipPortrait;}
+	inline bool landscape(void) const {return !portrait();}
 	void putString(const char *str, bool progMem = false);
 	void drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
 

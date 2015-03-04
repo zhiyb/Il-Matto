@@ -15,6 +15,7 @@ extern "C" {
 #include <avr/pgmspace.h>
 
 extern const unsigned char ascii[96][8] PROGMEM;
+extern const unsigned char ascii_stripped[96][6] PROGMEM;
 
 #ifdef __cplusplus
 }

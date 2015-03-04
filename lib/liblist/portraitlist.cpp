@@ -11,17 +11,19 @@
 #define MAX_AREA	(tft->vsMaximum())
 #define SCROLL_AREA	(tft->vsHeight())
 
-#define ITEM_NAME_X	(ITEM_IMAGE_X + ITEM_IMAGE_SIZE + 16)
-#define ITEM_NAME_Y	8
-#define ITEM_IMAGE_X	16
+#define ITEM_SPACE	8
+#define ITEM_NAME_X	(ITEM_IMAGE_X + ITEM_IMAGE_SIZE + ITEM_SPACE)
+#define ITEM_NAME_Y	6
+#define ITEM_IMAGE_X	ITEM_SPACE
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
 #define ITEM_EMPTY	"** EMPTY **"
 
-#define DEF_TOP_AREA	(ITEM_HEIGHT * 2)
+#define DEF_TOP_AREA	(ITEM_HEIGHT * 1)
 #define DEF_BOTTOM_AREA	(ITEM_HEIGHT * 1)
 
 void PortraitList::refresh(void)
 {
+	tft->setBackground(0);
 	tft->clean();
 	tft->setZoom(ZOOM);
 	display();
@@ -45,8 +47,8 @@ void PortraitList::display(listItem *item)
 		scr = 0;
 	}
 	tft->setVerticalScrolling(TOP_AREA + scroll() % SCROLL_AREA);
-	tft->setTopMask(0);
-	tft->setBottomMask(0);
+	tft->setTopMask(tft->topEdge());
+	tft->setBottomMask(tft->vsMaximum() - tft->bottomEdge());
 	tft->setY(0);
 	displayItem(currentItem());
 	displayItems(currentItem()->items);
