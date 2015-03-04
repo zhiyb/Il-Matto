@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <eemem.h>
 #include "tft.h"
 #include "sound.h"
 #include "display.h"
@@ -25,6 +26,7 @@ void init(void)
 	Print_frame();
 	Tetris_mem_init();
 	Tetris_init();
+	eeprom_first_done();
 /*	#define BAUD 115200
 	#include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;
