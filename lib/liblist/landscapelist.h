@@ -6,12 +6,13 @@
 #define LANDSCALELIST_H
 
 #include <tft.h>
+#include <rtouch.h>
 #include "list.h"
 
 class LandscapeList
 {
 public:
-	LandscapeList(tft_t *tft) : scr(0), max(0), cnt(0), focus(-1), curItem(0) {this->tft = tft;}
+	LandscapeList(tft_t *tft) : curItem(0), pressed(false) {this->tft = tft;}
 
 	listItem *currentItem(void) const {return curItem;}
 	void setCurrentItem(listItem *item) {curItem = item;}
@@ -23,22 +24,25 @@ public:
 	void scrollUp(uint16_t s);
 	void scrollDown(uint16_t s);
 	uint16_t count(void) const {return cnt;}
-	void setFocus(uint16_t index);
+	// Not transformed coordinate
+	void clickOn(uint16_t x, uint16_t y);
+	void activate(uint16_t index);
+	void pool(rTouch *touch);
 
 private:
-	void lostFocus(uint16_t index) {}	// TODO
-	uint16_t countItems(const listItem **items = 0) const;
-	// Scroll, y-coordinate
-	//listItem *itemAt(uint16_t index, uint16_t count) const;
-	uint16_t itemAt(const uint16_t s, const uint16_t y) const;
 	void scrollTo(const uint16_t s);
-	// tft->y() specify(index = -1) should not transform
+	uint16_t countItems(const listItem **items = 0) const;
+	uint16_t itemAt(const uint16_t s, const uint16_t y) const;
+	const listItem **itemsAt(const uint16_t index);
+	// tft->x() specify(index = -1) should not transform
 	void displayItem(const listItem *item, const uint16_t index = -1) const;
 	void displayItems(const listItem **items, uint16_t index = 0, uint16_t last = 0) const;
 
-	uint16_t scr, max, cnt, focus;
-	listItem *curItem;
 	tft_t *tft;
+	listItem *curItem;
+	bool pressed;
+	rTouch::coord_t prev;
+	uint16_t scr, max, cnt;
 };
 
 #endif

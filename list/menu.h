@@ -3,6 +3,8 @@
 
 #include <list.h>
 
-extern listItem menuRoot;
+extern listItem item_root;
+
+bool func_toggle(void);
 
 #endif

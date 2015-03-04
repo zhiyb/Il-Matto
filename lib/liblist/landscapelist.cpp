@@ -13,18 +13,22 @@
 #define SCROLL_AREA	(tft->vsHeight())
 
 #define ITEM_PER_COL	4
-#define ITEM_WIDTH	(FONT_WIDTH * ZOOM * 10)
-#define ITEM_HEIGHT	(tft->height() / ITEM_PER_COL)
+#define ITEM_SPACE	8
 #define ITEM_NAME_X	((ITEM_WIDTH - FONT_WIDTH * ZOOM * 7) / 2)
 #define ITEM_NAME_Y	((ITEM_HEIGHT - FONT_HEIGHT * ZOOM))
+#define ITEM_IMAGE_X	ITEM_SPACE
+#define ITEM_WIDTH	(FONT_WIDTH * ZOOM * 10)
+#define ITEM_HEIGHT	(tft->height() / ITEM_PER_COL)
 #define ITEM_EMPTY	"*EMPTY*"
 
 #define DEF_TOP_AREA	(ITEM_WIDTH * 0 + 8)
 #define DEF_BOTTOM_AREA	(ITEM_WIDTH * 0 + 32)
 
+using namespace colours::b16;
+
 void LandscapeList::refresh(void)
 {
-	tft->setBackground(0x0000);
+	tft->setBackground(Black);
 	tft->clean();
 	tft->setZoom(ZOOM);
 	display();
@@ -48,20 +52,14 @@ void LandscapeList::display(listItem *item)
 		scr = 0;
 	}
 	tft->setVerticalScrolling(TOP_AREA + scroll() % SCROLL_AREA);
-	tft->setTopMask(0);
-	tft->setBottomMask(0);
+	tft->setTopMask(tft->topEdge());
+	tft->setBottomMask(tft->vsMaximum() - tft->bottomEdge());
 	if (DEF_TOP_AREA >= ITEM_WIDTH) {
 		tft->setXY(0, 0);
 		displayItem(currentItem());
 	}
 	displayItems(currentItem()->items);
 }
-
-/*void LandscapeList::setFocus(uint16_t index) const
-{
-	if (focus != (uint16_t) -1)
-		lostFocus(focus);
-}*/
 
 uint16_t LandscapeList::countItems(const listItem **items) const
 {
@@ -73,58 +71,46 @@ uint16_t LandscapeList::countItems(const listItem **items) const
 	return i;
 }
 
-/*listItem *itemAt(uint16_t index) const
-{
-	const listItem **items = curItem->items;
-	if (count() <= index)
-		items += count();
-	else
-		items += index;
-}*/
-
-uint16_t LandscapeList::itemAt(const uint16_t s, const uint16_t y) const
-{
-	uint16_t index = s / ITEM_WIDTH * ITEM_PER_COL;
-	index += y / ITEM_HEIGHT;
-	return index;
-}
-
 void LandscapeList::displayItem(const listItem *item, const uint16_t index) const
 {
-	uint16_t xs, ys;
+	uint16_t xs, ys, yt, xt;
 	if (index != (uint16_t)-1) {
-		xs = index / ITEM_PER_COL * ITEM_WIDTH;		// Relative to top edge
-		ys = index % ITEM_PER_COL * ITEM_HEIGHT;
-		if (xs + ITEM_WIDTH < scroll())			// Out of scroll area
+		xt = index / ITEM_PER_COL * ITEM_WIDTH;		// Relative to top edge
+		yt = index % ITEM_PER_COL * ITEM_HEIGHT;
+		if (xt + ITEM_WIDTH < scroll())			// Out of scroll area
 			return;
-		if (xs < scroll()) {				// Above top edge
-			xs = tft->topEdge() - (scroll() - xs);
-			tft->setX(tft->vsTransform(xs + ITEM_NAME_X));
+		if (xt < scroll()) {				// Above top edge
+			xt = tft->topEdge() - (scroll() - xt);
+			tft->setX(tft->vsTransform(xt + ITEM_NAME_X));
 			goto disp;
 		}
-		xs -= scroll();					// Relative to top edge
-		if (xs >= tft->vsHeight())			// Out of scroll area
+		xt -= scroll();					// Relative to top edge
+		if (xt >= tft->vsHeight())			// Out of scroll area
 			return;
-		xs += tft->topEdge();				// Relative to 0, not tramsformed
+		xt += tft->topEdge();				// Relative to 0, not tramsformed
 	} else {
-		xs = tft->x();
-		ys = tft->y();
+		xt = tft->x();
+		yt = tft->y();
 	}
-	tft->setX(tft->vsTransform(xs + ITEM_NAME_X));
-	xs = tft->vsTransform(xs);
+	tft->setX(tft->vsTransform(xt + ITEM_NAME_X));
 
-	using namespace colours::b16;
-	static uint16_t c[] = {Red, Green, Blue, Yellow, Cyan, Magenta};
 disp:
+	xs = tft->vsTransform(xt);
+	ys = yt;
+
+	static uint16_t c[] = {Red, Green, Blue, Yellow, Cyan, Magenta};
 	tft->setBackground(c[index % (sizeof(c) / sizeof(c[1]))]);
 	tft->rectangle(xs, ys, ITEM_WIDTH, ITEM_HEIGHT, tft->background());
 	tft->setY(ys + ITEM_NAME_Y);
-	if (item)
+	if (item) {
+		if (item->image)
+			tft->drawImage2(item->image, tft->vsTransform(xt + ITEM_IMAGE_X), ys, ITEM_IMAGE_SIZE, ITEM_IMAGE_SIZE, true);
 		tft->putString(item->name, true);
 #ifdef ITEM_EMPTY
-	else
+	} else {
 		tft->putString(PSTR(ITEM_EMPTY), true);
 #endif
+	}
 }
 
 void LandscapeList::displayItems(const listItem **items, uint16_t index, uint16_t last) const
@@ -195,10 +181,65 @@ void LandscapeList::scrollUp(uint16_t s)
 	tft->setBottomMask(tft->vsMaximum() - (s > tft->vsHeight() ? tft->bottomEdge() : tft->topEdge() + s));
 	tft->setVerticalScrolling(TOP_AREA + scroll() % SCROLL_AREA);
 	uint16_t first = itemAt(scroll(), 0);
+	displayItems(itemsAt(first), first, last);
+}
+
+const listItem **LandscapeList::itemsAt(const uint16_t index)
+{
 	const listItem **items = curItem->items;
-	if (count() <= first)
+	if (count() <= index)
 		items += count();
 	else
-		items += first;
-	displayItems(items, first, last);
+		items += index;
+	return items;
+}
+
+uint16_t LandscapeList::itemAt(const uint16_t s, const uint16_t y) const
+{
+	uint16_t index = s / ITEM_WIDTH * ITEM_PER_COL;
+	index += y / ITEM_HEIGHT;
+	return index;
+}
+
+void LandscapeList::clickOn(uint16_t x, uint16_t y)
+{
+	if (x < tft->topEdge() || x >= tft->bottomEdge())
+		return;
+	activate(itemAt(scroll() + x - tft->topEdge(), y));
+	return;
+}
+
+void LandscapeList::activate(uint16_t index)
+{
+	const listItem *item = *itemsAt(index);
+	if (item->func)
+		item->func();
+}
+
+void LandscapeList::pool(rTouch *touch)
+{
+	rTouch::coord_t pos = touch->position();
+	switch(touch->status()) {
+	case rTouch::Pressed:
+		pressed = true;
+		break;
+	case rTouch::Moved:
+		pressed = false;
+		if (prev.y > 0 && (int16_t)scroll() - pos.x + prev.x >= 0)
+			setScroll((int16_t)scroll() - pos.x + prev.x);
+		break;
+	case rTouch::Idle:
+		if (pressed)
+			clickOn(pos.x, pos.y);
+		pressed = false;
+		break;
+	}
+#ifdef DEBUG
+	using namespace colours::b16;
+	tft->rectangle(tft->topEdge() - 1, 0, 1, tft->height(), White);
+	tft->rectangle(tft->bottomEdge(), 0, 1, tft->width(), White);
+	tft->rectangle(tft->bottomEdge() - 1, 0, 1, tft->width(), Black);
+#endif
+	prev.x = pos.x;
+	prev.y = pos.y;
 }

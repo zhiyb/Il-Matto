@@ -59,7 +59,8 @@ int main(void)
 	tft.setForeground(0x0000);
 
 	l.refresh();
-	l.display(&menuRoot);
+	l.setRootItem(&item_root);
+	l.display(&item_root);
 
 pool:
 	l.pool(&touch);
