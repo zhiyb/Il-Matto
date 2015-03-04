@@ -29,10 +29,10 @@ void init(void)
 {
 	DDRB |= _BV(7);			// LED
 	PORTB |= _BV(7);
-	DDRD |= _BV(6);
-	PORTD |= _BV(6);
+
 	adc_init();
 	adc_enable();
+
 	tft.init();
 #ifdef LANDSCAPE
 	tft.setOrient(tft.FlipLandscape);
@@ -42,7 +42,9 @@ void init(void)
 	tft.setBackground(0x0000);
 	tft.setForeground(0x667F);
 	tft.clean();
+
 	stdout = tftout(&tft);
+	menu::setTFT(&tft);
 	touch.init();
 	sei();
 
@@ -59,8 +61,8 @@ int main(void)
 	tft.setForeground(0x0000);
 
 	l.refresh();
-	l.setRootItem(&item_root);
-	l.display(&item_root);
+	l.setRootItem(&menu::root::item);
+	l.display(&menu::root::item);
 
 pool:
 	l.pool(&touch);

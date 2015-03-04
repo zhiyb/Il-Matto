@@ -1,7 +1,9 @@
 #include <avr/io.h>
 #include "menu.h"
 
-bool func_toggle(void)
+using namespace menu;
+
+bool toggle::func(void)
 {
 	PINB |= _BV(7);
 	return false;
