@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdio.h>
 #include <util/delay.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #include "file.h"
 #include "errno.h"
 #include "apps.h"
+#include "dac.h"
 
 #define PI	3.1415927
 
@@ -23,6 +25,8 @@ void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
+	init_dac();
+	sei();
 	tft.init();
 	tft.setOrient(tft.FlipLandscape);
 	tft.setForeground(conv::c32to16(0x00FF00));
@@ -73,7 +77,7 @@ start:
 	}
 	op::setfs(&fs);
 
-#if 1
+#if 0
 	puts("\nReading '/Il Matto/Testing' directory...");
 	DIR *dir = op::opendir("/Il Matto/Testing");
 	if (dir == NULL) {
@@ -115,7 +119,7 @@ start:
 #endif
 	pwm::init();
 	timer1::init();
-	apps::wav("/Il Matto/Testing/8bit.wav");
+	apps::wav("/Il Matto/Testing/nyan.wav");
 
 	goto fin;
 

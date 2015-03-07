@@ -8,6 +8,7 @@
 #include "file.h"
 #include "tty.h"
 #include "pwm.h"
+#include "dac.h"
 
 namespace apps
 {
@@ -120,6 +121,7 @@ static uint8_t apps::wav(const char *path)
 		while (!timer1::over());
 		timer1::clear();
 		pwm::set(ch);
+		set_dac(ch);
 	}
 	timer1::stop();
 	pwm::enable(false);

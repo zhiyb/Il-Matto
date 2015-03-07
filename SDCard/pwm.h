@@ -28,9 +28,9 @@ static void pwm::init(void)
 static inline void pwm::enable(const bool e)
 {
 	if (e)
-		TCCR2A = _BV(COM2A1) | _BV(WGM20);
+		TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
 	else
-		TCCR2A = _BV(WGM20);
+		TCCR2A = _BV(WGM20) | _BV(WGM21);
 }
 
 #endif

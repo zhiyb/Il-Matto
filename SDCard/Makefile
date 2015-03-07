@@ -1,7 +1,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= SDCard
-SRC	= dirent.cpp errno.cpp fat32.cpp file.cpp main.cpp sd.cpp
+SRC	= dirent.cpp errno.cpp fat32.cpp file.cpp main.cpp sd.cpp dac.c
 LIB	= tft-cpp
 LIBDIR	= ../lib
 VERSION	= 0.0.1
