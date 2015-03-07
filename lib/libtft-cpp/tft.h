@@ -83,6 +83,8 @@ public:
 	inline void setTopMask(const uint16_t lm) {d.topMask = lm;}
 	inline uint16_t bottomMask(void) const {return d.bottomMask;}
 	inline void setBottomMask(const uint16_t lm) {d.bottomMask = lm;}
+	// Return to normal mode (disable transform, vertical scrolling)
+	inline void vsNormal(void) {setTransform(false); setVerticalScrolling(topEdge());}
 #endif
 
 	inline void clean(void) {fill(background()); setX(0); setY(0);}

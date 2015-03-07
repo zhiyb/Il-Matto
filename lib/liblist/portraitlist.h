@@ -26,8 +26,9 @@ public:
 	uint16_t count(void) const {return cnt;}
 	// Not transformed coordinate
 	void clickOn(uint16_t x, uint16_t y);
-	void activate(uint16_t index);
 	void toUpperLevel(void);
+	void activate(uint16_t index) {activate(*itemsAt(index), true);}
+	void activate(const listItem *item, const bool enter = true);
 	void pool(rTouch *touch);
 
 private:
@@ -36,13 +37,14 @@ private:
 	uint16_t countItems(const listItem **items = 0) const;
 	uint16_t itemAt(const uint16_t s, const uint16_t y) const;
 	const listItem **itemsAt(const uint16_t index) const;
+	void displayTop(void) const;
 	// tft->y() specify(index = -1) should not transform
 	void displayItem(const listItem *item, const uint16_t index = -1) const;
 	void displayItems(const listItem **items, uint16_t index = 0, uint16_t last = 0) const;
 
 	tft_t *tft;
 	const listItem *curItem;
-	const listItem *stack[ITEM_STACK_SIZE];
+	const listItem *stack[LIST_STACK_SIZE];
 	rTouch::coord_t prev;
 	uint16_t scr, max, cnt;
 	uint8_t stackSize;

@@ -7,22 +7,36 @@
 
 // Size of image on each items
 #ifndef ITEM_IMAGE_SIZE
-#define ITEM_IMAGE_SIZE	(FONT_HEIGHT * 2)
+#define ITEM_IMAGE_SIZE		(FONT_HEIGHT * 2)
+#endif
+
+// Size of reserved area on top
+#ifndef LIST_TOP_RESERVED
+#define LIST_TOP_RESERVED	0
+#endif
+
+// Size of reserved area on top
+#ifndef LIST_BOTTOM_RESERVED
+#define LIST_BOTTOM_RESERVED	0
 #endif
 
 // Sub menus stack level
-#ifndef ITEM_STACK_SIZE
-#define ITEM_STACK_SIZE	5
+#ifndef LIST_STACK_SIZE
+#define LIST_STACK_SIZE		5
 #endif
 
 #include <avr/pgmspace.h>
 #include <inttypes.h>
 
 struct listItem {
+	// Display name of this item
 	const char *name;
+	// Icon of this item
 	const uint8_t *image;
+	// Children items (sub menu)
 	const listItem **items;
-	bool (*func)(void);
+	// Function to execute, arg: Enter or leave, ret: Accept
+	bool (*func)(bool enter);
 };
 
 #endif

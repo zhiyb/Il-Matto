@@ -1,5 +1,6 @@
 LIBNAME		= liblist
-LIBSRC		= landscapelist.cpp portraitlist.cpp
+LIBSRC		= portraitlist.cpp
+# landscapelist.cpp
 
 LIB		= tft-cpp rTouch
 
