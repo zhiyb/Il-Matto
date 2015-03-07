@@ -13,7 +13,7 @@ OPTIMIZE	= -Os
 # FAST define: no checks etc
 DEFS	+= -DF_CPU=12000000
 #DEFS	+= -DRTOUCH_SAFE
-DEFS	+= -DRTOUCH_SWAPXY
+#DEFS	+= -DRTOUCH_SWAPXY
 LIBS	+= -lm
 INCS	+=
 

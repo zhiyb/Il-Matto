@@ -54,6 +54,13 @@ void rTouch::init(void)
 	pcint_set(RTOUCH_PCMSK, RTOUCH_XP);
 	pcint_enable(RTOUCH_PCMSK);
 	adc_register_ISR(rTouchADCISR);
+
+	// First pressed detection
+	if (RTOUCH_DETECT()) {
+		pcint_disable(RTOUCH_PCMSK);
+		rTouchMode(ReadY);
+		adc_request(RTOUCH_YC);
+	}
 }
 
 const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
@@ -150,9 +157,10 @@ rTouch::Status rTouch::status(void)
 	return Moved;
 }
 
-void rTouch::calibrate(void)
+void rTouch::calibrate(bool reset)
 {
-	if (!eeprom_first()) {
+	_delay_ms(5);
+	if (!reset && !eeprom_first() && !pressed()) {
 		eeprom_read_block(cal, NVcal, sizeof(NVcal));
 		calibrated = true;
 		return;
@@ -173,6 +181,7 @@ void rTouch::calibrate(void)
 
 	calibration caldata;
 	calibrated = false;
+	while (pressed());
 recalibrate:
 	for (uint8_t i = 0; i < 5; i++) {
 		const coord_t pos = calibrationPoint(i);
@@ -279,9 +288,8 @@ static void rTouchADCISR(uint8_t channel, uint16_t result)
 		ts.postmp.x = result;
 		rTouchMode(Detection);
 		if (RTOUCH_DETECT()) {
-			if (rTouchAverager(ts.postmp.x, ts.postmp.y)) {
+			if (rTouchAverager(ts.postmp.x, ts.postmp.y))
 				ts.pressed = true;
-			}
 			rTouchMode(ReadY);
 			adc_request(RTOUCH_YC);
 		} else {

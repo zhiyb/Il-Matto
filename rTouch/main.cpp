@@ -12,7 +12,7 @@
 #include <eemem.h>
 #include <adc.h>
 
-#define AUTO_COLOUR
+//#define AUTO_COLOUR
 
 tft_t tft;
 rTouch touch(&tft);

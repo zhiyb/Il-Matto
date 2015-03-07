@@ -33,8 +33,8 @@ static struct request_t *request_dequeue(void)
 void adc_init(void)
 {
 	// Clear interrupt, Interrupt enable
-	// Clock rate F_CPU / 64 ~ 187kHz (< 200kHz)
-	ADCSRA = _BV(ADIF) | _BV(ADIE) | 6;
+	// Clock rate F_CPU / 128 ~ 94kHz (< 200kHz)
+	ADCSRA = _BV(ADIF) | _BV(ADIE) | 7;
 	handlers = 0;
 	requests = 0;
 }

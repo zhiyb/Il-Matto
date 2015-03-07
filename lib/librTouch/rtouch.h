@@ -38,12 +38,12 @@
 
 // Valid data variance
 #ifndef RTOUCH_DELTA
-#define RTOUCH_DELTA	10
+#define RTOUCH_DELTA	24
 #endif
 
 // Averager level
 #ifndef RTOUCH_AVERAGER
-#define RTOUCH_AVERAGER	32
+#define RTOUCH_AVERAGER	16
 #endif
 
 // Press / move threshold
@@ -64,8 +64,8 @@ public:
 	void init(void);
 	const coord_t position(void);
 	const coord_t waitForPress(void);
-	void calibrate(void);
-	void recalibrate(void) {calibrated = false; calibrate();}
+	void calibrate(bool reset = false);
+	void recalibrate(void) {calibrate(true);}
 	static bool pressed(void);
 	Status status(void);
 
