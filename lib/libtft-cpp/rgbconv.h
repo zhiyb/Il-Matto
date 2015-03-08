@@ -1,4 +1,4 @@
-/* 
+/*
  * Author: Yubo Zhi (yz39g13@soton.ac.uk)
  */
 
@@ -13,6 +13,7 @@ namespace conv
 	static inline uint32_t c32i(uint32_t c32);
 	static inline uint16_t c32to16(uint32_t c32);
 	static inline uint16_t c32to16i(uint32_t c32);
+	static inline uint32_t c32(uint8_t red, uint8_t green, uint8_t blue);
 }
 
 // Inline functions
@@ -42,6 +43,13 @@ static inline uint16_t conv::c32to16(uint32_t c32)
 static inline uint16_t conv::c32to16i(uint32_t c32)
 {
 	return c32to16(c32i(c32));
+}
+
+static inline uint32_t conv::c32(uint8_t red, uint8_t green, uint8_t blue)
+{
+	return ((uint32_t)red << 16) | \
+		((uint32_t)green << 8) | \
+		((uint32_t)blue << 0);
 }
 
 #endif
