@@ -268,8 +268,7 @@ static bool rTouchAverager(uint16_t x, uint16_t y)
 	if (averager.level < RTOUCH_AVERAGER) {
 		averager.x[averager.level] = x;
 		averager.y[averager.level] = y;
-		averager.current = averager.level;
-		averager.level++;
+		averager.current = averager.level++;
 		return false;
 	}
 	if (++averager.current == RTOUCH_AVERAGER)
