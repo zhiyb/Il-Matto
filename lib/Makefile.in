@@ -7,8 +7,6 @@ MCU_FREQ	?= 12000000
 OPTIMIZE	?= -Os
 DEFS		?= -DF_CPU=$(MCU_FREQ)
 DEFS		+= -Wall -Werror
-DEFS		+= -fpack-struct -fshort-enums
-DEFS		+= -funsigned-bitfields -funsigned-char
 
 LIBDIRS	= $(addprefix $(LIBDIR)/lib,$(LIBLIST) $(LIB))
 SUBDIRS += $(LIBDIRS)
