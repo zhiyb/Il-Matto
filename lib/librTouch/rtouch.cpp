@@ -25,14 +25,16 @@
 enum Functions {Detection = 0, ReadX, ReadY};
 
 int32_t EEMEM rTouch::NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
+
 static struct {
 	volatile bool pressed;
-	rTouch::coord_t pos, postmp;
+	rTouch::coord_t postmp;
 } ts;
+
 static struct averager_t {
 	uint8_t level, current;
 	uint16_t x[RTOUCH_AVERAGER], y[RTOUCH_AVERAGER];
-} averager = {0, 0};
+} averager;
 
 static inline void rTouchMode(Functions func);
 static void rTouchADCISR(uint8_t channel, uint16_t result);
@@ -143,15 +145,15 @@ rTouch::Status rTouch::status(void)
 		stat.pressed = false;
 		return Idle;
 	}
-	coord_t res = position();
+	coord_t pos = position();
 	if (!stat.pressed) {
-		stat.prev.x = res.x;
-		stat.prev.y = res.y;
+		stat.prev.x = pos.x;
+		stat.prev.y = pos.y;
 		stat.moved = false;
 		stat.pressed = true;
 		return Pressed;
 	}
-	if (!stat.moved && abs(stat.prev.x - res.x) + abs(stat.prev.y - res.y) < RTOUCH_MOVETH)
+	if (!stat.moved && abs(stat.prev.x - pos.x) + abs(stat.prev.y - pos.y) < RTOUCH_MOVETH)
 		return Pressed;
 	stat.moved = true;
 	return Moved;
@@ -254,9 +256,9 @@ static inline void rTouchMode(Functions func)
 	};
 }
 
-static inline bool rTouchAverager(uint16_t x, uint16_t y)
+static bool rTouchAverager(uint16_t x, uint16_t y)
 {
-	if (!averager.level || abs(x - averager.x[averager.current]) + abs(y - averager.y[averager.current]) > RTOUCH_DELTA) {
+	if (!averager.level || abs(x - averager.x[averager.current]) + abs(y - averager.y[averager.current]) >= RTOUCH_DELTA) {
 		averager.level = 1;
 		averager.current = 0;
 		averager.x[0] = x;
@@ -266,7 +268,8 @@ static inline bool rTouchAverager(uint16_t x, uint16_t y)
 	if (averager.level < RTOUCH_AVERAGER) {
 		averager.x[averager.level] = x;
 		averager.y[averager.level] = y;
-		averager.current = averager.level++;
+		averager.current = averager.level;
+		averager.level++;
 		return false;
 	}
 	if (++averager.current == RTOUCH_AVERAGER)

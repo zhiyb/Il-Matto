@@ -54,7 +54,7 @@
 class rTouch
 {
 public:
-	enum Status {Idle, Pressed, Moved};
+	enum Status {Idle = 0, Pressed, Moved};
 
 	struct coord_t {
 		int16_t x, y;
