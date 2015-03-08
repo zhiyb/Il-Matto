@@ -80,6 +80,7 @@ void PortraitList::displayTop(void) const
 	tft->setZoom(ZOOM);
 	tft->setTransform(false);
 	displayItem(currentItem());
+	tft->frame(0, DEF_TOP_AREA - ITEM_HEIGHT, tft->width(), ITEM_HEIGHT, ZOOM, Grey);
 }
 
 void PortraitList::displayItem(const listItem *item, const uint16_t index) const
