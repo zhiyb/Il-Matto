@@ -120,7 +120,7 @@ void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 
 void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c)
 {
-	if (!h || !w)
+	if ((int16_t)w <= 0 || (int16_t)h <= 0)
 		return;
 
 #ifdef TFT_VERTICALSCROLLING
@@ -173,6 +173,23 @@ void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 
 disp:
 #endif
+	if ((int16_t)x < 0) {
+		w -= -(int16_t)x;
+		x = 0;
+	}
+	if ((int16_t)y < 0) {
+		h -= -(int16_t)y;
+		y = 0;
+	}
+	if ((int16_t)w <= 0 || (int16_t)h <= 0)
+		return;
+	if (x + w > width())
+		w = width() - x;
+	if (y + h > height())
+		h = height() - y;
+	if ((int16_t)w <= 0 || (int16_t)h <= 0)
+		return;
+
 	area(x, y, w, h);
 #ifdef TFT_VERTICALSCROLLING
 draw:
