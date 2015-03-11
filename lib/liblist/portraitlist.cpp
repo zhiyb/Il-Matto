@@ -268,8 +268,8 @@ void PortraitList::pool(rTouch *touch)
 			setScroll((int16_t)scroll() - pos.y + prev.y);
 		break;
 	case rTouch::Idle:
-		if (pressed)
-			clickOn(pos.x, pos.y);
+		if (pressed && prev.x > 0)
+			clickOn(prev.x, prev.y);
 		pressed = false;
 		break;
 	}
