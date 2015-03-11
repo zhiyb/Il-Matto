@@ -368,10 +368,10 @@ draw:
 #endif
 		unsigned char c;
 #ifdef TFT_VERTICALSCROLLING
-		c = pgm_read_byte(&(ascii[ch - ' '][yi / zoom()])) << (xStart / zoom());
+		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom()])) << (xStart / zoom());
 		for (uint8_t xi = xStart; xi < xEnd; xi++) {
 #else
-		c = pgm_read_byte(&(ascii[ch - ' '][yi / zoom()]));
+		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom()]));
 		for (uint8_t xi = 0; xi < w; xi++) {
 #endif
 			if (c & 0x80)

@@ -199,7 +199,7 @@ inline class tft_t& tft_t::operator<<(const char c)
 		tab();
 		break;
 	default:
-		if ((unsigned)c < ' ' || (unsigned)c > 127)
+		if ((unsigned)c < ' ')
 			break;
 		putch(c);
 		next();
