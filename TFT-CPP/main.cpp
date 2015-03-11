@@ -1,7 +1,9 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
+#include "capture.h"
 
 class tft_t tft;
 
@@ -14,8 +16,11 @@ void init(void)
 	tft.setBackground(0x667F);
 	tft.setForeground(0x0000);
 	tft.clean();
+	capture::init(&tft);
+	capture::enable();
 	stdout = tftout(&tft);
 	tft.setBGLight(true);
+	sei();
 }
 
 int main(void)

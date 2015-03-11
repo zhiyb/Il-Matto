@@ -1,7 +1,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 PRG	= TFT-CPP
-SRC	= main.cpp
+SRC	= main.cpp capture.cpp
 LIB	= tft-cpp
 LIBDIR	= ../lib
 VERSION	= 0.0.1
