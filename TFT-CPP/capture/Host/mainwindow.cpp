@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
 		QMessageBox::critical(this, tr("Error"), tr("Cannot open selected serial port"));
 		return;
 	}
+	while (sp->waitForReadyRead(1000))
+		sp->readAll();
 	connect(sp, SIGNAL(error(QSerialPort::SerialPortError)), qApp, SLOT(quit()));
 
 	QWidget *w = new QWidget(this);
