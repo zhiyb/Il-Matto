@@ -11,6 +11,7 @@
 #include <rtouch.h>
 #include <eemem.h>
 #include <adc.h>
+#include <capture.h>
 
 //#define AUTO_COLOUR
 
@@ -32,6 +33,8 @@ void init(void)
 	sei();
 
 	tft.setBGLight(true);
+	capture::init(&tft);
+	capture::enable();
 	touch.calibrate();
 	tft.clean();
 	eeprom_first_done();

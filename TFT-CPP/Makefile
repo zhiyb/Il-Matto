@@ -2,8 +2,7 @@
 
 PRG	:= TFT-CPP
 SRC	:= main.cpp
-SUBDIRS	:= capture
-LIB	:= tft-cpp
+LIB	:= tft-cpp capture
 LIBDIR	:= ../lib
 VERSION	:= 0.0.1
 
@@ -22,5 +21,4 @@ LFUSE	= 0xE7
 
 LOG	= ~/.make_avr.log
 
-include $(SUBDIRS:%=%/Makefile)
 include ../Makefile.inc

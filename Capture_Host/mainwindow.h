@@ -6,14 +6,12 @@
 
 #define PORTRAIT
 
-#ifdef LANDSCAPE
-#define WIDTH	320
-#define HEIGHT	240
-#endif
-
 #ifdef PORTRAIT
 #define WIDTH	240
 #define HEIGHT	320
+#else
+#define WIDTH	320
+#define HEIGHT	240
 #endif
 
 class MainWindow : public QMainWindow

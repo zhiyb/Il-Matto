@@ -2,7 +2,7 @@
 
 PRG	= rTouch
 SRC	= main.cpp
-LIB	= tft-cpp rTouch common
+LIB	= tft-cpp rTouch common capture
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 
