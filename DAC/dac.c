@@ -6,12 +6,10 @@
 // In <avr/cpufunc.h>, but WinAVR doesn't have the file
 #define _NOP() __asm__ __volatile__("nop")
 
-static volatile uint8_t dac_data, dac_tx_status;
+static volatile uint8_t dac_data;
 
 void init_dac(void)
 {
-	dac_tx_status = 0;
-
 	// Port initialisation
 	DDRD |= DAC_LOAD | DAC_DATA | DAC_CLK;
 	PORTD |= DAC_LOAD | DAC_DATA | DAC_CLK;
@@ -50,13 +48,8 @@ ISR(USART1_UDRE_vect)
 // USART1 Transmit complete interrupt
 ISR(USART1_TX_vect, ISR_NOBLOCK)
 {
-	if (!dac_tx_status) {	// Transmitted channel configure byte
-		dac_tx_status++;
-		return;
-	}
 	PORTD &= ~DAC_LOAD;	// Lowing DAC_LOAD to load
 	//_NOP();		// tW(LOAD) min. 250ns
-	dac_tx_status = 0;
 	// Disable transmit complete interrupt
 	UCSR1B &= ~_BV(TXC1);
 	PORTD |= DAC_LOAD;
