@@ -123,7 +123,7 @@ $(EEPTRGS): e%: $(PRG)_eeprom.%
 	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $< $@
 
 # For program MCU with avrdude.
-AVROPS	= flash readflash eep readeep fuse
+AVROPS	= flash readflash eep readeep fuse flashall
 .PHONY: $(AVROPS) $(AVROPS:%=avr-%) knock
 
 $(AVROPS): %: avr-%
@@ -131,6 +131,9 @@ $(AVROPS): %: avr-%
 
 avr-flash: hex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(PRG).hex
+
+avr-flashall: hex ehex
+	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(PRG).hex -U eeprom:w:$(EEPFILE)
 
 avr-readflash:
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:r:$(PRG).hex:i
