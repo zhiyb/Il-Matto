@@ -31,7 +31,7 @@ void set_dac(uint8_t data)
 	UDR1 = DAC_CHANNEL * 2 + 1;	// RNG = 1 for gain of 2x from ref
 	dac_data = data;
 	// Enable data register empty interrupt
-	UCSR1B |= _BV(UDRE1);
+	UCSR1B |= _BV(UDRIE1);
 	return;
 }
 
@@ -40,9 +40,10 @@ ISR(USART1_UDRE_vect)
 {
 	UDR1 = dac_data;
 	// Disable data register empty interrupt
-	UCSR1B &= ~_BV(UDRE1);
+	UCSR1B &= ~_BV(UDRIE1);
 	// Enable transmit complete interrupt
-	UCSR1B |= _BV(TXC1);
+	UCSR1A |= _BV(TXC1);
+	UCSR1B |= _BV(TXCIE1);
 }
 
 // USART1 Transmit complete interrupt
@@ -51,6 +52,6 @@ ISR(USART1_TX_vect, ISR_NOBLOCK)
 	PORTD &= ~DAC_LOAD;	// Lowing DAC_LOAD to load
 	//_NOP();		// tW(LOAD) min. 250ns
 	// Disable transmit complete interrupt
-	UCSR1B &= ~_BV(TXC1);
+	UCSR1B &= ~_BV(TXCIE1);
 	PORTD |= DAC_LOAD;
 }
