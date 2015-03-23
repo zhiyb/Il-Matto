@@ -55,10 +55,7 @@ $(PRG).elf: $(OBJS) $(LIBFILES)
 	$(OBJDUMP) -h -S $< > $@
 
 # Libraries
-BUILDLIBFILES	= $(LIBFILES:%=build-%)
-.PHONY: $(BUILDLIBFILES)
-
-$(LIBFILES): %: build-%
+$(LIBFILES): %:
 	$(MAKE) -C $(dir $@)
 
 # Dependency
