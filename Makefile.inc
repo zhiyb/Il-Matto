@@ -6,9 +6,7 @@ LIBFILES	= $(foreach lib,$(LIB),$(lib:%=$(LIBDIR)/lib%)/$(lib:%=lib%.a))
 
 export DEFS
 DEFS	+=
-#DEFS	+= -fpack-struct -fshort-enums
-#DEFS	+= -funsigned-bitfields -funsigned-char
-NLIBS	+= $(addprefix -L./,$(LIBDIRS)) $(addprefix -l$,$(LIB))
+NLIBS	+= $(LIBDIRS:%=-L%) $(LIB:%=-l%)
 INCS	+= $(LIBDIRS:%=-I%)
 INCS	+= $(INCDIRS:%=-I%)
 
