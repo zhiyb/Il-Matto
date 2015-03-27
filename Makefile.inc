@@ -47,26 +47,42 @@ override CFLAGS		= $(DEFS) $(INCS) $(FLAGS)
 override CXXFLAGS	= $(DEFS) $(INCS) $(FLAGS)
 override LDFLAGS	= $(FLAGS) -Wl,-Map,$(PRG).map
 
+# Verbose display
+define verbose
+	@if [ 'x$(VERBOSE)' = x ]; then	\
+		echo "  "$1;		\
+	else				\
+		echo $2;		\
+	fi
+	@$2
+endef
+
 # Rules
 all: elf lst text eeprom
 PHONYTRGS	+= elf lst map
 
 CLEAN_FILES	+= $(OBJS)
 $(PRG).elf: $(OBJS) $(LIBFILES)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(NEWLIBS) $(LIBS)
-	$(SIZE) $@
+	$(call verbose,"LD\t$<",\
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(NEWLIBS) $(LIBS))
+	$(call verbose,"SIZE\t$@",\
+	$(SIZE) $@)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(call verbose,"CC\t$<",\
+	$(CC) $(CFLAGS) -c -o $@ $<)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(call verbose,"CXX\t$<",\
+	$(CXX) $(CXXFLAGS) -c -o $@ $<)
 
 %.o: %.S
-	$(AS) $(ASFLAGS) -c -o $@ $<
+	$(call verbose,"AS\t$<",\
+	$(AS) $(ASFLAGS) -c -o $@ $<)
 
 %.lst: %.elf
-	$(OBJDUMP) -h -S $< > $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJDUMP) -h -S $< > $@)
 
 # Libraries
 $(LIBFILES): %:
@@ -105,13 +121,16 @@ text: hex
 PHONYTRGS	+= hex bin srec
 
 %.hex: %.elf
-	$(OBJCOPY) -j .text -j .data -O ihex $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .text -j .data -O ihex $< $@)
 
 %.srec: %.elf
-	$(OBJCOPY) -j .text -j .data -O srec $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .text -j .data -O srec $< $@)
 
 %.bin: %.elf
-	$(OBJCOPY) -j .text -j .data -O binary $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .text -j .data -O binary $< $@)
 
 # Rules for building the .eeprom rom images
 # Only ehex is needed; Others: ebin, esrec
@@ -125,13 +144,16 @@ CLEAN_FILES	+= $(EEPTRGS:e%=$(PRG)_eeprom.%)
 $(EEPTRGS): e%: $(PRG)_eeprom.%
 
 %_eeprom.hex: %.elf
-	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O ihex $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O ihex $< $@)
 
 %_eeprom.srec: %.elf
-	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O srec $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O srec $< $@\)
 
 %_eeprom.bin: %.elf
-	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $< $@
+	$(call verbose,"GEN\t$@",\
+	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $< $@)
 
 # For program MCU with avrdude.
 AVROPS	= flash readflash eep readeep fuse flashall
