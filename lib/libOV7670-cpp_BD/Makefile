@@ -1,12 +1,6 @@
-LIBNAME		= libOV7670-cpp_BD
-LIBSRC		= i2c_pin.cpp ov7670.cpp
+LIBTRG	= OV7670-cpp_BD
+SRC	= i2c_pin.cpp ov7670.cpp
 
-LIB		= 
+FLAGS	= -g -Wall
 
-MCU_TARGET	?= atmega644p
-MCU_FREQ	?= 12000000 
-
-OPTIMIZE	?= -Os
-DEFS		?= -DF_CPU=$(MCU_FREQ)
-
-include ../Makefile.inc
+include ../Makefile.defs

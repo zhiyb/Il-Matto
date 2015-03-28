@@ -16,7 +16,7 @@ namespace root
 
 namespace toggle
 {
-	bool func(void);
+	bool func(bool enter);
 }
 
 }

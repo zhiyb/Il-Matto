@@ -1,24 +1,20 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	:= TFT-CPP
-SRC	:= main.cpp
-LIB	:= tft-cpp capture
-LIBDIR	:= ../lib
-VERSION	:= 0.0.1
+TRG	= TFT-CPP
+SRC	= main.cpp
+LIB	= tft-cpp capture
+LIBDIR	= ../lib
 
-PRGER	= usbasp
+PRGER		= usbasp
 MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
+MCU_FREQ	= 12000000
 
 DEFS	+= -DF_CPU=12000000
 #DEFS	+= -DTFT_VERTICALSCROLLING
 LIBS	+= -lm
-INCS	+= -I.
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-LOG	= ~/.make_avr.log
-
-include ../Makefile.inc
+include ../Makefile.defs

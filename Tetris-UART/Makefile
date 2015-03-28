@@ -1,23 +1,18 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= Tetris_UART
+TRG	= Tetris_UART
 SRC	= ascii.c display.c ili9341.c main.c rand.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
 LIB	= common
 LIBDIR	= ../lib
-VERSION	= 0.0.1
 
-PRGER	= usbasp
+PRGER		= usbasp
 MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
+MCU_FREQ	= 12000000
 
-DEFS	+= -DF_CPU=12000000 -DBAUD=9600
-LIBS	+=
-INCS	+=
+DEFS	+= -DBAUD=9600
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-LOG	= ~/.make_avr.log
-
-include ../Makefile.inc
+include ../Makefile.defs

@@ -1,12 +1,6 @@
-LIBNAME		= libcapture
-LIBSRC		= capture.cpp
+LIBTRG	= capture
+SRC	= capture.cpp
 
-LIB		= tft-cpp
+LIB	= tft-cpp
 
-MCU_TARGET	?= atmega644p
-MCU_FREQ	?= 12000000 
-
-OPTIMIZE	?= -Os
-DEFS		?= -DF_CPU=$(MCU_FREQ)
-
-include ../Makefile.inc
+include ../Makefile.defs

@@ -1,18 +1,13 @@
 # Modified by zhiyb (Yubo Zhi)
 
-PRG	= HDDMotor
+TRG	= HDDMotor
 SRC	= main.c
-LIB	= 
-LIBDIR	= ../lib
 VERSION	= 0.0.1
 
-PRGER	= usbasp
+PRGER		= usbasp
 MCU_TARGET	= atmega644p
-OPTIMIZE	= -Os
-
-DEFS	+= -DF_CPU=12000000
-LIBS	+=
-INCS	+=
+MCU_FREQ	= 12000000
+OPTLEVEL	= s
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
@@ -20,4 +15,4 @@ LFUSE	= 0xE7
 
 LOG	= ~/.make_avr.log
 
-include ../Makefile.inc
+include ../Makefile.defs
