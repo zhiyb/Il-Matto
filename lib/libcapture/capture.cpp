@@ -37,6 +37,9 @@ void capture::init(tft_t *t)
 
 void capture::enable(void)
 {
+	// Clear flags
+	UCSR1A |= _BV(TXC1);
+	UDR1;
 	// Interrupt
 	UCSR1B |= _BV(RXCIE1);
 }
@@ -69,7 +72,8 @@ void capture::send(void)
 
 ISR(USART1_RX_vect)
 {
-	UDR1;
+	if (UDR1 != 'W')
+		return;
 	capture::disable();
 	capture::send();
 	capture::enable();
