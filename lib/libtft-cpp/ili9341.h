@@ -11,6 +11,16 @@
 #define _NOP() __asm__ __volatile__("nop")
 #include <util/delay.h>
 
+#define TFT_CONCAT(a,b)		a ## b
+#define TFT_CONCAT_E(a,b)	TFT_CONCAT(a, b)
+
+#define TFT_PCTRL	TFT_CONCAT_E(DDR, TFT_PORT_CTRL)
+#define TFT_WCTRL	TFT_CONCAT_E(PORT, TFT_PORT_CTRL)
+#define TFT_RCTRL	TFT_CONCAT_E(PIN, TFT_PORT_CTRL)
+#define TFT_PDATA	TFT_CONCAT_E(DDR, TFT_PORT_DATA)
+#define TFT_WDATA	TFT_CONCAT_E(PORT, TFT_PORT_DATA)
+#define TFT_RDATA	TFT_CONCAT_E(PIN, TFT_PORT_DATA)
+
 class ili9341
 {
 public:
@@ -111,11 +121,10 @@ inline void ili9341::init(void)
 	uint8_t c;
 	uint16_t r;
 
-// FIXME
-//#if (TFT_WCTRL == PORTC) || (TFT_WDATA == PORTC)
-	MCUCR |= 0x80;			// Disable JTAG
-	MCUCR |= 0x80;
-//#endif
+	if (TFT_WCTRL == PORTC || TFT_WDATA == PORTC) {
+		MCUCR |= 0x80;			// Disable JTAG
+		MCUCR |= 0x80;
+	}
 
 	TFT_PCTRL = 0xFF & ~TFT_FMK;
 	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light
