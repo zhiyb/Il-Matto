@@ -111,10 +111,11 @@ inline void ili9341::init(void)
 	uint8_t c;
 	uint16_t r;
 
-#ifndef TFT_USE_PORT_BD
+// FIXME
+//#if (TFT_WCTRL == PORTC) || (TFT_WDATA == PORTC)
 	MCUCR |= 0x80;			// Disable JTAG
 	MCUCR |= 0x80;
-#endif
+//#endif
 
 	TFT_PCTRL = 0xFF & ~TFT_FMK;
 	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light

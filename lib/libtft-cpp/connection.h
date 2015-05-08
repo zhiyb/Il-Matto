@@ -7,20 +7,11 @@
 
 // 8-bit parallel interface I
 
-#ifdef TFT_USE_PORT_BD
-#define TFT_PCTRL	DDRB
-#define TFT_WCTRL	PORTB
-#define TFT_RCTRL	PINB
-#define TFT_PDATA	DDRD
-#define TFT_WDATA	PORTD
-#define TFT_RDATA	PIND
-#else
-#define TFT_PCTRL	DDRA
-#define TFT_WCTRL	PORTA
-#define TFT_RCTRL	PINA
-#define TFT_PDATA	DDRC
-#define TFT_WDATA	PORTC
-#define TFT_RDATA	PINC
+#ifndef TFT_PORT_CTRL
+#define TFT_PORT_CTRL	A
+#endif
+#ifndef TFT_PORT_DATA
+#define TFT_PORT_DATA	C
 #endif
 
 #define TFT_CS	(1 << 0)	// Chip-select (0)
@@ -31,5 +22,15 @@
 #define TFT_RD	(1 << 5)	// Parallel data read strobe (Rising)
 #define TFT_VSY	(1 << 6)	// VSYNC
 #define TFT_FMK	(1 << 7)	// Frame mark
+
+#define TFT_CONCAT(a,b)		a ## b
+#define TFT_CONCAT_E(a,b)	TFT_CONCAT(a, b)
+
+#define TFT_PCTRL	TFT_CONCAT_E(DDR, TFT_PORT_CTRL)
+#define TFT_WCTRL	TFT_CONCAT_E(PORT, TFT_PORT_CTRL)
+#define TFT_RCTRL	TFT_CONCAT_E(PIN, TFT_PORT_CTRL)
+#define TFT_PDATA	TFT_CONCAT_E(DDR, TFT_PORT_DATA)
+#define TFT_WDATA	TFT_CONCAT_E(PORT, TFT_PORT_DATA)
+#define TFT_RDATA	TFT_CONCAT_E(PIN, TFT_PORT_DATA)
 
 #endif
