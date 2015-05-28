@@ -14,6 +14,7 @@ $(warning "Please use $$(MCU_FREQ)")
 endif
 LOG		?= ~/.make_avr.log
 endif
+TOPDIR	?= $(dir $(lastword $(MAKEFILE_LIST)))
 
 OBJCOPY	= $(CROSS_COMPILE)objcopy
 OBJDUMP	= $(CROSS_COMPILE)objdump
@@ -35,7 +36,7 @@ EXTRA_TARGETS	+= lst text eeprom
 PHONYTRGS	+= lst map
 endif
 
-include $(dir $(lastword $(MAKEFILE_LIST)))/Makefile_generic.defs
+include $(TOPDIR)/Makefile_generic.defs
 
 # Following are not needed when building libraries
 ifndef LIBTRG

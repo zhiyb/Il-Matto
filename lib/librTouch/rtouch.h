@@ -36,12 +36,12 @@
 #define RTOUCH_YP	(1 << 7)
 #define RTOUCH_YC	6
 
-// Valid data variance
+// Data valid variance (maximum)
 #ifndef RTOUCH_DELTA
 #define RTOUCH_DELTA	24
 #endif
 
-// Averager level
+// Averager depth
 #ifndef RTOUCH_AVERAGER
 #define RTOUCH_AVERAGER	16
 #endif
@@ -81,7 +81,7 @@ private:
 
 	bool calibrated;
 	int32_t cal[7];
-	static int32_t EEMEM NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
+	static int32_t EEMEM NVcal[7];
 
 	tft_t *tft;
 };

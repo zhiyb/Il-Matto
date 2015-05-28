@@ -24,7 +24,7 @@
 
 enum Functions {Detection = 0, ReadX, ReadY};
 
-int32_t EEMEM rTouch::NVcal[sizeof(rTouch::cal) / sizeof(rTouch::cal[0])];
+int32_t EEMEM rTouch::NVcal[7];
 
 static struct {
 	volatile bool pressed;

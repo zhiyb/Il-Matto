@@ -9,9 +9,12 @@ PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
 
-#DEFS	+= -DTFT_VERTICALSCROLLING
-DEFS	+= -DTFT_PORT_CTRL=A
-DEFS	+= -DTFT_PORT_DATA=C
+# TFT port settings
+TFT_PORT_CTRL	= A
+TFT_PORT_DATA	= C
+# Vertical scrolling enable
+TFT_VERTICALSCROLLING	= n
+
 LIBS	+= -lm
 
 EFUSE	= 0xFF

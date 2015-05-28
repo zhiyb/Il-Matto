@@ -5,15 +5,24 @@ define outdated
 $(warning "$$($1) outdated, use $$($2) instead")
 endef
 
-ifndef LIBTRG
+# Change variable type to simply-expanded
+SRC	:= $(SRC)
+LIB	:= $(LIB)
+LIBS	:= $(LIBS)
+DEFS	:= $(DEFS)
+INCDIRS	:= $(INCDIRS)
+
 # Defaults
+ifndef OPTIMIZE
 OPTLEVEL	?= s
 endif
 #CROSS_COMPILE	?=
+DEPDIR	?= .deps
+TOPDIR	?= $(dir $(lastword $(MAKEFILE_LIST)))
 
 # Subdirectories
 define inc_subdir
-DIR	= $(1)
+DIR	:= $(1)
 include $(1)/Makefile
 SRC	+= $$(NSRC:%=$$(DIR)/%)
 LIB	+= $$(NLIB)
@@ -25,16 +34,28 @@ endef
 $(foreach dir,$(SUBDIRS),$(eval $(call inc_subdir,$(dir))))
 
 # Libs
+ifndef LIBTRG
+LIBDIR	?= $(TOPDIR)
+else
 LIBDIR	?= ..
+endif
 LIBDIRS	= $(LIB:%=$(LIBDIR)/lib%)
+LIBCONFS	= $(LIBDIRS:%=%/Makefile.conf)
 LIBFILES	= $(foreach lib,$(LIB),$(lib:%=$(LIBDIR)/lib%)/$(lib:%=lib%.a))
+-include $(LIBCONFS)
 
 ifndef LIBTRG
-# General
 ifndef TRG
 $(call outdated,PRG,TRG)
 TRG	= $(PRG)
 endif
+define checkconf
+ifeq ($$($1),y)
+	DEFS	+= -D$1
+endif
+endef
+DEFS	+= $(foreach conf,$(CONFS),-D$(conf)=$($(conf)))
+$(foreach conf,$(CONFS_D),$(eval $(call checkconf,$(conf))))
 endif
 
 ifndef CROSS_COMPILE
@@ -42,7 +63,6 @@ ifeq ($(OS),Windows_NT)
 	SUFFIX	?= .exe
 endif
 endif
-
 
 #DEFS	+= -fpack-struct -fshort-enums
 #DEFS	+= -funsigned-bitfields -funsigned-char
@@ -52,7 +72,6 @@ INCS	+= $(INCDIRS:%=-I%)
 
 ELF	= $(TRG)$(SUFFIX)
 OBJS	= $(subst .S,.o,$(subst .c,.o,$(SRC:.cpp=.o)))
-DEPS	= $(OBJS:.o=.d)
 
 AR	= $(CROSS_COMPILE)ar
 AS	= $(CROSS_COMPILE)gcc
@@ -61,18 +80,11 @@ CXX	= $(CROSS_COMPILE)g++
 LD	= $(CROSS_COMPILE)g++
 SIZE	= $(CROSS_COMPILE)size
 
-#FLAGS	?= -g -Wall -Werror
-ifdef OPTIMIZE
-ifndef LIBTRG
-$(call outdated,OPTIMIZE,OPTLEVEL)
-endif
-FLAGS	+= $(OPTIMIZE)
-else
-FLAGS	+= -O$(OPTLEVEL)
-endif
+#FLAGS	+= -g -Wall -Werror
+FLAGS	+= $(OPTIMIZE) -O$(OPTLEVEL)
 
 # Exports
-export DEFS OPTIMIZE OPTLEVEL
+export DEFS OPTIMIZE OPTLEVEL $(CONFS) CONFS CONFS_D
 
 ARFLAGS	= $(ARFLG) rcs
 ifdef $(OVERRIDE)
@@ -112,12 +124,14 @@ $(ELF): $(OBJS) $(LIBFILES)
 	$(SIZE) $@)
 
 %.o: %.c
+	@mkdir -p $(dir $(DEPDIR)/$<)
 	$(call verbose,"CC	$<",\
-	$(CC) $(CFLAGS) -c -o $@ $<)
+	$(CC) $(CFLAGS) -c -o $@ $<) -MD -MP -MF "$(DEPDIR)/$*.d"
 
 %.o: %.cpp
+	@mkdir -p $(dir $(DEPDIR)/$<)
 	$(call verbose,"CXX	$<",\
-	$(CXX) $(CXXFLAGS) -c -o $@ $<)
+	$(CC) $(CFLAGS) -c -o $@ $<) -MD -MP -MF "$(DEPDIR)/$*.d"
 
 %.o: %.S
 	$(call verbose,"AS	$<",\
@@ -147,29 +161,21 @@ $(LIBFILES): %:
 	$(MAKE) -C $(dir $@))
 
 # Dependency
-CLEAN_FILES	+= $(DEPS) $(DEPS:%=%.*)
--include $(DEPS)
-
-%.d: %.c
-	@set -e; rm -f $@; \
-	$(CC) -MM $(CFLAGS) $< | \
-	sed 's,[^:]*\.o[ :]*,$(<:.c=.o) $@ : ,g' > $@;
-
-%.d: %.cpp
-	@set -e; rm -f $@; \
-	$(CXX) -MM $(CXXFLAGS) $< | \
-	sed 's,[^:]*\.o[ :]*,$(<:.cpp=.o) $@ : ,g' > $@;
+-include $(OBJS:%.o=$(DEPDIR)/%.d)
+CLEAN_DIRS	+= $(DEPDIR)
 
 # Clean up
 ifndef LIBTRG
-CLEAN_DIRS	+= $(LIBDIRS:%=clean-%)
+CLEAN_LIBS	+= $(LIBDIRS:%=clean-%)
 endif
-.PHONY: $(CLEAN_DIRS)
-$(CLEAN_DIRS):
+.PHONY: $(CLEAN_LIBS)
+$(CLEAN_LIBS):
 	$(call verbose,"CLEAN	$(@:clean-%=%)",\
 	$(MAKE) -C $(@:clean-%=%) clean)
 
 .PHONY: clean
-clean: $(CLEAN_DIRS)
+clean: $(CLEAN_LIBS)
 	$(call verbose,"CLEAN	$(CLEAN_FILES)",\
 	$(RM) $(CLEAN_FILES))
+	$(call verbose,"CLEAN	$(CLEAN_DIRS)",\
+	$(RM) -r $(CLEAN_DIRS))

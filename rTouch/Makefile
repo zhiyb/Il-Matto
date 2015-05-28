@@ -9,12 +9,11 @@ PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
 
-# FAST define: no checks etc
-DEFS	+= -DF_CPU=12000000
-#DEFS	+= -DRTOUCH_SAFE
-#DEFS	+= -DRTOUCH_SWAPXY
+# FAST: no checks etc
+RTOUCH_SAFE	= n
+RTOUCH_SWAPXY	= n
+
 LIBS	+= -lm
-INCS	+=
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
