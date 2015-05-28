@@ -26,7 +26,7 @@ void init(void)
 	Print_frame();
 	Tetris_mem_init();
 	Tetris_init();
-	eeprom_first_done();
+	eepromFirstDone();
 /*	#define BAUD 115200
 	#include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;

@@ -132,7 +132,7 @@ load:	// Load
 
 void Tetris_mem_init(void)
 {
-	if (eeprom_first()) {
+	if (eepromFirst()) {
 		eeprom_update_word(&NVhighScore, 0);
 		eeprom_update_word(&NVsaveValid, 0);
 	}

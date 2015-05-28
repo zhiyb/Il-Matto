@@ -6,7 +6,7 @@ uint32_t EEMEM NVrandSeed;
 
 void Rand_init(void)
 {
-	if (eeprom_first()) {
+	if (eepromFirst()) {
 		srand(0);
 		eeprom_update_dword(&NVrandSeed, 1);
 		return;

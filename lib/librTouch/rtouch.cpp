@@ -55,13 +55,13 @@ void rTouch::init(void)
 {
 	ts.pressed = false;
 	rTouchMode(Detection);
-	pcint_set(RTOUCH_PCMSK, RTOUCH_XP);
-	pcint_enable(RTOUCH_PCMSK);
+	pcintSet(RTOUCH_PCMSK, RTOUCH_XP);
+	pcintEnable(RTOUCH_PCMSK);
 	adcReq->registerISR(rTouchADCISR);
 
 	// First pressed detection
 	if (RTOUCH_DETECT()) {
-		pcint_disable(RTOUCH_PCMSK);
+		pcintDisable(RTOUCH_PCMSK);
 		rTouchMode(ReadY);
 		adcReq->request(RTOUCH_YC);
 	}
@@ -164,7 +164,7 @@ rTouch::Status rTouch::status(void)
 void rTouch::calibrate(bool reset)
 {
 	_delay_ms(10);
-	if (!reset && !eeprom_first() && !pressed()) {
+	if (!reset && !eepromFirst() && !pressed()) {
 		eeprom_read_block(cal, NVcal, sizeof(NVcal));
 		calibrated = true;
 		return;
@@ -299,7 +299,7 @@ static void rTouchADCISR(uint8_t channel, uint16_t result)
 		} else {
 			averager.level = 0;
 			ts.pressed = false;
-			pcint_enable(RTOUCH_PCMSK);
+			pcintEnable(RTOUCH_PCMSK);
 		}
 	}
 }
@@ -307,7 +307,7 @@ static void rTouchADCISR(uint8_t channel, uint16_t result)
 ISR(RTOUCH_PCMSKV)
 {
 	if (RTOUCH_DETECT()) {
-		pcint_disable(RTOUCH_PCMSK);
+		pcintDisable(RTOUCH_PCMSK);
 		rTouchMode(ReadY);
 		adcReq->request(RTOUCH_YC);
 	}

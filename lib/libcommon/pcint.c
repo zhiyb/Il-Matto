@@ -4,7 +4,7 @@
 
 #include "pcint.h"
 
-void pcint_set(uint8_t group, uint8_t pins)
+inline void pcintSet(uint8_t group, uint8_t pins)
 {
 	uint8_t gp = _BV(group);
 	// Disable interrupt

@@ -12,9 +12,27 @@ extern "C" {
 #include <avr/io.h>
 
 // Pin change interrupt
-void pcint_set(uint8_t group, uint8_t pins);
-#define pcint_enable(group)	PCICR |= _BV(group)
-#define pcint_disable(group)	PCICR &= ~_BV(group)
+#define pcintEnable(group)	PCICR |= _BV(group)
+#define pcintDisable(group)	PCICR &= ~_BV(group)
+
+static inline void pcintSet(uint8_t group, uint8_t pins)
+{
+	uint8_t gp = _BV(group);
+	// Disable interrupt
+	pcintDisable(group);
+	// Clear interrupt flag
+	PCIFR |= gp;
+	// Enable interrupt
+	PCICR |= gp;
+	if (group == 0)
+		PCMSK0 = pins;
+	else if (group == 1)
+		PCMSK1 = pins;
+	else if (group == 2)
+		PCMSK2 = pins;
+	else if (group == 3)
+		PCMSK3 = pins;
+}
 
 #ifdef __cplusplus
 }

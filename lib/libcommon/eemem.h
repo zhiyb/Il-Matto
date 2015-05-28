@@ -11,8 +11,8 @@ extern "C" {
 
 #include <avr/eeprom.h>
 
-uint8_t eeprom_first(void);
-void eeprom_first_done(void);
+uint8_t eepromFirst(void);
+void eepromFirstDone(void);
 
 #ifdef __cplusplus
 }

@@ -53,7 +53,7 @@ void init(void)
 
 	tft.setBGLight(true);
 	touch.calibrate();
-	eeprom_first_done();
+	eepromFirstDone();
 }
 
 int main(void)

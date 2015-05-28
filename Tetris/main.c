@@ -24,7 +24,7 @@ void init(void)
 	Print_frame();
 	Tetris_mem_init();
 	Tetris_init();
-	eeprom_first_done();
+	eepromFirstDone();
 }
 
 int main(void)
