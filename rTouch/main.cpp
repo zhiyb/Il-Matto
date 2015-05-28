@@ -13,7 +13,7 @@
 #include <capture.h>
 #include <adcrequest.h>
 
-//#define AUTO_COLOUR
+#define AUTO_COLOUR
 
 tft_t tft;
 adcRequest_t adcReq;
@@ -41,7 +41,7 @@ void init(void)
 	capture::enable();
 	touch.calibrate();
 	tft.clean();
-	eeprom_first_done();
+	eepromFirstDone();
 }
 
 int main(void)
@@ -64,13 +64,8 @@ loop:
 	if (touch.pressed()) {
 		rTouch::coord_t res = touch.position();
 		if (res.x <= -20) {
-#if 1
 			int16_t spl = tft.height() / 7;
 			clr = c[res.y / spl];
-#else
-			uint8_t mv = res.y * 16 / tft.height();
-			clr = (0x001F << mv) | (((uint32_t)0x001F << mv) >> 16);
-#endif
 		} else if (res.x > (int16_t)(tft.width() + 20))
 			tft.clean();
 		else {
