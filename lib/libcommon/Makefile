@@ -1,4 +1,4 @@
 LIBTRG	= common
-SRC	= eemem.c adc.c pcint.c
+SRC	= eemem.c pcint.c request.cpp
 
 include ../Makefile.defs

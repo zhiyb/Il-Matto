@@ -10,20 +10,24 @@
 #include <rgbconv.h>
 #include <rtouch.h>
 #include <eemem.h>
-#include <adc.h>
 #include <capture.h>
+#include <adcrequest.h>
 
 //#define AUTO_COLOUR
 
 tft_t tft;
-rTouch touch(&tft);
+adcRequest_t adcReq;
+rTouch touch(&tft, &adcReq);
+
+ISR(ADC_vect, ISR_NOBLOCK)
+{
+	adcReq.isr();
+}
 
 void init(void)
 {
 	DDRB |= 0x80;			// LED
 	PORTB |= 0x80;
-	adc_init();
-	adc_enable();
 	tft.init();
 	tft.setOrient(tft.Portrait);
 	tft.setBackground(0x0000);

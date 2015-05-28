@@ -4,7 +4,6 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <adc.h>
 #include <eemem.h>
 #include <pcint.h>
 #include "rtouch.h"
@@ -26,6 +25,8 @@ enum Functions {Detection = 0, ReadX, ReadY};
 
 int32_t EEMEM rTouch::NVcal[7];
 
+static adcRequest_t *adcReq;
+
 static struct {
 	volatile bool pressed;
 	rTouch::coord_t postmp;
@@ -39,9 +40,10 @@ static struct averager_t {
 static inline void rTouchMode(Functions func);
 static void rTouchADCISR(uint8_t channel, uint16_t result);
 
-rTouch::rTouch(tft_t *tft)
+rTouch::rTouch(tft_t *tft, adcRequest_t *req)
 {
 	this->tft = tft;
+	adcReq = req;
 	calibrated = false;
 	stat.prev.x = 0;
 	stat.prev.y = 0;
@@ -55,13 +57,13 @@ void rTouch::init(void)
 	rTouchMode(Detection);
 	pcint_set(RTOUCH_PCMSK, RTOUCH_XP);
 	pcint_enable(RTOUCH_PCMSK);
-	adc_register_ISR(rTouchADCISR);
+	adcReq->registerISR(rTouchADCISR);
 
 	// First pressed detection
 	if (RTOUCH_DETECT()) {
 		pcint_disable(RTOUCH_PCMSK);
 		rTouchMode(ReadY);
-		adc_request(RTOUCH_YC);
+		adcReq->request(RTOUCH_YC);
 	}
 }
 
@@ -285,7 +287,7 @@ static void rTouchADCISR(uint8_t channel, uint16_t result)
 	if (channel == RTOUCH_YC) {
 		ts.postmp.y = result;
 		rTouchMode(ReadX);
-		adc_request(RTOUCH_XC);
+		adcReq->request(RTOUCH_XC);
 	} else if (channel == RTOUCH_XC) {
 		ts.postmp.x = result;
 		rTouchMode(Detection);
@@ -293,7 +295,7 @@ static void rTouchADCISR(uint8_t channel, uint16_t result)
 			if (rTouchAverager(ts.postmp.x, ts.postmp.y))
 				ts.pressed = true;
 			rTouchMode(ReadY);
-			adc_request(RTOUCH_YC);
+			adcReq->request(RTOUCH_YC);
 		} else {
 			averager.level = 0;
 			ts.pressed = false;
@@ -307,6 +309,6 @@ ISR(RTOUCH_PCMSKV)
 	if (RTOUCH_DETECT()) {
 		pcint_disable(RTOUCH_PCMSK);
 		rTouchMode(ReadY);
-		adc_request(RTOUCH_YC);
+		adcReq->request(RTOUCH_YC);
 	}
 }

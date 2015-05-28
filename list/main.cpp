@@ -11,27 +11,30 @@
 #include <landscapelist.h>
 #include <rtouch.h>
 #include <eemem.h>
-#include <adc.h>
+#include <adcrequest.h>
 #include <colours.h>
 #include "menu.h"
 
 //#define LANDSCAPE
 
 tft_t tft;
-rTouch touch(&tft);
+adcRequest_t adcReq;
+rTouch touch(&tft, &adcReq);
 #ifdef LANDSCAPE
 LandscapeList l(&tft);
 #else
 PortraitList l(&tft);
 #endif
 
+ISR(ADC_vect, ISR_NOBLOCK)
+{
+	adcReq.isr();
+}
+
 void init(void)
 {
 	DDRB |= _BV(7);			// LED
 	PORTB |= _BV(7);
-
-	adc_init();
-	adc_enable();
 
 	tft.init();
 #ifdef LANDSCAPE

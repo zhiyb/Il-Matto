@@ -8,6 +8,7 @@
 #include <avr/eeprom.h>
 #include <avr/io.h>
 #include <tft.h>
+#include <adcrequest.h>
 
 // Safe mode switches, generally unnecessary
 //#define RTOUCH_SAFE
@@ -60,7 +61,7 @@ public:
 		int16_t x, y;
 	};
 
-	rTouch(tft_t *tft);
+	rTouch(tft_t *tft, adcRequest_t *req);
 	void init(void);
 	const coord_t position(void);
 	const coord_t waitForPress(void);
