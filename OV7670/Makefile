@@ -2,17 +2,15 @@
 
 TRG	= OV7670
 SRC	= main.cpp
-LIB	= tft-cpp OV7670-cpp_AC
+LIB	= tft-cpp OV7670-cpp common
 LIBDIR	= ../lib
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
 
-#DEFS	+= -DTFT_CHECK
-#DEFS	+= -DTFT_VERTICALSCROLLING
-LIBS	+=
-INCS	+=
+OV7670_PORT_CTRL	?= D
+OV7670_PORT_DATA	?= B
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C

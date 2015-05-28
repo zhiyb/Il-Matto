@@ -2,7 +2,7 @@
 
 TRG	= MPU6050
 SRC	= main.cpp
-LIB	= tft-cpp MPU6050_BD
+LIB	= tft-cpp MPU6050_BD common
 LIBDIR	= ../lib
 VERSION	= 0.0.1
 

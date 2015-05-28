@@ -2,7 +2,7 @@
 
 TRG	= TFT-CPP
 SRC	= main.cpp
-LIB	= tft-cpp capture
+LIB	= tft-cpp capture common
 LIBDIR	= ../lib
 
 PRGER		= usbasp

@@ -10,16 +10,14 @@
 #include <avr/io.h>
 #define _NOP() __asm__ __volatile__("nop")
 #include <util/delay.h>
+#include <macros.h>
 
-#define TFT_CONCAT(a,b)		a ## b
-#define TFT_CONCAT_E(a,b)	TFT_CONCAT(a, b)
-
-#define TFT_PCTRL	TFT_CONCAT_E(DDR, TFT_PORT_CTRL)
-#define TFT_WCTRL	TFT_CONCAT_E(PORT, TFT_PORT_CTRL)
-#define TFT_RCTRL	TFT_CONCAT_E(PIN, TFT_PORT_CTRL)
-#define TFT_PDATA	TFT_CONCAT_E(DDR, TFT_PORT_DATA)
-#define TFT_WDATA	TFT_CONCAT_E(PORT, TFT_PORT_DATA)
-#define TFT_RDATA	TFT_CONCAT_E(PIN, TFT_PORT_DATA)
+#define TFT_PCTRL	CONCAT_E(DDR, TFT_PORT_CTRL)
+#define TFT_WCTRL	CONCAT_E(PORT, TFT_PORT_CTRL)
+#define TFT_RCTRL	CONCAT_E(PIN, TFT_PORT_CTRL)
+#define TFT_PDATA	CONCAT_E(DDR, TFT_PORT_DATA)
+#define TFT_WDATA	CONCAT_E(PORT, TFT_PORT_DATA)
+#define TFT_RDATA	CONCAT_E(PIN, TFT_PORT_DATA)
 
 class ili9341
 {

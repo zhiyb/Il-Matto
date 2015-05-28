@@ -31,7 +31,7 @@ struct ov7670_info {
  *
  * These settings give VGA YUYV.
  */
-
+#if 0
 static struct regval_list ov7670_default_regs[] = {
 	{ REG_COM7, COM7_RESET },
 /*
@@ -148,7 +148,7 @@ static struct regval_list ov7670_default_regs[] = {
 
 	{ 0xff, 0xff },	/* END MARKER */
 };
-
+#endif
 
 /*
  * Here we'll try to encapsulate the changes for just the output
@@ -158,7 +158,7 @@ static struct regval_list ov7670_default_regs[] = {
  *
  * IMPORTANT RULE: the first entry must be for COM7, see ov7670_s_fmt for why.
  */
-
+#if 0
 static struct regval_list ov7670_fmt_yuv422[] = {
 	{ REG_COM7, 0x0 },  /* Selects YUV mode */
 	{ REG_RGB444, 0 },	/* No RGB444 please */
@@ -174,7 +174,7 @@ static struct regval_list ov7670_fmt_yuv422[] = {
 	{ REG_COM13, COM13_GAMMA|COM13_UVSAT },
 	{ 0xff, 0xff },
 };
-
+#endif
 static struct regval_list ov7670_fmt_rgb565[] = {
 	{ REG_COM7, COM7_RGB },	/* Selects RGB mode */
 	{ REG_RGB444, 0 },	/* No RGB444 please */
@@ -190,7 +190,7 @@ static struct regval_list ov7670_fmt_rgb565[] = {
 	{ REG_COM13, /*COM13_GAMMA|*/COM13_UVSAT },
 	{ 0xff, 0xff },
 };
-
+#if 0
 static struct regval_list ov7670_fmt_rgb444[] = {
 	{ REG_COM7, COM7_RGB },	/* Selects RGB mode */
 	{ REG_RGB444, R444_ENABLE },	/* Enable xxxxrrrr ggggbbbb */
@@ -214,7 +214,7 @@ static struct regval_list ov7670_fmt_raw[] = {
 	{ REG_REG76, 0xe1 }, /* Pix correction, magic rsvd */
 	{ 0xff, 0xff },
 };
-
+#endif
 #if 0
 /*
  * Store information about the video data format.  The color matrix
@@ -270,6 +270,7 @@ static struct ov7670_format_struct {
  * which is allegedly provided by the sensor.  So here's the weird register
  * settings.
  */
+#if 0
 static struct regval_list ov7670_qcif_regs[] = {
 	{ REG_COM3, COM3_SCALEEN|COM3_DCWEN },
 	{ REG_COM3, COM3_DCWEN },
@@ -375,6 +376,7 @@ static struct regval_list OV7670_QVGA[] =
 	{0x09, 0x03},{0x3b, 0x42},
 	{0xff, 0xff},
 };
+#endif
 
 static struct regval_list qvga_ov7670[] = {
 	{REG_COM14, 0x19},
@@ -542,11 +544,7 @@ static int ov7670_set_hw(struct i2c_client *client, int hstart, int hstop,
 
 void OV7670::init(void)
 {
-	MCUCR |= 0x80;			// Disable JTAG
-	MCUCR |= 0x80;
-
 	i2c::init();
-
 	OV_CTRLD &= ~(OV_VSYNC | OV_HREF);
 	OV_CTRLD |= OV_WEN | OV_RRST | OV_OE | OV_RCLK;
 	OV_CTRLW &= ~(OV_RRST);
