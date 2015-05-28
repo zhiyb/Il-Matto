@@ -20,8 +20,6 @@ OBJCOPY	= $(CROSS_COMPILE)objcopy
 OBJDUMP	= $(CROSS_COMPILE)objdump
 AVRDUDE	= avrdude
 
-FLAGS	+= -mmcu=$(MCU_TARGET)
-
 # Exports
 export MCU_TARGET
 #export MCU_FREQ
@@ -37,6 +35,8 @@ PHONYTRGS	+= lst map
 endif
 
 include $(TOPDIR)/Makefile_generic.defs
+
+FLAGS	+= -mmcu=$(MCU_TARGET)
 
 # Following are not needed when building libraries
 ifndef LIBTRG

@@ -80,7 +80,8 @@ CXX	= $(CROSS_COMPILE)g++
 LD	= $(CROSS_COMPILE)g++
 SIZE	= $(CROSS_COMPILE)size
 
-#FLAGS	+= -g -Wall -Werror
+FLAGS	?= -g -Wall
+#FLAGS	+= -Werror
 FLAGS	+= $(OPTIMIZE) -O$(OPTLEVEL)
 
 # Exports
