@@ -114,9 +114,10 @@ ifdef LIBTRG
 all: lib
 else
 all: $(ELF) $(EXTRA_TARGETS)
+CLEAN_FILES	+= $(ELF)
 endif
 
-CLEAN_FILES	+= $(ELF) $(OBJS)
+CLEAN_FILES	+= $(OBJS)
 $(ELF): $(OBJS) $(LIBFILES)
 	$(call verbose,"LD	$@",\
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(NEWLIBS) $(LIBS))
@@ -137,7 +138,7 @@ $(ELF): $(OBJS) $(LIBFILES)
 	$(call verbose,"AS	$<",\
 	$(AS) $(ASFLAGS) -c -o $@ $<)
 
-%.lst: %.elf
+%.lst: %$(SUFFIX)
 	$(call verbose,"GEN	$@",\
 	$(OBJDUMP) -h -S $< > $@)
 
