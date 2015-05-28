@@ -28,12 +28,11 @@ export MCU_TARGET
 # Override is only needed by avr-lib build system.
 OVERRIDE	= true
 LDFLAG	+= -Wl,-Map,$(TRG).map
-CLEAN_FILES	+= $(TRG).map
 
 # Rules
 ifndef LIBTRG
-EXTRA_TARGETS	+= $(TRG).lst text eeprom
-CLEAN_FILES	+= $(TRG).lst
+EXTRA_TARGETS	+= lst text eeprom
+PHONYTRGS	+= lst map
 endif
 
 include $(dir $(lastword $(MAKEFILE_LIST)))/Makefile_generic.defs
@@ -109,3 +108,8 @@ avr-fuse:
 knock:
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET)
 endif
+
+# PHONY targets
+.PHONY: $(PHONYTRGS)
+$(PHONYTRGS): %: $(TRG).%
+CLEAN_FILES	+= $(PHONYTRGS:%=$(TRG).%)
