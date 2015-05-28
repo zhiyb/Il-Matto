@@ -50,12 +50,17 @@ $(call outdated,PRG,TRG)
 TRG	= $(PRG)
 endif
 define checkconf
+ifdef $1
+	DEFS	+= -D$1=$$($1)
+endif
+endef
+define checkconf_d
 ifeq ($$($1),y)
 	DEFS	+= -D$1
 endif
 endef
-DEFS	+= $(foreach conf,$(CONFS),-D$(conf)=$($(conf)))
-$(foreach conf,$(CONFS_D),$(eval $(call checkconf,$(conf))))
+$(foreach conf,$(CONFS),$(eval $(call checkconf,$(conf))))
+$(foreach conf,$(CONFS_D),$(eval $(call checkconf_d,$(conf))))
 endif
 
 ifndef CROSS_COMPILE
