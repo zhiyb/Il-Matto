@@ -61,7 +61,7 @@ disp:
 		tft.rectangle(x, 0, 1, tft.height(), Black);
 		for (uint8_t i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
 			int32_t y = (int32_t)data[i] * tft.height() \
-				    / 0x0000FFFF + tft.height() / 2;
+				    / 0x00010000 + tft.height() / 2;
 			tft.point(x, y, clr[i]);
 		}
 	}
