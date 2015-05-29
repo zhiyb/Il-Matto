@@ -9,16 +9,20 @@ namespace MPU6050
 	data3d_t readData3D(uint8_t aaddr);
 }
 
-void MPU6050::init(void)
+bool MPU6050::init(void)
 {
 	i2c::init();
+	_delay_ms(3);
 	if (!ack())
-		return;
-	write(PWR_MGMT_1, PM1_DEVICE_RESET);
+		return false;
+	if (!write(PWR_MGMT_1, PM1_DEVICE_RESET))
+		return false;
+	while (read(PWR_MGMT_1) & PM1_DEVICE_RESET);
+	//_delay_ms(100);
+	if (!write(USER_CTRL, UC_FIFO_RESET | UC_I2C_MST_RESET | UC_SIG_COND_RESET))
+		return false;
 	_delay_ms(100);
-	write(USER_CTRL, UC_FIFO_RESET | UC_I2C_MST_RESET | UC_SIG_COND_RESET);
-	_delay_ms(100);
-	write(PWR_MGMT_1, PM1_CLK_GYRO_X);
+	return write(PWR_MGMT_1, PM1_CLK_GYRO_X);
 }
 
 bool MPU6050::ack(void)
@@ -50,7 +54,6 @@ bool MPU6050::read(uint8_t addr, uint8_t count, uint8_t *data)
 		return false;
 	if (!i2c::write(addr))
 		return false;
-	//i2c::stop();
 	i2c::start();
 	if (!i2c::write(MPU6050_I2C_ADDR_READ))
 		return false;
