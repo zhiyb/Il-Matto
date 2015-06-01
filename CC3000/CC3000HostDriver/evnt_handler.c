@@ -238,7 +238,7 @@ UINT8 * hci_event_handler(void *pRetParams, UINT8 *from, UINT8 *fromlen)
 	while (1)
 	{
 		if (tSLInformation.usEventOrDataReceived != 0)
-		{				
+		{
 			pucReceivedData = (tSLInformation.pucReceivedData);
 
 			if (*pucReceivedData == HCI_TYPE_EVNT)
@@ -256,7 +256,7 @@ UINT8 * hci_event_handler(void *pRetParams, UINT8 *from, UINT8 *fromlen)
 					STREAM_TO_UINT8(pucReceivedData, HCI_DATA_LENGTH_OFFSET, usLength);
 
 					switch(usReceivedEventOpcode)
-					{		
+					{
 					case HCI_CMND_READ_BUFFER_SIZE:
 						{
 							STREAM_TO_UINT8((CHAR *)pucReceivedParams, 0, 
@@ -449,7 +449,6 @@ UINT8 * hci_event_handler(void *pRetParams, UINT8 *from, UINT8 *fromlen)
 			{				
 				pucReceivedParams = pucReceivedData;
 				STREAM_TO_UINT8((CHAR *)pucReceivedData, HCI_PACKET_ARGSIZE_OFFSET, ucArgsize);
-
 				STREAM_TO_UINT16((CHAR *)pucReceivedData, HCI_PACKET_LENGTH_OFFSET, usLength);
 
 				// Data received: note that the only case where from and from length 

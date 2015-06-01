@@ -1,7 +1,10 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= TFT-CPP
-SRC	= main.cpp Spi/spi.c
+SRC	= main.cpp
+#SRC	= patch/PatchProgrammer_DR_Patch.cpp
+#SRC	= patch/PatchProgrammer_FW_Patch.cpp
+SRC	+= Spi/spi.c
 SUBDIRS	= CC3000HostDriver
 INCDIRS	= CC3000HostDriver Spi
 LIB	= tft-cpp common

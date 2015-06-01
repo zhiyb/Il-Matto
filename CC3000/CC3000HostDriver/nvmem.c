@@ -46,6 +46,7 @@
 #include "hci.h"
 #include "socket.h"
 #include "evnt_handler.h"
+#include <avr/pgmspace.h>
 
 //*****************************************************************************
 //
@@ -161,6 +162,31 @@ INT32 nvmem_write(UINT32 ulFileId, UINT32 ulLength, UINT32 ulEntryOffset, UINT8 
 	return(iRes);
 }
 
+INT32 nvmem_write_P(UINT32 ulFileId, UINT32 ulLength, UINT32 ulEntryOffset, UINT8 *buff)
+{
+	INT32 iRes = EFAIL;
+	UINT8 *ptr = tSLInformation.pucTxCommandBuffer;
+	UINT8 *args = (ptr + SPI_HEADER_SIZE + HCI_DATA_CMD_HEADER_SIZE);
+
+	// Fill in HCI packet structure
+	args = UINT32_TO_STREAM(args, ulFileId);
+	args = UINT32_TO_STREAM(args, 12);
+	args = UINT32_TO_STREAM(args, ulLength);
+	args = UINT32_TO_STREAM(args, ulEntryOffset);
+
+	uint8_t *dest = ptr + SPI_HEADER_SIZE + HCI_DATA_CMD_HEADER_SIZE + NVMEM_WRITE_PARAMS_LEN;
+	UINT32 i = ulLength;
+	while (i--)
+		*dest++ = pgm_read_byte(buff++);
+
+	// Initiate a HCI command but it will come on data channel
+	hci_data_command_send(HCI_CMND_NVMEM_WRITE, ptr, NVMEM_WRITE_PARAMS_LEN,
+		ulLength);
+
+	SimpleLinkWaitEvent(HCI_EVNT_NVMEM_WRITE, &iRes);
+
+	return(iRes);
+}
 
 //*****************************************************************************
 //
@@ -245,6 +271,29 @@ UINT8 nvmem_write_patch(UINT32 ulFileId, UINT32 spLength, const UINT8 *spData)
 	return status;
 }
 
+UINT8 nvmem_write_patch_P(UINT32 ulFileId, UINT32 spLength, const UINT8 *spData)
+{
+	UINT8	status = 0;
+	UINT16	offset = 0;
+	UINT8*	spDataPtr = (UINT8*)spData;
+
+	while ((status == 0) && (spLength >= SP_PORTION_SIZE))
+	{
+		status = nvmem_write_P(ulFileId, SP_PORTION_SIZE, offset, spDataPtr);
+		offset += SP_PORTION_SIZE;
+		spLength -= SP_PORTION_SIZE;
+		spDataPtr += SP_PORTION_SIZE;
+	}
+
+	if (status !=0)		// NVMEM error occurred
+		return status;
+
+	if (spLength != 0)	// if reached here, a reminder is left
+		status = nvmem_write_P(ulFileId, spLength, offset, spDataPtr);
+
+	return status;
+}
+
 //*****************************************************************************
 //
 //!  nvmem_read_sp_version
@@ -263,19 +312,18 @@ UINT8 nvmem_write_patch(UINT32 ulFileId, UINT32 spLength, const UINT8 *spData)
 UINT8 nvmem_read_sp_version(UINT8* patchVer)
 {
 	UINT8 *ptr;
-	// 1st byte is the status and the rest is the SP version
-	UINT8	retBuf[5];	
+	UINT8 retBuf[5];	// 1st byte is the status and the rest is the SP version
 
 	ptr = tSLInformation.pucTxCommandBuffer;
 
 	// Initiate a HCI command, no args are required
-	hci_command_send(HCI_CMND_READ_SP_VERSION, ptr, 0);	
+	hci_command_send(HCI_CMND_READ_SP_VERSION, ptr, 0);
 	SimpleLinkWaitEvent(HCI_CMND_READ_SP_VERSION, retBuf);
 
 	// package ID
-	*patchVer = retBuf[3];			
+	*patchVer = retBuf[3];
 	// package build number
-	*(patchVer+1) = retBuf[4];		
+	*(patchVer+1) = retBuf[4];
 
 	return(retBuf[0]);
 }

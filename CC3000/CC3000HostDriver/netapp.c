@@ -230,8 +230,7 @@ INT32 netapp_timeout_values(UINT32 *aucDHCP, UINT32 *aucARP,UINT32 *aucKeepalive
 //*****************************************************************************
 
 #ifndef CC3000_TINY_DRIVER
-INT32
-	netapp_ping_send(UINT32 *ip, UINT32 ulPingAttempts, UINT32 ulPingSize, UINT32 ulPingTimeout)
+INT32 netapp_ping_send(UINT32 *ip, UINT32 ulPingAttempts, UINT32 ulPingSize, UINT32 ulPingTimeout)
 {
 	INT8 scRet;
 	UINT8 *ptr, *args;

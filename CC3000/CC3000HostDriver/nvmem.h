@@ -132,6 +132,7 @@ extern INT32 nvmem_read(UINT32 file_id, UINT32 length, UINT32 offset, UINT8 *buf
 //*****************************************************************************
 
 extern INT32 nvmem_write(UINT32 ulFileId, UINT32 ulLength, UINT32 ulEntryOffset, UINT8 *buff);
+extern INT32 nvmem_write_P(UINT32 ulFileId, UINT32 ulLength, UINT32 ulEntryOffset, UINT8 *buff);
 
 
 //*****************************************************************************
@@ -182,6 +183,7 @@ extern UINT8 nvmem_get_mac_address(UINT8 *mac);
 //!	 
 //*****************************************************************************
 extern UINT8 nvmem_write_patch(UINT32 ulFileId, UINT32 spLength, const UINT8 *spData);
+extern UINT8 nvmem_write_patch_P(UINT32 ulFileId, UINT32 spLength, const UINT8 *spData);
 
 
 //*****************************************************************************
