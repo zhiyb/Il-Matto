@@ -46,8 +46,7 @@
 #include "evnt_handler.h"
 #include "wlan.h"
 
-#include <avr/pgmspace.h>
-#include <stdio.h>
+#include <string.h>
 
 #define SL_PATCH_PORTION_SIZE		(1000)
 

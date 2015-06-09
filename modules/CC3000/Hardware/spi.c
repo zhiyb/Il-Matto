@@ -45,7 +45,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
@@ -168,7 +167,7 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
 //!  @brief  initializes an SPI interface
 //
 //*****************************************************************************
-int init_spi(void)
+int spi_init(void)
 {
 	SPI_D |= SPI_MOSI | SPI_SCK | SPI_CS | CC3000_EN;
 	SPI_D &= ~(SPI_MISO | CC3000_INT);

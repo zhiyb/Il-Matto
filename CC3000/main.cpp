@@ -1,7 +1,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <tft.h>
-#include <spi.h>
+#include <string.h>
+#include <cc3000.h>
 #include <host_driver_version.h>
 #include <wlan.h>
 #include <hci.h>
@@ -27,68 +28,18 @@ struct _wlan_full_scan_results_args_t
 	uint8_t	bssid[6];			// BSSID
 };
 
-tft_t tft;
-
-volatile unsigned long ulSmartConfigFinished, ulCC3000Connected,ulCC3000DHCP,
-			OkToDoShutDown,	ulCC3000DHCP_configured;
-volatile unsigned char ucStopSmartConfig;
-
-unsigned char printOnce	= 1;
-
+static tft_t tft;
+static volatile uint8_t ulSmartConfigFinished, ulCC3000Connected, ulCC3000DHCP;
 // Simple Config Prefix
-const char aucCC3000_prefix[] =	{'T', 'T', 'T'};
+static const char aucCC3000_prefix[] =	{'T', 'T', 'T'};
 
-long ReadWlanInterruptPin(void)
-{
-	return SPI_R & CC3000_INT;
-}
-
-void WlanInterruptEnable()
-{
-	PCICR |= _BV(PCIE3);
-	PCMSK3 |= CC3000_INT;
-}
-
-void WlanInterruptDisable()
-{
-	PCMSK3 &= ~CC3000_INT;
-}
-
-void WriteWlanPin(unsigned char	val)
-{
-	if (val)
-		SPI_W |= CC3000_EN;
-	else
-		SPI_W &= ~CC3000_EN;
-}
-
-char *sendPatch(unsigned long *Length)
-{
-	*Length	= 0;
-	return NULL;
-}
-
-//*****************************************************************************
-//
-//! CC3000_UsynchCallback
-//!
-//! @param  lEventType	 Event type
-//! @param  data
-//! @param  length
-//!
-//! @return none
-//!
-//! @brief  The	function handles asynchronous events that come from CC3000
-//!	    device and operates	a LED1 to have an on-board indication
-//
-//*****************************************************************************
+// The function handles asynchronous events that come from CC3000
 void CC3000_UsynchCallback(long	lEventType, char *data,	unsigned char length)
 {
 	uint8_t	i;
 	switch (lEventType) {
 	case HCI_EVNT_WLAN_ASYNC_SIMPLE_CONFIG_DONE:
 		ulSmartConfigFinished =	1;
-		ucStopSmartConfig     =	1;
 		break;
 	case HCI_EVNT_WLAN_UNSOL_CONNECT:
 		ulCC3000Connected = 1;
@@ -97,8 +48,6 @@ void CC3000_UsynchCallback(long	lEventType, char *data,	unsigned char length)
 	case HCI_EVNT_WLAN_UNSOL_DISCONNECT:
 		ulCC3000Connected = 0;
 		ulCC3000DHCP	  = 0;
-		ulCC3000DHCP_configured	= 0;
-		printOnce = 1;
 		puts_P(PSTR("HCI_EVNT_WLAN_UNSOL_DISCONNECT"));
 		break;
 	case HCI_EVNT_WLAN_UNSOL_DHCP:
@@ -117,7 +66,7 @@ void CC3000_UsynchCallback(long	lEventType, char *data,	unsigned char length)
 				putchar(i != 0 ? '.' : '\n');
 			} while	(i-- !=	0);
 			ulCC3000DHCP = 1;
-			puts_P(PSTR("HCI_EVNT_WLAN_UNSOL_DHCP: success"));
+			puts_P(PSTR("HCI_EVNT_WLAN_UNSOL_DHCP: OK"));
 		} else {
 			ulCC3000DHCP = 0;
 			puts_P(PSTR("HCI_EVNT_WLAN_UNSOL_DHCP: failed"));
@@ -130,7 +79,6 @@ void CC3000_UsynchCallback(long	lEventType, char *data,	unsigned char length)
 		break;
 	}
 	case HCI_EVENT_CC3000_CAN_SHUT_DOWN:
-		OkToDoShutDown = 1;
 		break;
 	default:
 		printf_P(PSTR("Event: %lX, %u\n"), lEventType, length);
@@ -174,11 +122,8 @@ void init()
 	sei();
 	printf_P(PSTR("Host driver version: %u\n"), DRIVER_VERSION_NUMBER);
 
-	init_spi();
-	puts_P(PSTR("SPI initialised."));
-
-	wlan_init(CC3000_UsynchCallback, sendPatch, sendPatch, sendPatch, ReadWlanInterruptPin,	WlanInterruptEnable, WlanInterruptDisable, WriteWlanPin);
-	puts_P(PSTR("WLAN initialised."));
+	cc3000_init(CC3000_UsynchCallback);
+	puts_P(PSTR("CC3000 initialised."));
 	int32_t	res;
 
 	wlan_start(0);
@@ -250,8 +195,6 @@ void init()
 	res = wlan_connect(WLAN_SEC_UNSEC, 0, 0, bssid,	0, 0);
 #endif
 	printf_P(PSTR("WLAN connect: %ld\n"), res);
-
-	ucStopSmartConfig = 0;
 }
 
 int main()

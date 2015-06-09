@@ -36,10 +36,6 @@
 #ifndef __SPI_H__
 #define __SPI_H__
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header
@@ -49,11 +45,6 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-typedef void (*gcSpiHandleRx)(void *p);
-typedef void (*gcSpiHandleTx)(void);
-
-extern unsigned char wlan_tx_buffer[];
 
 // Using USART1 on PORTD as SPI
 #define SPI_W		PORTD
@@ -66,6 +57,11 @@ extern unsigned char wlan_tx_buffer[];
 #define CC3000_EN	_BV(6)
 #define CC3000_INT	_BV(7)
 
+typedef void (*gcSpiHandleRx)(void *p);
+typedef void (*gcSpiHandleTx)(void);
+
+extern unsigned char wlan_tx_buffer[];
+
 //*****************************************************************************
 //
 // Prototypes for the APIs.
@@ -75,10 +71,10 @@ extern void SpiOpen(gcSpiHandleRx pfRxHandler);
 extern void SpiClose(void);
 extern long SpiWrite(unsigned char *pUserBuffer, unsigned short usLength);
 extern void SpiResumeSpi(void);
-extern int init_spi(void);
 extern long TXBufferIsEmpty(void);
 extern long RXBufferIsEmpty(void);
 extern void SpiPauseSpi(void);
+extern int spi_init(void);
 //*****************************************************************************
 //
 // Mark the end of the C bindings section for C++ compilers.
