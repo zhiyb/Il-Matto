@@ -2,8 +2,7 @@
 
 TRG	= Pong
 SRC	= game.c main.c rotary.c sound.c
-LIB	= tft common
-LIBDIR	= ../lib
+SUBDIRS	= tft common
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -14,4 +13,5 @@ EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs

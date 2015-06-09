@@ -236,10 +236,16 @@ void init()
 
 	scanNetworks();
 
-#if 1
+#if 0
 	char ssid[] = "Network";
 	res = wlan_connect(WLAN_SEC_UNSEC, ssid, strlen(ssid), 0, 0, 0);
-#else
+#endif
+#if 1
+	char ssid[] = "ZZFNB00000017_Network";
+	char key[] = "f3ei-zeb6-m35o";
+	res = wlan_connect(WLAN_SEC_WPA2, ssid, strlen(ssid), 0, (uint8_t *)key, strlen(key));
+#endif
+#if 0
 	uint8_t	bssid[6] = {0x00, 0x1F,	0xA3, 0x1F, 0xC0, 0xF7};
 	res = wlan_connect(WLAN_SEC_UNSEC, 0, 0, bssid,	0, 0);
 #endif

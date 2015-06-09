@@ -1,7 +1,0 @@
-LIBTRG	= tft-cpp
-SRC	= ascii.c tft.cpp
-
-# Only macros used; no need for compile
-LIB	= common
-
-include ../Makefile.defs

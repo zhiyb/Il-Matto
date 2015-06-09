@@ -2,8 +2,7 @@
 
 TRG	= MPU6050
 SRC	= main.cpp
-LIB	= tft-cpp MPU6050-cpp common
-LIBDIR	= ../lib
+SUBDIRS	= tft-cpp MPU6050-cpp common
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -17,4 +16,5 @@ EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs

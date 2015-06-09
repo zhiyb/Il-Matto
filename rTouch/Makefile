@@ -2,8 +2,7 @@
 
 TRG	= rTouch
 SRC	= main.cpp
-LIB	= tft-cpp rTouch common capture
-LIBDIR	= ../lib
+SUBDIRS	= tft-cpp rTouch common tft-capture
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -19,4 +18,5 @@ EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs

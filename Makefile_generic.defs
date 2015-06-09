@@ -1,15 +1,14 @@
-# Author: Yubo Zhi (yz39g13@soton.ac.uk)
+# General Makefile
+# Author: Yubo Zhi (normanzyb@gmail.com)
 
-# Outdated warning
-define outdated
-$(warning "$$($1) outdated, use $$($2) instead")
-endef
+# Root dir
+SRCDIR	?= .
 
 # Change variable type to simply-expanded
 SRC	:= $(SRC)
-LIB	:= $(LIB)
 LIBS	:= $(LIBS)
 DEFS	:= $(DEFS)
+SUBDIRS	:= $(SUBDIRS)
 INCDIRS	:= $(INCDIRS)
 
 # Defaults
@@ -18,37 +17,20 @@ OPTLEVEL	?= s
 endif
 #CROSS_COMPILE	?=
 DEPDIR	?= .deps
-TOPDIR	?= $(dir $(lastword $(MAKEFILE_LIST)))
 
 # Subdirectories
 define inc_subdir
 DIR	:= $(1)
-include $(1)/Makefile
-SRC	+= $$(NSRC:%=$$(DIR)/%)
-LIB	+= $$(NLIB)
-LIBS	+= $$(NLIBS)
-DEFS	+= $$(NDEFS)
-INCDIRS	+= $$(NINCDIRS:%=$$(DIR)/%)
+include $(SRCDIR)/$$(DIR)/Makefile
 endef
-
 $(foreach dir,$(SUBDIRS),$(eval $(call inc_subdir,$(dir))))
 
-# Libs
+# General target
 ifndef LIBTRG
-LIBDIR	?= $(TOPDIR)
-else
-LIBDIR	?= ..
+TRG	?= $(PRG)
 endif
-LIBDIRS	= $(LIB:%=$(LIBDIR)/lib%)
-LIBCONFS	= $(LIBDIRS:%=%/Makefile.conf)
-LIBFILES	= $(foreach lib,$(LIB),$(lib:%=$(LIBDIR)/lib%)/$(lib:%=lib%.a))
--include $(LIBCONFS)
 
-ifndef LIBTRG
-ifndef TRG
-$(call outdated,PRG,TRG)
-TRG	= $(PRG)
-endif
+# Append configuration definations
 define checkconf
 ifdef $1
 	DEFS	+= -D$1=$$($1)
@@ -61,22 +43,21 @@ endif
 endef
 $(foreach conf,$(CONFS),$(eval $(call checkconf,$(conf))))
 $(foreach conf,$(CONFS_D),$(eval $(call checkconf_d,$(conf))))
-endif
 
+# Cross compile target suffix
 ifndef CROSS_COMPILE
 ifeq ($(OS),Windows_NT)
 	SUFFIX	?= .exe
 endif
+else
+	SUFFIX	?= .elf
 endif
-
-#DEFS	+= -fpack-struct -fshort-enums
-#DEFS	+= -funsigned-bitfields -funsigned-char
-NEWLIBS	= $(LIBDIRS:%=-L%) $(LIB:%=-l%)
-INCS	+= $(LIBDIRS:%=-I%)
-INCS	+= $(INCDIRS:%=-I%)
 
 ELF	= $(TRG)$(SUFFIX)
 OBJS	= $(subst .S,.o,$(subst .c,.o,$(SRC:.cpp=.o)))
+vpath %.c $(SRCDIR)
+vpath %.cpp $(SRCDIR)
+vpath %.S $(SRCDIR)
 
 AR	= $(CROSS_COMPILE)ar
 AS	= $(CROSS_COMPILE)gcc
@@ -85,12 +66,15 @@ CXX	= $(CROSS_COMPILE)g++
 LD	= $(CROSS_COMPILE)g++
 SIZE	= $(CROSS_COMPILE)size
 
+# Flags
+INCS	+= $(INCDIRS:%=-I$(SRCDIR)/%)
 FLAGS	?= -g -Wall
 #FLAGS	+= -Werror
-FLAGS	+= $(OPTIMIZE) -O$(OPTLEVEL)
-
-# Exports
-export DEFS OPTIMIZE OPTLEVEL CONFS $(CONFS) CONFS_D $(CONFS_D)
+ifdef OPTLEVEL
+FLAGS	+= -O$(OPTLEVEL)
+else
+FLAGS	+= $(OPTIMIZE)
+endif
 
 ARFLAGS	= $(ARFLG) rcs
 ifdef $(OVERRIDE)
@@ -105,7 +89,7 @@ CXXFLAGS	= $(CXXFLAG) $(DEFS) $(INCS) $(FLAGS)
 LDFLAGS	= $(LDFLAG) $(FLAGS)
 endif
 
-# Verbose display
+# Verbose
 define verbose
 	@if [ 'x$(VERBOSE)' = x ]; then	\
 		echo "  "$1;		\
@@ -115,7 +99,7 @@ define verbose
 	@$2
 endef
 
-# Rules
+# Default rule
 ifdef LIBTRG
 all: lib
 else
@@ -126,17 +110,17 @@ endif
 CLEAN_FILES	+= $(OBJS)
 $(ELF): $(OBJS) $(LIBFILES)
 	$(call verbose,"LD	$@",\
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(NEWLIBS) $(LIBS))
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS))
 	$(call verbose,"SIZE	$@",\
 	$(SIZE) $@)
 
 %.o: %.c
-	@mkdir -p $(dir $(DEPDIR)/$<)
+	@mkdir -p $(dir $(DEPDIR)/$*.d) $(dir $@)
 	$(call verbose,"CC	$<",\
 	$(CC) $(CFLAGS) -c -o $@ $<) -MD -MP -MF "$(DEPDIR)/$*.d"
 
 %.o: %.cpp
-	@mkdir -p $(dir $(DEPDIR)/$<)
+	@mkdir -p $(dir $(DEPDIR)/$*.d) $(dir $@)
 	$(call verbose,"CXX	$<",\
 	$(CC) $(CFLAGS) -c -o $@ $<) -MD -MP -MF "$(DEPDIR)/$*.d"
 
@@ -148,8 +132,8 @@ $(ELF): $(OBJS) $(LIBFILES)
 	$(call verbose,"GEN	$@",\
 	$(OBJDUMP) -h -S $< > $@)
 
+# Rules for building library
 ifdef LIBTRG
-# Rule for building library
 .PHONY: lib
 lib: lib-static
 
@@ -162,27 +146,15 @@ lib$(LIBTRG).a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS))
 endif
 
-# Libraries
-$(LIBFILES): %:
-	$(call verbose,"MAKE	$@",\
-	$(MAKE) -C $(dir $@))
-
 # Dependency
 -include $(OBJS:%.o=$(DEPDIR)/%.d)
 CLEAN_DIRS	+= $(DEPDIR)
 
 # Clean up
-ifndef LIBTRG
-CLEAN_LIBS	+= $(LIBDIRS:%=clean-%)
-endif
-.PHONY: $(CLEAN_LIBS)
-$(CLEAN_LIBS):
-	$(call verbose,"CLEAN	$(@:clean-%=%)",\
-	$(MAKE) -C $(@:clean-%=%) clean)
-
 .PHONY: clean
-clean: $(CLEAN_LIBS)
+clean:
 	$(call verbose,"CLEAN	$(CLEAN_FILES)",\
 	$(RM) $(CLEAN_FILES))
 	$(call verbose,"CLEAN	$(CLEAN_DIRS)",\
 	$(RM) -r $(CLEAN_DIRS))
+	@rmdir -p $(dir $(CLEAN_FILES)) 2> /dev/null || true

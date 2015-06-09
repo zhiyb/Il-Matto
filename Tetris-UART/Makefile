@@ -2,8 +2,7 @@
 
 TRG	= Tetris_UART
 SRC	= ascii.c display.c ili9341.c main.c rand.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
-LIB	= common
-LIBDIR	= ../lib
+SUBDIRS	= common
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -15,4 +14,5 @@ EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs

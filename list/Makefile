@@ -2,9 +2,7 @@
 
 TRG	= list
 SRC	= main.cpp menu.cpp menufunc.cpp
-LIB	= tft-cpp list rTouch common
-LIBDIR	= ../lib
-VERSION	= 0.0.1
+SUBDIRS	= tft-cpp list rTouch common
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -15,10 +13,10 @@ RTOUCH_SWAPXY	= n
 
 #DEFS	+= -DDEBUG
 LIBS	+= -lm
-INCS	+=
 
 EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs

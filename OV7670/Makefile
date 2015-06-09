@@ -2,8 +2,7 @@
 
 TRG	= OV7670
 SRC	= main.cpp
-LIB	= tft-cpp OV7670-cpp common
-LIBDIR	= ../lib
+SUBDIRS	= tft-cpp OV7670-cpp common
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -16,4 +15,5 @@ EFUSE	= 0xFF
 HFUSE	= 0x9C
 LFUSE	= 0xE7
 
-include ../Makefile.defs
+SRCDIR	?= .
+include $(SRCDIR)/../Makefile_AVR.defs
