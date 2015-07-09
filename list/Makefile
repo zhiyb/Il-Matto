@@ -7,16 +7,16 @@ SUBDIRS	= tft-cpp list rTouch common
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
-OPTLEVEL	= s
 
+# Options
 RTOUCH_SWAPXY	= n
+#LIST_ITEM_IMAGE_SIZE	= 0
+#LIST_TOP_RESERVED	= 0
+#LIST_BOTTOM_RESERVED	= 0
+#LIST_STACK_SIZE	= 5
 
 #DEFS	+= -DDEBUG
 LIBS	+= -lm
-
-EFUSE	= 0xFF
-HFUSE	= 0x9C
-LFUSE	= 0xE7
 
 SRCDIR	?= .
 include $(SRCDIR)/../Makefile_AVR.defs

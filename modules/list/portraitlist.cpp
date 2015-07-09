@@ -13,7 +13,7 @@
 #define SCROLL_AREA	(tft->vsHeight())
 
 #define ITEM_SPACE	8
-#define ITEM_NAME_X	(ITEM_IMAGE_X + ITEM_IMAGE_SIZE + ITEM_SPACE)
+#define ITEM_NAME_X	(ITEM_IMAGE_X + LIST_ITEM_IMAGE_SIZE + ITEM_SPACE)
 #define ITEM_NAME_Y	8
 #define ITEM_IMAGE_X	ITEM_SPACE
 #define ITEM_HEIGHT	(FONT_HEIGHT * ZOOM + ITEM_NAME_Y * 2)
@@ -113,7 +113,7 @@ disp:
 	tft->setX(ITEM_NAME_X);
 	if (item) {
 		if (item->image)
-			tft->drawImage2(item->image, ITEM_IMAGE_X, tft->y(), ITEM_IMAGE_SIZE, ITEM_IMAGE_SIZE, true);
+			tft->drawImage2(item->image, ITEM_IMAGE_X, tft->y(), LIST_ITEM_IMAGE_SIZE, LIST_ITEM_IMAGE_SIZE, true);
 		tft->putString(item->name, true);
 #ifdef ITEM_EMPTY
 	} else {

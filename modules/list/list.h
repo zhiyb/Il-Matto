@@ -6,16 +6,16 @@
 #define LIST_H
 
 // Size of image on each items
-#ifndef ITEM_IMAGE_SIZE
-#define ITEM_IMAGE_SIZE		(FONT_HEIGHT * 2)
+#ifndef LIST_ITEM_IMAGE_SIZE
+#define LIST_ITEM_IMAGE_SIZE	(FONT_HEIGHT * 2)
 #endif
 
-// Size of reserved area on top
+// Size of reserved area at top
 #ifndef LIST_TOP_RESERVED
 #define LIST_TOP_RESERVED	0
 #endif
 
-// Size of reserved area on top
+// Size of reserved area at bottom
 #ifndef LIST_BOTTOM_RESERVED
 #define LIST_BOTTOM_RESERVED	0
 #endif
