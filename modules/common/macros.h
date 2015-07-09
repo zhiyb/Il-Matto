@@ -8,4 +8,7 @@
 #define CONCAT(a,b)	a ## b
 #define CONCAT_E(a,b)	CONCAT(a, b)
 
+#define STRINGIFY(x)	#x
+#define TOSTRING(x)	STRINGIFY(x)
+
 #endif
