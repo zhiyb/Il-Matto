@@ -1,14 +1,18 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= CC3000
-SRC	= main.cpp
+SRC	= main.cpp menu.cpp wlanfunc.cpp nvmemfunc.cpp event.cpp
 #SRC	= patch/PatchProgrammer_DR_Patch.cpp
 #SRC	= patch/PatchProgrammer_FW_Patch.cpp
-SUBDIRS	= CC3000 tft-cpp common
+SUBDIRS	= CC3000 tft-cpp common list rTouch
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
+
+# Options
+RTOUCH_SWAPXY	= n
+LIST_ITEM_IMAGE_SIZE	= 0
 
 LIBS	+= -lm
 
