@@ -25,6 +25,14 @@ namespace nvmem
 	namespace getMAC{bool func(bool enter);}
 	namespace setMAC{bool func(bool enter);}
 }
+namespace socket
+{
+	namespace socket{bool func(bool enter);}
+	namespace bind{bool func(bool enter);}
+	namespace connect{bool func(bool enter);}
+	namespace closesocket{bool func(bool enter);}
+	namespace newsocket{bool func(bool enter);}
+}
 namespace root {extern listItem item;}
 }
 

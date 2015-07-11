@@ -1,7 +1,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= CC3000
-SRC	= main.cpp menu.cpp wlanfunc.cpp nvmemfunc.cpp event.cpp
+SRC	= main.cpp menu.cpp event.cpp wlanfunc.cpp nvmemfunc.cpp socketfunc.cpp
 #SRC	= patch/PatchProgrammer_DR_Patch.cpp
 #SRC	= patch/PatchProgrammer_FW_Patch.cpp
 SUBDIRS	= CC3000 tft-cpp common list rTouch

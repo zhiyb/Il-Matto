@@ -70,11 +70,45 @@ namespace nvmem
 	0};
 	static listItem item = {name, 0, items, 0};
 }
+namespace socket
+{
+	namespace socket
+	{
+		static const char PROGMEM name[] = "socket()";
+		static listItem item = {name, 0, 0, func};
+	}
+	namespace bind
+	{
+		static const char PROGMEM name[] = "bind()";
+		static listItem item = {name, 0, 0, func};
+	}
+	namespace connect
+	{
+		static const char PROGMEM name[] = "connect()";
+		static listItem item = {name, 0, 0, func};
+	}
+	namespace closesocket
+	{
+		static const char PROGMEM name[] = "closesocket()";
+		static listItem item = {name, 0, 0, func};
+	}
+	namespace newsocket
+	{
+		static const char PROGMEM name[] = "newsocket()";
+		static listItem item = {name, 0, 0, func};
+	}
+	static const char PROGMEM name[] = "Socket operations";
+	static const listItem *items[] = {
+		&socket::item, &bind::item, &connect::item,
+		&closesocket::item, &newsocket::item,
+	0};
+	static listItem item = {name, 0, items, 0};
+}
 namespace root
 {
 	static const char PROGMEM name[] = "CC3000, HDV: " TOSTRING(DRIVER_VERSION_NUMBER);
 	static const listItem *items[] = {
-		&wlan::item, &nvmem::item,
+		&wlan::item, &nvmem::item, &socket::item,
 	0};
 	listItem item = {name, 0, items, 0};
 }

@@ -79,7 +79,7 @@ bool menu::wlan::connect::func(bool enter)
 	char ssid[] = "Network";
 	res = wlan_connect(WLAN_SEC_UNSEC, ssid, strlen(ssid), 0, 0, 0);
 #endif
-#if 1
+#if 0
 	char ssid[] = "ZZFNB00000017_Network";
 	char key[] = "f3ei-zeb6-m35o";
 #else
