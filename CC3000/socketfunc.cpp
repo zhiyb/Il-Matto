@@ -74,6 +74,25 @@ bool menu::socket::connect::func(bool enter)
 	return true;
 }
 
+bool menu::socket::send::func(bool enter)
+{
+	if (skt == -1)
+		connect::func(enter);
+	else
+		tftClean();
+	if (skt == -1)
+		return true;
+	puts_P(PSTR("Sending HW..."));
+	char str[] = "Hello, world!\n";
+	int32_t res = ::send(skt, str, strlen(str) + 1, 0);
+	if (res == 0)
+		puts_P(PSTR("Sent."));
+	else
+		printf_P(PSTR("Error: %ld\n"), res);
+	touch.waitForPress();
+	return true;
+}
+
 bool menu::socket::closesocket::func(bool enter)
 {
 	tftClean();

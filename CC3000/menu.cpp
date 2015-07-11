@@ -87,6 +87,11 @@ namespace socket
 		static const char PROGMEM name[] = "connect()";
 		static listItem item = {name, 0, 0, func};
 	}
+	namespace send
+	{
+		static const char PROGMEM name[] = "send()";
+		static listItem item = {name, 0, 0, func};
+	}
 	namespace closesocket
 	{
 		static const char PROGMEM name[] = "closesocket()";
@@ -99,7 +104,7 @@ namespace socket
 	}
 	static const char PROGMEM name[] = "Socket operations";
 	static const listItem *items[] = {
-		&socket::item, &bind::item, &connect::item,
+		&socket::item, &bind::item, &connect::item, &send::item,
 		&closesocket::item, &newsocket::item,
 	0};
 	static listItem item = {name, 0, items, 0};
