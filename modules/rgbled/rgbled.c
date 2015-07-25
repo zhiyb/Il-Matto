@@ -11,10 +11,6 @@ uint32_t rgbLED[RGBLED_NUM] = {
 	0x00000000,
 };
 
-#define RED(c)		(((c) >> 16) & 0xff)
-#define GREEN(c)	(((c) >> 8) & 0xff)
-#define BLUE(c)		(((c) >> 0) & 0xff)
-
 #define DDR	CONCAT_E(DDR, RGBLED_PORT)
 #define PORT	CONCAT_E(PORT, RGBLED_PORT)
 #define DIN	_BV(RGBLED_DIN)
@@ -70,8 +66,8 @@ void rgbLED_refresh()
 	reset();
 	do {
 		uint32_t clr = *p++;
-		send(GREEN(clr));
-		send(RED(clr));
-		send(BLUE(clr));
+		send(GREEN888(clr));
+		send(RED888(clr));
+		send(BLUE888(clr));
 	} while (--cnt);
 }
