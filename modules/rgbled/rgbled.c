@@ -46,14 +46,14 @@ static void send(uint8_t data)
 	uint8_t cnt = 8;
 	do {
 		while (!(TIFR2 & _BV(OCF2A)));
-		PORTD |= DIN;
+		PORT |= DIN;
 		TIFR2 |= _BV(OCF2A);
 		if (!(data & 0x80))
-			PORTD &= ~DIN;
+			PORT &= ~DIN;
 		while (!(TIFR2 & _BV(OCF2A)));
 		TIFR2 |= _BV(OCF2A);
 		while (!(TIFR2 & _BV(OCF2A)));
-		PORTD &= ~DIN;
+		PORT &= ~DIN;
 		TIFR2 |= _BV(OCF2A);
 		data <<= 1;
 	} while (--cnt);

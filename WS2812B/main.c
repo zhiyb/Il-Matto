@@ -35,6 +35,10 @@ int main()
 	uint8_t i = 0, j = 0;
 	int8_t d = 1;
 	uint8_t cnt;
+
+	for (j = 0; j < RGBLED_NUM; j++)
+		rgbLED[j] = 0xffffff;
+	rgbLED_refresh();
 loop:
 	cnt = RGBLED_NUM;
 	do {
