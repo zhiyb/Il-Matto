@@ -1,5 +1,5 @@
 /*
- * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
 #include <avr/io.h>
@@ -10,17 +10,8 @@
 #include "tft_hw.h"
 #include "tft.h"
 
-#define WIDTH	FONT_WIDTH
-#define HEIGHT	FONT_HEIGHT
-#define SIZE_H	TFT_SIZE_HEIGHT
-#define SIZE_W	TFT_SIZE_WIDTH
 #define DEF_FGC	0xFFFF
 #define DEF_BGC	0x0000
-/*#define SWAP(x, y) { \
-	(x) = (x) ^ (y); \
-	(y) = (x) ^ (y); \
-	(x) = (x) ^ (y); \
-}*/
 
 namespace tft
 {
@@ -92,7 +83,7 @@ void tft::init()
 #ifdef TFT_VERTICAL_SCROLLING
 	d.tfa = 0;
 	d.bfa = 0;
-	d.vsp = SIZE_H;
+	d.vsp = vsMaximum();
 	setTopMask(0);
 	setBottomMask(0);
 	setTransform(false);
@@ -269,13 +260,13 @@ void tft::setOrient(uint8_t o)
 	switch (o) {
 	case Landscape:
 	case FlipLandscape:
-		width = SIZE_H;
-		height = SIZE_W;
+		width = TFT_SIZE_WIDTH;
+		height = TFT_SIZE_HEIGHT;
 		break;
 	case Portrait:
 	case FlipPortrait:
-		width = SIZE_W;
-		height = SIZE_H;
+		width = TFT_SIZE_HEIGHT;
+		height = TFT_SIZE_WIDTH;
 	}
 	x = 0;
 	y = 0;
@@ -332,7 +323,7 @@ void tft::setVerticalScrolling(const uint16_t vsp)
 
 void tft::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 {
-	uint16_t vsa = SIZE_H - tfa - bfa;
+	uint16_t vsa = vsMaximum() - tfa - bfa;
 	if (flipped())
 		tfthw::setVSDefinition(bfa, vsa, tfa);
 	else
@@ -341,6 +332,21 @@ void tft::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 	d.bfa = bfa;
 }
 #endif
+
+void tft::newline()
+{
+	using namespace tfthw;
+	x = 0;
+	y += FONT_HEIGHT * zoom;
+	if (y + FONT_HEIGHT * zoom > height) {
+#ifdef TFT_SCROLL
+		shiftUp(FONT_HEIGHT * zoom);
+		y -= FONT_HEIGHT * zoom;
+#else
+		clean();
+#endif
+	}
+}
 
 void tft::drawChar(char ch)
 {

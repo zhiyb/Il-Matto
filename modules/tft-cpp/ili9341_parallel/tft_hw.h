@@ -1,18 +1,18 @@
 /*
- * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
 #ifndef ILI9341_H
 #define ILI9341_H
 
-#include "connection.h"
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <macros.h>
+#include "connection.h"
 
-#define TFT_SIZE_HEIGHT	320
-#define TFT_SIZE_WIDTH	240
+// With respect to landscape orientation
+#define TFT_SIZE_HEIGHT	240
+#define TFT_SIZE_WIDTH	320
 #define TFT_DEF_ORIENT	tft::Portrait
 
 #define TFT_PCTRL	CONCAT_E(DDR, TFT_PORT_CTRL)
@@ -34,19 +34,18 @@ namespace tfthw
 {
 	static inline void cmd(uint8_t dat);
 	static inline void data(uint8_t dat);
-	//static inline void send(bool c, uint8_t dat);
-	static inline void setBGLight(bool ctrl);
-	static inline void setOrient(uint8_t o);
 	
 	static inline void idle(bool e) {cmd(0x38 + e);}
 	static inline void sleep(bool e) {cmd(0x10 + e);}
 	static inline void inversion(bool e) {cmd(0x20 + e);}
-};
+}
 
 // Port
 namespace tfthw
 {
 	static inline void init();
+	static inline void setBGLight(bool ctrl);
+	static inline void setOrient(uint8_t o);
 	static inline void setPage(const uint16_t start, const uint16_t end);
 	static inline void setColumn(const uint16_t start, const uint16_t end);
 	// 0x2c Write, 0x2e Read, 0x3c / 0x3e Continue, 0x00 NOP
@@ -133,14 +132,6 @@ static inline void tfthw::mode(bool read)
 	} else
 		TFT_PDATA = 0xFF;
 }
-
-/*static inline void tfthw::send(bool c, uint8_t dat)
-{
-	if (c)
-		cmd(dat);
-	else
-		data(dat);
-}*/
 
 static inline uint8_t tfthw::read()
 {

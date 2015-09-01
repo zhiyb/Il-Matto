@@ -1,9 +1,9 @@
 /*
- * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
-#ifndef LIBTFT_CPP_CONNECTION_H
-#define LIBTFT_CPP_CONNECTION_H
+#ifndef TFT_ILI9341_CONNECTION_H
+#define TFT_ILI9341_CONNECTION_H
 
 // 8-bit parallel interface I
 

@@ -13,11 +13,12 @@ CONFS_D	+= TFT_CHECKING
 # Ability to read pixels (for screen shift up operation)
 CONFS_D	+= TFT_READ_AVAILABLE
 
-# Determine pixel read ability from hardware module
+# Module specific settings
 ifeq ($(TFT_HARDWARE), ili9341_parallel)
 	TFT_READ_AVAILABLE = y
 else
 	TFT_READ_AVAILABLE = n
+	TFT_VERTICAL_SCROLLING = n
 endif
 
 # File rules

@@ -38,8 +38,8 @@ namespace tft
 	void putString(const char *str, bool progMem = false);
 	void drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
 
-#ifdef TFT_VERTICAL_SCROLLING
 	// Vertical scrolling related functions
+#ifdef TFT_VERTICAL_SCROLLING
 	// Vertical scrolling pointer
 	void setVerticalScrolling(const uint16_t vsp);
 	// Top fixed area, bottom fixed area
@@ -48,7 +48,7 @@ namespace tft
 	static inline bool transform() {return d.tf;}
 	static inline void setTransform(const bool on) {d.tf = on;}
 	// Vertical scrolling mode helper functions
-	static inline uint16_t vsMaximum() {return TFT_SIZE_HEIGHT;}
+	static inline uint16_t vsMaximum() {return TFT_SIZE_WIDTH;}
 	static inline uint16_t topFixedArea() {return d.tfa;}
 	static inline uint16_t bottomFixedArea() {return d.bfa;}
 	static inline uint16_t topEdge() {return topFixedArea();}
@@ -83,9 +83,9 @@ namespace tft
 #endif
 
 	// Private functions
-	inline void newline();
-	inline void next();
-	inline void tab();
+	void newline();
+	static inline void next();
+	static inline void tab();
 }
 
 namespace tfthw
@@ -123,21 +123,6 @@ inline void tft::point(uint16_t x, uint16_t y, uint16_t c)
 	area(x, y, 1, 1);
 	memWrite();
 	write16(c);
-}
-
-inline void tft::newline()
-{
-	using namespace tfthw;
-	x = 0;
-	y += FONT_HEIGHT * zoom;
-	if (y + FONT_HEIGHT * zoom > height) {
-#ifdef TFT_SCROLL
-		shiftUp(FONT_HEIGHT * zoom);
-		y -= FONT_HEIGHT * zoom;
-#else
-		clean();
-#endif
-	}
 }
 
 inline void tfthw::area(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
