@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <macros.h>
+#include <tft_defs.h>
 #include "connection.h"
 
 // With respect to landscape orientation
@@ -21,15 +22,6 @@
 #define TFT_PDATA	CONCAT_E(DDR, TFT_PORT_DATA)
 #define TFT_WDATA	CONCAT_E(PORT, TFT_PORT_DATA)
 #define TFT_RDATA	CONCAT_E(PIN, TFT_PORT_DATA)
-
-namespace tft
-{
-	enum Orientation {Landscape = 0, Portrait, \
-		FlipLandscape, FlipPortrait, \
-		BMPLandscape, BMPPortrait, \
-		BMPFlipLandscape, BMPFlipPortrait, \
-		Orientations};
-}
 
 namespace tfthw
 {
@@ -102,17 +94,14 @@ static inline void tfthw::setOrient(uint8_t o)
 	using namespace tft;
 	static const uint8_t base = 0x08;
 	static const uint8_t MY = 1U << 7, MX = 1U << 6, MV = 1U << 5;
-	static uint8_t orient[Orientations];
-	orient[Landscape]		= base | MV;
-	orient[Portrait]		= base | MX;
-	orient[FlipLandscape]		= orient[Landscape] ^ (MY | MX);
-	orient[FlipPortrait]		= orient[Portrait] ^ (MY | MX);
-	orient[BMPLandscape]		= orient[Landscape] ^ MX;
-	orient[BMPFlipLandscape]	= orient[FlipLandscape] ^ MX;
-	orient[BMPPortrait]		= orient[Portrait] ^ MY;
-	orient[BMPFlipPortrait]		= orient[FlipPortrait] ^ MY;
+	static uint8_t orient;
+	orient = o & Portrait ?  base | MX : base | MV;
+	if (o & Flipped)
+		orient ^= MY | MX;
+	if (o & BMPMode)
+		orient ^= o & Portrait ? MY : MX;
 	cmd(0x36);			// Memory Access Control
-	data(orient[o]);
+	data(orient);
 }
 
 static inline void tfthw::cmd(uint8_t dat)

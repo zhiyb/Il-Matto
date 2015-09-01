@@ -7,7 +7,7 @@ extern void test(void);
 void test(void)
 {
 	using namespace tft;
-	setOrient(tft::Portrait);
+	setOrient(Portrait);
 	background = 0x667f;
 	foreground = 0x0000;
 	setBGLight(true);
@@ -50,7 +50,7 @@ loop:
 	tft::setVerticalScrolling(v);
 	if (max == ++v)
 		v = 64;
-	_delay_ms(100);
+	_delay_ms(50);
 #else
 loop:
 #endif

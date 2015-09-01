@@ -9,8 +9,8 @@ MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
 
 # for ili9341
-#TFT_HARDWARE	= ili9341_parallel
-TFT_HARDWARE	= st7735s_serial4_wo
+TFT_HARDWARE	= ili9341_parallel
+#TFT_HARDWARE	= st7735s_serial4_wo
 
 ifeq ($(TFT_HARDWARE), ili9341_parallel)
 	SRC	+= test_320x240.cpp

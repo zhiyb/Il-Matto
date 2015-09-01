@@ -1,5 +1,5 @@
 /*
- * Author: Yubo Zhi (yz39g13@soton.ac.uk)
+ * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
 #ifndef TFT_H
@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
+#include "tft_defs.h"
 #include "tft_hw.h"
 #include "ascii.h"
 
@@ -15,28 +16,11 @@ namespace tft
 {
 	void init();
 
-	// Orientation should only be set with setOrient()
-	extern uint8_t zoom, orient, tabSize;
-	// Width & height should only be manipulated by setOrient()
-	extern uint16_t x, y, width, height;
-	extern uint16_t foreground, background;	// Colours
-
-#ifdef TFT_VERTICAL_SCROLLING
-	extern struct tft_vs_t {
-		uint16_t vsp, tfa, bfa, topMask, bottomMask;
-		bool tf;
-	} d;
-#endif
-
-	void bmp(bool e);
 	void setOrient(uint8_t o);
+	static inline void bmp(bool e) {tfthw::setOrient(orient | (e ? BMPMode : 0));}
 	static inline void setBGLight(bool e) {tfthw::setBGLight(e);}
-	static inline bool flipped() {return orient == FlipPortrait || orient == FlipLandscape;}
-	static inline bool portrait() {return orient == Portrait || orient == FlipPortrait;}
-	static inline bool landscape() {return !portrait();}
 	static inline void putChar(const char c);
 	void putString(const char *str, bool progMem = false);
-	void drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
 
 	// Vertical scrolling related functions
 #ifdef TFT_VERTICAL_SCROLLING
@@ -68,15 +52,13 @@ namespace tft
 	static inline void vsNormal() {setTransform(false); setVerticalScrolling(topEdge());}
 #endif
 
-	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
-		uint16_t c);
-	void frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
-		uint8_t s, uint16_t c);
+	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c);
+	void frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t s, uint16_t c);
 	void fill(uint16_t clr);
 	static inline void clean() {fill(background); x = 0; y = 0;}
 	void drawChar(char ch);
-	void rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
-		uint16_t c);
+	void rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c);
+	void drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
 	static inline void point(uint16_t x, uint16_t y, uint16_t c);
 #ifdef TFT_READ_AVAILABLE
 	void shiftUp(const uint16_t l);

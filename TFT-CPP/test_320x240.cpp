@@ -7,8 +7,7 @@ extern void test(void);
 void test(void)
 {
 	using namespace tft;
-	setOrient(tft::FlipLandscape);
-	setOrient(tft::Portrait);
+	setOrient(Flipped | Landscape);
 	background = 0x667f;
 	foreground = 0x0000;
 	setBGLight(true);

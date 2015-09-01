@@ -257,17 +257,10 @@ draw:
 
 void tft::setOrient(uint8_t o)
 {
-	switch (o) {
-	case Landscape:
-	case FlipLandscape:
-		width = TFT_SIZE_WIDTH;
-		height = TFT_SIZE_HEIGHT;
-		break;
-	case Portrait:
-	case FlipPortrait:
-		width = TFT_SIZE_HEIGHT;
-		height = TFT_SIZE_WIDTH;
-	}
+	width = TFT_SIZE_WIDTH;
+	height = TFT_SIZE_HEIGHT;
+	if (o & Portrait)
+		swap(width, height);
 	x = 0;
 	y = 0;
 	orient = o;
@@ -304,17 +297,7 @@ uint16_t tft::vsTransformBack(uint16_t y)
 	y += topEdge();		// Relative to 0
 	return y;
 }
-#endif
 
-void tft::bmp(bool e)
-{
-	if (e)
-		tfthw::setOrient(orient + BMPLandscape);
-	else
-		tfthw::setOrient(orient);
-}
-
-#ifdef TFT_VERTICAL_SCROLLING
 void tft::setVerticalScrolling(const uint16_t vsp)
 {
 	tfthw::setVSStart(flipped() ? vsMaximum() - vsp : vsp);
