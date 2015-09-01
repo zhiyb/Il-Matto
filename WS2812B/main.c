@@ -1,6 +1,7 @@
 // Author: Yubo Zhi (normanzyb@gmail.com)
 
 #include <avr/io.h>
+#include <util/delay.h>
 #include <macros.h>
 #include "rgbled.h"
 
@@ -39,6 +40,8 @@ int main()
 	for (j = 0; j < RGBLED_NUM; j++)
 		rgbLED[j] = 0xffffff;
 	rgbLED_refresh();
+	_delay_ms(1000);
+	j = 0;
 loop:
 	cnt = RGBLED_NUM;
 	do {
