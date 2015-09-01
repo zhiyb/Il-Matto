@@ -8,6 +8,7 @@ void test(void)
 {
 	using namespace tft;
 	setOrient(tft::FlipLandscape);
+	setOrient(tft::Portrait);
 	background = 0x667f;
 	foreground = 0x0000;
 	setBGLight(true);
@@ -57,7 +58,7 @@ start:
 
 #ifdef TFT_VERTICAL_SCROLLING
 	tft::setVerticalScrollingArea(64, 32);
-	uint16_t max = 320 - 32;
+	uint16_t max = tft::vsMaximum() - 32;
 	uint16_t v = 64;
 loop:
 	tft::setVerticalScrolling(v);

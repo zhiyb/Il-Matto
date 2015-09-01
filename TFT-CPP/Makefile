@@ -23,7 +23,7 @@ else ifeq ($(TFT_HARDWARE), st7735s_serial4_wo)
 	#TFT_PORT	= D
 endif
 # Vertical scrolling enable
-TFT_VERTICAL_SCROLLING	= n
+TFT_VERTICAL_SCROLLING	= y
 
 LIBS	+= -lm
 

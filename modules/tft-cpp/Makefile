@@ -22,7 +22,6 @@ else ifeq ($(TFT_HARDWARE), st7735s_serial4_wo)
 	TFT_PORT	= D
 	CONFS	+= TFT_PORT
 	TFT_READ_AVAILABLE = n
-	TFT_VERTICAL_SCROLLING = n
 endif
 
 # File rules

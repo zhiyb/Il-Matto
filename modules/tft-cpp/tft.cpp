@@ -144,13 +144,13 @@ void tft::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 	if (x0 == x1) {
 		if (y0 > y1)
 			swap(y0, y1);
-		rectangle(x0, y0, 1, y1 - y0, c);
+		rectangle(x0, y0, 1, y1 - y0 + 1, c);
 		return;
 	}
 	if (y0 == y1) {
 		if (x0 > x1)
 			swap(x0, x1);
-		rectangle(x0, y0, x1 - x0, 1, c);
+		rectangle(x0, y0, x1 - x0 + 1, 1, c);
 		return;
 	}
 	uint16_t dx = abs(x1 - x0), dy = abs(y1 - y0);

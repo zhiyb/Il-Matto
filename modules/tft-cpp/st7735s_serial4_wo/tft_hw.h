@@ -24,8 +24,10 @@ namespace tft
 	enum Orientation {Landscape = 0, Portrait, \
 		FlipLandscape, FlipPortrait, \
 		BMPLandscape, BMPPortrait, \
-		BMPFlipLandscape, BMPFlipPortrait,
+		BMPFlipLandscape, BMPFlipPortrait, \
 		Orientations};
+
+	extern uint8_t orient;
 }
 
 namespace tfthw
@@ -51,44 +53,48 @@ namespace tfthw
 	static inline void write(const uint8_t d) {data(d);}
 	static inline void write16(const uint16_t c) {write(c >> 8); write(c & 0xff);}
 
-/*#ifdef TFT_VERTICAL_SCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 	static inline void setVSStart(const uint16_t addr);
 	static inline void setVSDefinition(const uint16_t tfa, \
 			const uint16_t vsa, const uint16_t bfa);
-#endif*/
+#endif
 }
 
 // Defined as inline to excute faster
 
-/*#ifdef TFT_VERTICAL_SCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 static inline void tfthw::setVSStart(uint16_t addr)
 {
+	static const uint8_t offset[tft::Orientations] = {1, 1, 3, 3};
 	cmd(0x37);	// Vertical Scrolling Start Address
-	write16(addr);
+	write16(addr + offset[tft::orient]);
 }
 
 static inline void tfthw::setVSDefinition(const uint16_t tfa, \
 		const uint16_t vsa, const uint16_t bfa)
 {
+	static const uint8_t offset[tft::Orientations] = {1, 1, 3, 3};
 	cmd(0x33);	// Vertical Scrolling Definition
-	write16(tfa);	// Top Fixed Area
+	write16(tfa + offset[tft::orient]);	// Top Fixed Area
 	write16(vsa);	// Vertical Scrolling Area
-	write16(bfa);	// Bottom Fixed Area
+	write16(bfa + 3);	// Bottom Fixed Area
 }
-#endif*/
+#endif
 
 static inline void tfthw::setColumn(const uint16_t start, const uint16_t end)
 {
+	static const uint8_t offset[tft::Orientations] = {1, 2, 3, 2};
 	cmd(0x2a);	// Set column address
-	write16(start);
-	write16(end);
+	write16(start + offset[tft::orient]);
+	write16(end + offset[tft::orient]);
 }
 
 static inline void tfthw::setPage(const uint16_t start, const uint16_t end)
 {
+	static const uint8_t offset[tft::Orientations] = {2, 1, 2, 3};
 	cmd(0x2b);	// Set page(row) address
-	write16(start);
-	write16(end);
+	write16(start + offset[tft::orient]);
+	write16(end + offset[tft::orient]);
 }
 
 static inline void tfthw::setOrient(uint8_t o)
@@ -97,8 +103,8 @@ static inline void tfthw::setOrient(uint8_t o)
 	static const uint8_t base = 0x08;
 	static const uint8_t MY = 1U << 7, MX = 1U << 6, MV = 1U << 5;
 	static uint8_t orient[Orientations];
-	orient[Landscape]		= base | MY | MV;
-	orient[Portrait]		= base | MY | MX;
+	orient[Landscape]		= base | MX | MV;
+	orient[Portrait]		= base;
 	orient[FlipLandscape]		= orient[Landscape] ^ (MY | MX);
 	orient[FlipPortrait]		= orient[Portrait] ^ (MY | MX);
 	orient[BMPLandscape]		= orient[Landscape] ^ MX;
@@ -174,14 +180,7 @@ static inline void tfthw::init()
 		for (c = 0; c < 240; c++) {
 			data(0x00);
 			data(0x00);
-			data(0x00);
 		}
-	/*cmd(0xB1);		// Frame Rate control, normal
-	data(0x00);		// Faster
-	data(0x18);
-	cmd(0xB3);		// Frame Rate control, partial
-	data(0x00);		// Faster
-	data(0x18);*/
 	cmd(0x29);		// Display On
 }
 
