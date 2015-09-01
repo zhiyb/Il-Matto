@@ -1,6 +1,8 @@
 #ifndef CAPTURE_H
 #define CAPTURE_H
 
+#ifdef TFT_READ_AVAILABLE
+
 #include <tft.h>
 
 // UART baudrate (750kbps)
@@ -12,5 +14,7 @@ namespace capture
 	void enable();
 	void disable();
 }
+
+#endif	// TFT_READ_AVAILABLE
 
 #endif

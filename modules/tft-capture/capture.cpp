@@ -1,3 +1,5 @@
+#ifdef TFT_READ_AVAILABLE
+
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <tft.h>
@@ -74,3 +76,5 @@ ISR(USART1_RX_vect)
 	capture::send();
 	capture::enable();
 }
+
+#endif	// TFT_READ_AVAILABLE
