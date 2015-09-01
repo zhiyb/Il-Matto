@@ -2,8 +2,8 @@
  * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
-#ifndef ILI9341_H
-#define ILI9341_H
+#ifndef TFT_ILI9341_H
+#define TFT_ILI9341_H
 
 #include <avr/io.h>
 #include <util/delay.h>

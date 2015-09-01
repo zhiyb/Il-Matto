@@ -2,8 +2,8 @@
  * Author: Yubo Zhi (normanzyb@gmail.com)
  */
 
-#ifndef TFT_ILI9341_CONNECTION_H
-#define TFT_ILI9341_CONNECTION_H
+#ifndef TFT_CONNECTION_H
+#define TFT_CONNECTION_H
 
 // 8-bit parallel interface I
 
