@@ -11,30 +11,27 @@
 #include "connection.h"
 
 // With respect to landscape orientation
-#define TFT_SIZE_HEIGHT	240
-#define TFT_SIZE_WIDTH	320
+#define TFT_SIZE_HEIGHT	128
+#define TFT_SIZE_WIDTH	128
 #define TFT_DEF_ORIENT	tft::Portrait
 
-#define TFT_PCTRL	CONCAT_E(DDR, TFT_PORT_CTRL)
-#define TFT_WCTRL	CONCAT_E(PORT, TFT_PORT_CTRL)
-#define TFT_RCTRL	CONCAT_E(PIN, TFT_PORT_CTRL)
-#define TFT_PDATA	CONCAT_E(DDR, TFT_PORT_DATA)
-#define TFT_WDATA	CONCAT_E(PORT, TFT_PORT_DATA)
-#define TFT_RDATA	CONCAT_E(PIN, TFT_PORT_DATA)
+#define TFT_DIR		CONCAT_E(DDR, TFT_PORT)
+#define TFT_WRITE	CONCAT_E(PORT, TFT_PORT)
+#define TFT_READ	CONCAT_E(PIN, TFT_PORT)
 
 namespace tft
 {
 	enum Orientation {Landscape = 0, Portrait, \
 		FlipLandscape, FlipPortrait, \
 		BMPLandscape, BMPPortrait, \
-		BMPFlipLandscape, BMPFlipPortrait, \
+		BMPFlipLandscape, BMPFlipPortrait,
 		Orientations};
 }
 
 namespace tfthw
 {
-	static inline void cmd(uint8_t dat);
-	static inline void data(uint8_t dat);
+	static inline void cmd(uint8_t d);
+	static inline void data(uint8_t d);
 	
 	static inline void idle(bool e) {cmd(0x38 + e);}
 	static inline void sleep(bool e) {cmd(0x10 + e);}
@@ -51,22 +48,19 @@ namespace tfthw
 	static inline void setColumn(const uint16_t start, const uint16_t end);
 	// 0x2c Write, 0x2e Read, 0x3c / 0x3e Continue, 0x00 NOP
 	static inline void memWrite() {cmd(0x2c);}
-	static inline void memRead() {cmd(0x2e);}
-	static inline void mode(bool read);
 	static inline void write(const uint8_t d) {data(d);}
 	static inline void write16(const uint16_t c) {write(c >> 8); write(c & 0xff);}
-	static inline uint8_t read();
 
-#ifdef TFT_VERTICAL_SCROLLING
+/*#ifdef TFT_VERTICAL_SCROLLING
 	static inline void setVSStart(const uint16_t addr);
 	static inline void setVSDefinition(const uint16_t tfa, \
 			const uint16_t vsa, const uint16_t bfa);
-#endif
+#endif*/
 }
 
 // Defined as inline to excute faster
 
-#ifdef TFT_VERTICAL_SCROLLING
+/*#ifdef TFT_VERTICAL_SCROLLING
 static inline void tfthw::setVSStart(uint16_t addr)
 {
 	cmd(0x37);	// Vertical Scrolling Start Address
@@ -81,7 +75,7 @@ static inline void tfthw::setVSDefinition(const uint16_t tfa, \
 	write16(vsa);	// Vertical Scrolling Area
 	write16(bfa);	// Bottom Fixed Area
 }
-#endif
+#endif*/
 
 static inline void tfthw::setColumn(const uint16_t start, const uint16_t end)
 {
@@ -103,8 +97,8 @@ static inline void tfthw::setOrient(uint8_t o)
 	static const uint8_t base = 0x08;
 	static const uint8_t MY = 1U << 7, MX = 1U << 6, MV = 1U << 5;
 	static uint8_t orient[Orientations];
-	orient[Landscape]		= base | MV;
-	orient[Portrait]		= base | MX;
+	orient[Landscape]		= base | MY | MV;
+	orient[Portrait]		= base | MY | MX;
 	orient[FlipLandscape]		= orient[Landscape] ^ (MY | MX);
 	orient[FlipPortrait]		= orient[Portrait] ^ (MY | MX);
 	orient[BMPLandscape]		= orient[Landscape] ^ MX;
@@ -115,47 +109,28 @@ static inline void tfthw::setOrient(uint8_t o)
 	data(orient[o]);
 }
 
-static inline void tfthw::cmd(uint8_t dat)
+static inline void tfthw::cmd(uint8_t d)
 {
-	TFT_WCTRL &= ~TFT_RS;
-	TFT_WDATA = dat;
-	TFT_WCTRL &= ~TFT_WR;
-	TFT_WCTRL |= TFT_WR;
-	TFT_WCTRL |= TFT_RS;
+	TFT_WRITE &= ~TFT_DCX;
+	data(d);
+	TFT_WRITE |= TFT_DCX;
 }
 
-static inline void tfthw::data(uint8_t dat)
+static inline void tfthw::data(uint8_t d)
 {
-	TFT_WDATA = dat;
-	TFT_WCTRL &= ~TFT_WR;
-	TFT_WCTRL |= TFT_WR;
-}
-
-static inline void tfthw::mode(bool read)
-{
-	if (read) {
-		TFT_PDATA = 0x00;
-		TFT_WDATA = 0xFF;
-	} else
-		TFT_PDATA = 0xFF;
-}
-
-static inline uint8_t tfthw::read()
-{
-	unsigned char dat;
-	TFT_WCTRL &= ~TFT_RD;
-	_NOP();
-	dat = TFT_RDATA;
-	TFT_WCTRL |= TFT_RD;
-	return dat;
+	TFT_WRITE &= ~TFT_CS;
+	UDR1 = d;
+	while (!(UCSR1A & _BV(TXC1)));
+	UCSR1A = _BV(TXC1);
+	TFT_WRITE |= TFT_CS;
 }
 
 static inline void tfthw::setBGLight(bool ctrl)
 {
 	if (ctrl)
-		TFT_WCTRL |= TFT_BLC;
+		TFT_WRITE |= TFT_LED;
 	else
-		TFT_WCTRL &= ~TFT_BLC;
+		TFT_WRITE &= ~TFT_LED;
 }
 
 static inline void tfthw::init()
@@ -163,25 +138,26 @@ static inline void tfthw::init()
 	uint8_t c;
 	uint16_t r;
 
-	if (TFT_WCTRL == PORTC || TFT_WDATA == PORTC) {
+	if (TFT_WRITE == PORTC) {
 		MCUCR |= 0x80;			// Disable JTAG
 		MCUCR |= 0x80;
 	}
 
-	TFT_PCTRL = 0xFF & ~TFT_FMK;
-	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light
-	mode(true);			// Read mode
+	TFT_DIR |= TFT_LED | TFT_MOSI | TFT_SCK | TFT_CS | TFT_DCX | TFT_RST;
+	TFT_WRITE |= TFT_MOSI | TFT_SCK | TFT_CS | TFT_DCX | TFT_RST;
+	TFT_WRITE &= ~(TFT_LED);	// Disable background light
 
-	TFT_WCTRL &= ~TFT_RST;	// Hardware reset
-	TFT_WCTRL &= ~TFT_CS;
-	TFT_WCTRL |= TFT_WR;
-	TFT_WCTRL |= TFT_RD;
-	TFT_WCTRL |= TFT_RS;
-	TFT_WCTRL |= TFT_VSY;
+	// Initialise SPI interface
+	UCSR1B = /*_BV(RXEN1) |*/ _BV(TXEN1);
+	UCSR1C = _BV(UMSEL11) | _BV(UMSEL10);
+	UBRR1 = 0;
+	UCSR1A = 0xff;	// Clear flags
+
+	TFT_WRITE &= ~TFT_RST;	// Hardware reset
+	TFT_WRITE |= TFT_CS;
 	_delay_us(10);		// Min: 10us
-	TFT_WCTRL |= TFT_RST;
+	TFT_WRITE |= TFT_RST;
 	_delay_ms(120);
-	mode(false);		// Write mode
 	cmd(0x28);		// Display OFF
 	cmd(0x11);		// Sleep Out
 	_delay_ms(120);
@@ -200,12 +176,12 @@ static inline void tfthw::init()
 			data(0x00);
 			data(0x00);
 		}
-	cmd(0xB1);		// Frame Rate control, normal
+	/*cmd(0xB1);		// Frame Rate control, normal
 	data(0x00);		// Faster
 	data(0x18);
 	cmd(0xB3);		// Frame Rate control, partial
 	data(0x00);		// Faster
-	data(0x18);
+	data(0x18);*/
 	cmd(0x29);		// Display On
 }
 

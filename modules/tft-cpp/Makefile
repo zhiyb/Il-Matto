@@ -1,8 +1,5 @@
-# TFT port connection
-TFT_PORT_CTRL	?= A
-TFT_PORT_DATA	?= C
 TFT_HARDWARE	?= ili9341_parallel
-CONFS	+= TFT_PORT_CTRL TFT_PORT_DATA TFT_HARDWARE
+CONFS	+= TFT_HARDWARE
 
 # Use shifting up instead of clean screen after screen full
 CONFS_D	+= TFT_SCROLL
@@ -15,8 +12,15 @@ CONFS_D	+= TFT_READ_AVAILABLE
 
 # Module specific settings
 ifeq ($(TFT_HARDWARE), ili9341_parallel)
+	# TFT port connection
+	TFT_PORT_CTRL	?= A
+	TFT_PORT_DATA	?= C
+	CONFS	+= TFT_PORT_CTRL TFT_PORT_DATA
 	TFT_READ_AVAILABLE = y
-else
+else ifeq ($(TFT_HARDWARE), st7735s_serial4_wo)
+	# TFT port connection
+	TFT_PORT	= D
+	CONFS	+= TFT_PORT
 	TFT_READ_AVAILABLE = n
 	TFT_VERTICAL_SCROLLING = n
 endif
