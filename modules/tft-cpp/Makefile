@@ -1,12 +1,26 @@
 # TFT port connection
 TFT_PORT_CTRL	?= A
 TFT_PORT_DATA	?= C
-CONFS	+= TFT_PORT_CTRL TFT_PORT_DATA
+TFT_HARDWARE	?= ili9341_parallel
+CONFS	+= TFT_PORT_CTRL TFT_PORT_DATA TFT_HARDWARE
 
+# Use shifting up instead of clean screen after screen full
+CONFS_D	+= TFT_SCROLL
 # Vertical scrolling functionality enable
-CONFS_D	+= TFT_VERTICALSCROLLING
+CONFS_D	+= TFT_VERTICAL_SCROLLING
+# Enable (generally unnecessary) draw in range checking
+CONFS_D	+= TFT_CHECKING
+# Ability to read pixels (for screen shift up operation)
+CONFS_D	+= TFT_READ_AVAILABLE
+
+# Determine pixel read ability from hardware module
+ifeq ($(TFT_HARDWARE), ili9341_parallel)
+	TFT_READ_AVAILABLE = y
+else
+	TFT_READ_AVAILABLE = n
+endif
 
 # File rules
 NSRC	:= ascii.c tft.cpp
 SRC	+= $(NSRC:%=$(DIR)/%)
-INCDIRS	+= $(DIR)
+INCDIRS	+= $(DIR) $(DIR)/$(TFT_HARDWARE)

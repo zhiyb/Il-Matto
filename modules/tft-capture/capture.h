@@ -8,9 +8,9 @@
 
 namespace capture
 {
-	void init(tft_t *t);
-	void enable(void);
-	void disable(void);
+	void init();
+	void enable();
+	void disable();
 }
 
 #endif

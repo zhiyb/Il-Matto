@@ -9,14 +9,10 @@ namespace capture
 {
 	void send(void);
 	void write(uint8_t data);
-
-	static tft_t *tft;
 }
 
-void capture::init(tft_t *t)
+void capture::init()
 {
-	tft = t;
-
 	// Initialise UART1
 	#include <util/setbaud.h>
 	DDRD &= ~0x02;
@@ -57,17 +53,17 @@ void capture::write(uint8_t data)
 
 void capture::send(void)
 {
-	tft->all();
-	tft->cmd(0x2E);		// Read
-	tft->mode(true);	// Read mode
-	tft->recv();
-	for (uint16_t y = 0; y < tft->height(); y++)
-		for (uint16_t x = 0; x < tft->width(); x++) {
-			write(tft->recv());
-			write(tft->recv());
-			write(tft->recv());
+	tfthw::all();
+	tfthw::memRead();	// Read
+	tfthw::mode(true);	// Read mode
+	tfthw::read();
+	for (uint16_t y = 0; y < tft::height; y++)
+		for (uint16_t x = 0; x < tft::width; x++) {
+			write(tfthw::read());
+			write(tfthw::read());
+			write(tfthw::read());
 		}
-	tft->mode(false);	// Write mode
+	tfthw::mode(false);	// Write mode
 }
 
 ISR(USART1_RX_vect)

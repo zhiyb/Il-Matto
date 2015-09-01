@@ -8,9 +8,12 @@
 #include "connection.h"
 
 #include <avr/io.h>
-#define _NOP() __asm__ __volatile__("nop")
 #include <util/delay.h>
 #include <macros.h>
+
+#define TFT_SIZE_HEIGHT	320
+#define TFT_SIZE_WIDTH	240
+#define TFT_DEF_ORIENT	tft::Portrait
 
 #define TFT_PCTRL	CONCAT_E(DDR, TFT_PORT_CTRL)
 #define TFT_WCTRL	CONCAT_E(PORT, TFT_PORT_CTRL)
@@ -19,40 +22,59 @@
 #define TFT_WDATA	CONCAT_E(PORT, TFT_PORT_DATA)
 #define TFT_RDATA	CONCAT_E(PIN, TFT_PORT_DATA)
 
-class ili9341
+namespace tft
 {
-public:
 	enum Orientation {Landscape = 0, Portrait, \
 		FlipLandscape, FlipPortrait, \
 		BMPLandscape, BMPPortrait, \
 		BMPFlipLandscape, BMPFlipPortrait};
+}
 
-	static inline void init(void);
+namespace tfthw
+{
+	static inline void cmd(uint8_t dat);
+	static inline void data(uint8_t dat);
+	//static inline void send(bool c, uint8_t dat);
+	static inline void setBGLight(bool ctrl);
+	static inline void setOrient(uint8_t o);
+	
 	static inline void idle(bool e) {cmd(0x38 + e);}
 	static inline void sleep(bool e) {cmd(0x10 + e);}
 	static inline void inversion(bool e) {cmd(0x20 + e);}
-
-//protected:
-	static inline void cmd(uint8_t dat);
-	static inline void data(uint8_t dat);
-	static inline void send(bool c, uint8_t dat);
-	static inline uint8_t recv(void);
-	static inline void mode(bool _recv);
-	static inline void _setBGLight(bool ctrl);
-	static inline void _setOrient(uint8_t o);
 };
+
+// Port
+namespace tfthw
+{
+	static inline void init();
+	static inline void setPage(const uint16_t start, const uint16_t end);
+	static inline void setColumn(const uint16_t start, const uint16_t end);
+	// 0x2c Write, 0x2e Read, 0x3c / 0x3e Continue, 0x00 NOP
+	static inline void memWrite() {cmd(0x2c);}
+	static inline void memRead() {cmd(0x2e);}
+	static inline void mode(bool read);
+	static inline void write(const uint8_t d) {data(d);}
+	static inline void write16(const uint16_t c) {write(c >> 8); write(c & 0xff);}
+	static inline uint8_t read();
+}
 
 // Defined as inline to excute faster
 
-#define LOW(b)	TFT_WCTRL &= ~(b)
-#define HIGH(b)	TFT_WCTRL |= (b)
-#define SEND() TFT_PDATA = 0xFF
-#define RECV() do { \
-	TFT_PDATA = 0x00; \
-	TFT_WDATA = 0xFF; \
-} while(0)
+static inline void tfthw::setColumn(const uint16_t start, const uint16_t end)
+{
+	cmd(0x2a);	// Set column address
+	write16(start);
+	write16(end);
+}
 
-inline void ili9341::_setOrient(uint8_t o)
+static inline void tfthw::setPage(const uint16_t start, const uint16_t end)
+{
+	cmd(0x2b);	// Set page(row) address
+	write16(start);
+	write16(end);
+}
+
+static inline void tfthw::setOrient(uint8_t o)
 {
 	// Landscape, Portrait, FlipLandscape, FlipPortrait
 	// BMPLandscape, BMPPortrait, BMPFlipLandscape, BMPFlipPortrait
@@ -64,49 +86,50 @@ inline void ili9341::_setOrient(uint8_t o)
 	data(orient[o]);
 }
 
-inline void ili9341::cmd(uint8_t dat)
+static inline void tfthw::cmd(uint8_t dat)
 {
-	LOW(TFT_RS);
+	TFT_WCTRL &= ~TFT_RS;
 	TFT_WDATA = dat;
-	LOW(TFT_WR);
-	HIGH(TFT_WR);
-	HIGH(TFT_RS);
+	TFT_WCTRL &= ~TFT_WR;
+	TFT_WCTRL |= TFT_WR;
+	TFT_WCTRL |= TFT_RS;
 }
 
-inline void ili9341::data(uint8_t dat)
+static inline void tfthw::data(uint8_t dat)
 {
 	TFT_WDATA = dat;
-	LOW(TFT_WR);
-	HIGH(TFT_WR);
+	TFT_WCTRL &= ~TFT_WR;
+	TFT_WCTRL |= TFT_WR;
 }
 
-inline void ili9341::mode(bool _recv)
+static inline void tfthw::mode(bool read)
 {
-	if (_recv)
-		RECV();
-	else
-		SEND();
+	if (read) {
+		TFT_PDATA = 0x00;
+		TFT_WDATA = 0xFF;
+	} else
+		TFT_PDATA = 0xFF;
 }
 
-inline void ili9341::send(bool c, uint8_t dat)
+/*static inline void tfthw::send(bool c, uint8_t dat)
 {
 	if (c)
 		cmd(dat);
 	else
 		data(dat);
-}
+}*/
 
-inline uint8_t ili9341::recv(void)
+static inline uint8_t tfthw::read()
 {
 	unsigned char dat;
-	LOW(TFT_RD);
+	TFT_WCTRL &= ~TFT_RD;
 	_NOP();
 	dat = TFT_RDATA;
-	HIGH(TFT_RD);
+	TFT_WCTRL |= TFT_RD;
 	return dat;
 }
 
-inline void ili9341::_setBGLight(bool ctrl)
+static inline void tfthw::setBGLight(bool ctrl)
 {
 	if (ctrl)
 		TFT_WCTRL |= TFT_BLC;
@@ -114,7 +137,7 @@ inline void ili9341::_setBGLight(bool ctrl)
 		TFT_WCTRL &= ~TFT_BLC;
 }
 
-inline void ili9341::init(void)
+static inline void tfthw::init()
 {
 	uint8_t c;
 	uint16_t r;
@@ -126,17 +149,18 @@ inline void ili9341::init(void)
 
 	TFT_PCTRL = 0xFF & ~TFT_FMK;
 	TFT_WCTRL = 0xFF & ~TFT_BLC;	// Disable background light
-	RECV();
-	LOW(TFT_RST);			// Hardware reset
-	LOW(TFT_CS);
-	HIGH(TFT_WR);
-	HIGH(TFT_RD);
-	HIGH(TFT_RS);
-	HIGH(TFT_VSY);
-	_delay_us(10);			// Min: 10us
-	HIGH(TFT_RST);
+	mode(true);			// Read mode
+
+	TFT_WCTRL &= ~TFT_RST;	// Hardware reset
+	TFT_WCTRL &= ~TFT_CS;
+	TFT_WCTRL |= TFT_WR;
+	TFT_WCTRL |= TFT_RD;
+	TFT_WCTRL |= TFT_RS;
+	TFT_WCTRL |= TFT_VSY;
+	_delay_us(10);		// Min: 10us
+	TFT_WCTRL |= TFT_RST;
 	_delay_ms(120);
-	SEND();
+	mode(false);		// Write mode
 	cmd(0x28);		// Display OFF
 	cmd(0x11);		// Sleep Out
 	_delay_ms(120);
@@ -163,10 +187,5 @@ inline void ili9341::init(void)
 	data(0x18);
 	cmd(0x29);		// Display On
 }
-
-#undef LOW
-#undef HIGH
-#undef SEND
-#undef RECV
 
 #endif

@@ -5,27 +5,87 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "ascii.h"
-#include "ili9341.h"
+#include "tft_hw.h"
 #include "tft.h"
 
-#define WIDTH FONT_WIDTH
-#define HEIGHT FONT_HEIGHT
-#define SIZE_H 320
-#define SIZE_W 240
-#define DEF_FGC 0xFFFF
-#define DEF_BGC 0x0000
-#define SWAP(x, y) { \
+#define WIDTH	FONT_WIDTH
+#define HEIGHT	FONT_HEIGHT
+#define SIZE_H	TFT_SIZE_HEIGHT
+#define SIZE_W	TFT_SIZE_WIDTH
+#define DEF_FGC	0xFFFF
+#define DEF_BGC	0x0000
+/*#define SWAP(x, y) { \
 	(x) = (x) ^ (y); \
 	(y) = (x) ^ (y); \
 	(x) = (x) ^ (y); \
+}*/
+
+namespace tft
+{
+	template <typename Type>
+	static inline void swap(Type &a, Type &b);
+
+	uint8_t zoom, orient, tabSize;
+	uint16_t x, y, width, height;
+	uint16_t foreground, background;
 }
 
-tft_t::tft_t(void)
+template <typename Type>
+inline void tft::swap(Type &a, Type &b)
 {
-	setX(0);
-	setY(0);
-#ifdef TFT_VERTICALSCROLLING
+	Type tmp = a;
+	a = b;
+	b = tmp;
+}
+
+#ifdef TFT_READ_AVAILABLE
+inline void tft::shiftUp(const uint16_t l)
+{
+	using namespace tfthw;
+
+	uint8_t buff[width * 2];
+	uint16_t r;
+	tfthw::setColumn(0, width - 1);
+	for (r = 0; r < height - l; r++) {
+		uint16_t b = width * 2;
+		//area(0, r + l, w, 1);
+		setPage(r + l, r + l);
+		memRead();
+		mode(true);	// Read mode
+		read();
+		while (b--) {	// RGB 888 mode
+			buff[b] = read() & 0xF8;
+			uint8_t g = read();
+			buff[b--] |= g >> 5;
+			buff[b] = (g << 3) & 0xE0;
+			buff[b] |= read() >> 3;
+		}
+		mode(false);		// Write mode
+
+		b = width * 2;
+		//area(0, r, w, 1);
+		setPage(r, r);
+		memWrite();
+		while (b--)
+			write(buff[b]);
+	}
+	//area(0, h - l, w, l);
+	setPage(height - l, height - 1);
+	memWrite();
+	while (r++ < height)
+		for (uint16_t c = width; c; c--)
+			write16(background);
+}
+#endif
+
+void tft::init()
+{
+	tfthw::init();
+	x = 0;
+	y = 0;
+#ifdef TFT_VERTICAL_SCROLLING
 	d.tfa = 0;
 	d.bfa = 0;
 	d.vsp = SIZE_H;
@@ -33,18 +93,18 @@ tft_t::tft_t(void)
 	setBottomMask(0);
 	setTransform(false);
 #endif
-	setZoom(1);
-	d.orient = Portrait;
-	setTabSize(4);
-	setWidth(SIZE_W);
-	setHeight(SIZE_H);
-	setForeground(DEF_FGC);
-	setBackground(DEF_BGC);
+	zoom = 1;
+	setOrient(TFT_DEF_ORIENT);
+	tabSize = 4;
+	//width = SIZE_W;
+	//height = SIZE_H;
+	foreground = DEF_FGC;
+	background = DEF_BGC;
 }
 
-void tft_t::putString(const char *str, bool progMem)
+void tft::putString(const char *str, bool progMem)
 {
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 	uint16_t xt = 0;
 	bool clip = transform() && !portrait();
 	if (clip) {
@@ -55,8 +115,8 @@ void tft_t::putString(const char *str, bool progMem)
 
 	char c;
 	while ((c = progMem ? pgm_read_byte(str++) : *str++) != '\0') {
-		*this << c;
-#ifdef TFT_VERTICALSCROLLING
+		putChar(c);
+#ifdef TFT_VERTICAL_SCROLLING
 		if (clip) {
 			xt += FONT_WIDTH * zoom();
 			if (xt >= bottomEdge())
@@ -66,7 +126,7 @@ void tft_t::putString(const char *str, bool progMem)
 	}
 }
 
-void tft_t::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
+void tft::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 		uint8_t s, uint16_t c)
 {
 	rectangle(x, y, w - s, s, c);
@@ -75,42 +135,42 @@ void tft_t::frame(uint16_t x, uint16_t y, uint16_t w, uint16_t h, \
 	rectangle(x + s, y + h - s, w - s, s, c);
 }
 
-void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
+void tft::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 		uint16_t c)
 {
-	if (x0 > width())
-		x0 = width() - 1;
-	if (x1 > width())
-		x1 = width() - 1;
-	if (y0 > height())
-		y0 = height() - 1;
-	if (y1 > height())
-		y1 = height() - 1;
+	if (x0 > width)
+		x0 = width - 1;
+	if (x1 > width)
+		x1 = width - 1;
+	if (y0 > height)
+		y0 = height - 1;
+	if (y1 > height)
+		y1 = height - 1;
 	if (x0 == x1) {
 		if (y0 > y1)
-			SWAP(y0, y1);
+			swap(y0, y1);
 		rectangle(x0, y0, 1, y1 - y0, c);
 		return;
 	}
 	if (y0 == y1) {
 		if (x0 > x1)
-			SWAP(x0, x1);
+			swap(x0, x1);
 		rectangle(x0, y0, x1 - x0, 1, c);
 		return;
 	}
 	uint16_t dx = abs(x1 - x0), dy = abs(y1 - y0);
 	if (dx < dy) {
 		if (y0 > y1) {
-			SWAP(x0, x1);
-			SWAP(y0, y1);
+			swap(x0, x1);
+			swap(y0, y1);
 		}
 		for (uint16_t y = y0; y <= y1; y++)
 			point(x0 + dx * (y - y0) / dy * \
 					(x0 > x1 ? -1 : 1), y, c);
 	} else {
 		if (x0 > x1) {
-			SWAP(x0, x1);
-			SWAP(y0, y1);
+			swap(x0, x1);
+			swap(y0, y1);
 		}
 		for (uint16_t x = x0; x <= x1; x++)
 			point(x, y0 + dy * (x - x0) / dx * \
@@ -118,12 +178,12 @@ void tft_t::line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
 	}
 }
 
-void tft_t::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c)
+void tft::rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c)
 {
 	if ((int16_t)w <= 0 || (int16_t)h <= 0)
 		return;
 
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 	uint16_t yt, bMask;
 	if (!transform())
 		goto disp;
@@ -183,43 +243,43 @@ disp:
 	}
 	if ((int16_t)w <= 0 || (int16_t)h <= 0)
 		return;
-	if (x + w > width())
-		w = width() - x;
-	if (y + h > height())
-		h = height() - y;
+	if (x + w > width)
+		w = width - x;
+	if (y + h > height)
+		h = height - y;
 	if ((int16_t)w <= 0 || (int16_t)h <= 0)
 		return;
 
-	area(x, y, w, h);
-#ifdef TFT_VERTICALSCROLLING
+	tfthw::area(x, y, w, h);
+#ifdef TFT_VERTICAL_SCROLLING
 draw:
 #endif
-	start();
+	tfthw::memWrite();
 	while (h--)
 		for (uint16_t xx = 0; xx < w; xx++)
-			write16(c);
+			tfthw::write16(c);
 }
 
-void tft_t::setOrient(uint8_t o)
+void tft::setOrient(uint8_t o)
 {
 	switch (o) {
 	case Landscape:
 	case FlipLandscape:
-		setWidth(SIZE_H);
-		setHeight(SIZE_W);
+		width = SIZE_H;
+		height = SIZE_W;
 		break;
 	case Portrait:
 	case FlipPortrait:
-		setWidth(SIZE_W);
-		setHeight(SIZE_H);
+		width = SIZE_W;
+		height = SIZE_H;
 	}
-	setX(0);
-	setY(0);
-	d.orient = o;
-	_setOrient(o);
+	x = 0;
+	y = 0;
+	orient = o;
+	tfthw::setOrient(o);
 }
 
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 uint16_t tft_t::vsTransform(uint16_t y) const
 {
 #ifdef TFT_CHECKING
@@ -251,15 +311,15 @@ uint16_t tft_t::vsTransformBack(uint16_t y) const
 }
 #endif
 
-void tft_t::bmp(bool e)
+void tft::bmp(bool e)
 {
 	if (e)
-		_setOrient(orient() + BMPLandscape);
+		tfthw::setOrient(orient + BMPLandscape);
 	else
-		_setOrient(orient());
+		tfthw::setOrient(orient);
 }
 
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 void tft_t::setVerticalScrolling(const uint16_t vsp)
 {
 	cmd(0x37);	// Vertical Scrolling Start Address
@@ -285,16 +345,16 @@ void tft_t::setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa)
 }
 #endif
 
-void tft_t::putch(char ch)
+void tft::drawChar(char ch)
 {
 #ifdef TFT_CHECKING
 	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
 		return;
 #endif
-	if ((int16_t)(x() + FONT_WIDTH * zoom()) < 0)
+	if ((int16_t)(x + FONT_WIDTH * zoom) < 0)
 		return;
-	uint8_t h = FONT_HEIGHT * zoom(), w = FONT_WIDTH * zoom();
-#ifdef TFT_VERTICALSCROLLING
+	uint8_t h = FONT_HEIGHT * zoom, w = FONT_WIDTH * zoom;
+#ifdef TFT_VERTICAL_SCROLLING
 	// Display coordinate, start coordinate
 	uint16_t xx = x();
 	uint16_t yy = y();
@@ -353,10 +413,10 @@ void tft_t::putch(char ch)
 draw:
 	area(xx, yy, xEnd - xStart, h);
 #else
-	area(x(), y(), w, h);
+	tfthw::area(x, y, w, h);
 #endif
-	start();
-#ifdef TFT_VERTICALSCROLLING
+	tfthw::memWrite();
+#ifdef TFT_VERTICAL_SCROLLING
 	for (uint8_t yi = yStart; yi < yStop; yi++) {
 		if (yTransform && yy + yi - yStart == bottomEdge()) {
 			area(x(), topEdge(), w, h);
@@ -367,22 +427,22 @@ draw:
 	for (uint8_t yi = 0; yi < h; yi++) {
 #endif
 		unsigned char c;
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom()])) << (xStart / zoom());
 		for (uint8_t xi = xStart; xi < xEnd; xi++) {
 #else
-		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom()]));
+		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom]));
 		for (uint8_t xi = 0; xi < w; xi++) {
 #endif
 			if (c & 0x80)
-				write16(foreground());
+				tfthw::write16(foreground);
 			else
-				write16(background());
-			if ((xi + 1) % zoom() == 0)
+				tfthw::write16(background);
+			if ((xi + 1) % zoom == 0)
 				c <<= 1;
 		}
 	}
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 	if (xTransform) {
 		xx = topEdge();
 		xStart = xEnd;
@@ -393,12 +453,12 @@ draw:
 #endif
 }
 
-void tft_t::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem)
+void tft::drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem)
 {
 	uint8_t i = 0, c = 0;
 	// TODO: zooming support
 
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 	uint16_t xt = 0, yt = 0, bMask;
 	uint8_t xs = 0, xe = 0;
 
@@ -459,17 +519,17 @@ landscape:
 	w -= xs + xe;
 #endif
 
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 disp:
 #endif
-	area(x, y, w, h);
-	start();
-#ifdef TFT_VERTICALSCROLLING
+	tfthw::area(x, y, w, h);
+	tfthw::memWrite();
+#ifdef TFT_VERTICAL_SCROLLING
 	//bool xTransform = transform() && !portrait() && x < bottomEdge() && x + w - xs - xe > bottomEdge();
 	bool yTransform = transform() && portrait() && y < bottomEdge() && y + h > bottomEdge();
 #endif
 	for (uint8_t yy = 0; yy < h; yy++) {
-#ifdef TFT_VERTICALSCROLLING
+#ifdef TFT_VERTICAL_SCROLLING
 		if (yTransform && y + yy == bottomEdge()) {
 			area(x, topEdge(), w, h);
 			start();
@@ -494,9 +554,9 @@ disp:
 			if (i++ == 0)
 				c = progMem ? pgm_read_byte(ptr++) : *ptr++;
 			if (c & 0x80)
-				write16(foreground());
+				tfthw::write16(foreground);
 			else
-				write16(background());
+				tfthw::write16(background);
 			if (i == 8)
 				i = 0;
 			else
@@ -505,19 +565,32 @@ disp:
 	}
 }
 
-static tft_t *tft;
-
-inline int tftputch(const char c, FILE *stream)
+static int tftputchar(const char c, FILE *stream)
 {
-	(*tft) << c;
+	tft::putChar(c);
 	return 0;
 }
 
-FILE *tftout(tft_t *hw)
+FILE *tftout()
 {
 	static FILE *out = NULL;
-	tft = hw;
 	if (out == NULL)
-		out = fdevopen(tftputch, NULL);
+		out = fdevopen(tftputchar, NULL);
 	return out;
+}
+
+void tft::fill(uint16_t clr)
+{
+	using namespace tfthw;
+	uint8_t ch = clr / 0x0100, cl = clr % 0x0100;
+	uint16_t x = width, y;
+	all();
+	memWrite();
+	while (x--) {
+		y = height;
+		while (y--) {
+			data(ch);
+			data(cl);
+		}
+	}
 }

@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#define _NOP() __asm__ __volatile__("nop")
+
 #define CONCAT(a,b)	a ## b
 #define CONCAT_E(a,b)	CONCAT(a, b)
 
