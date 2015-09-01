@@ -20,14 +20,11 @@ namespace tft
 	// Width & height should only be manipulated by setOrient()
 	extern uint16_t x, y, width, height;
 	extern uint16_t foreground, background;	// Colours
-#if 0
-	extern struct tft_t {
-		uint8_t zoom, orient, tabSize;
-		uint16_t x, y, w, h, fgc, bgc;
+
 #ifdef TFT_VERTICAL_SCROLLING
+	extern struct tft_vs_t {
 		uint16_t vsp, tfa, bfa, topMask, bottomMask;
 		bool tf;
-#endif
 	} d;
 #endif
 
@@ -48,27 +45,27 @@ namespace tft
 	// Top fixed area, bottom fixed area
 	void setVerticalScrollingArea(const uint16_t tfa, const uint16_t bfa);
 	// Vertical scrolling mode drawing auto transform
-	inline bool transform() const {return d.tf;}
-	inline void setTransform(const bool on) {d.tf = on;}
+	static inline bool transform() {return d.tf;}
+	static inline void setTransform(const bool on) {d.tf = on;}
 	// Vertical scrolling mode helper functions
-	inline uint16_t vsMaximum() const;
-	inline uint16_t topFixedArea() const {return d.tfa;}
-	inline uint16_t bottomFixedArea() const {return d.bfa;}
-	inline uint16_t vsHeight() const {return bottomEdge() - topFixedArea();}
-	inline uint16_t topEdge() const {return topFixedArea();}
-	inline uint16_t bottomEdge() const {return vsMaximum() - bottomFixedArea();}
-	inline uint16_t upperEdge() const {return d.vsp;}
-	inline uint16_t lowerEdge() const {return upperEdge() == topFixedArea() ? bottomEdge() : upperEdge();}
+	static inline uint16_t vsMaximum() {return TFT_SIZE_HEIGHT;}
+	static inline uint16_t topFixedArea() {return d.tfa;}
+	static inline uint16_t bottomFixedArea() {return d.bfa;}
+	static inline uint16_t topEdge() {return topFixedArea();}
+	static inline uint16_t bottomEdge() {return vsMaximum() - bottomFixedArea();}
+	static inline uint16_t upperEdge() {return d.vsp;}
+	static inline uint16_t lowerEdge() {return upperEdge() == topFixedArea() ? bottomEdge() : upperEdge();}
+	static inline uint16_t vsHeight() {return bottomEdge() - topFixedArea();}
 	// Vertical scrolling mode drawing coordinate transform
-	uint16_t vsTransform(uint16_t y) const;
-	uint16_t vsTransformBack(uint16_t y) const;
+	uint16_t vsTransform(uint16_t y);
+	uint16_t vsTransformBack(uint16_t y);
 	// Refresh region mask, not transformed
-	inline uint16_t topMask() const {return d.topMask;}
-	inline void setTopMask(const uint16_t lm) {d.topMask = lm;}
-	inline uint16_t bottomMask() const {return d.bottomMask;}
-	inline void setBottomMask(const uint16_t lm) {d.bottomMask = lm;}
+	static inline uint16_t topMask() {return d.topMask;}
+	static inline void setTopMask(const uint16_t lm) {d.topMask = lm;}
+	static inline uint16_t bottomMask() {return d.bottomMask;}
+	static inline void setBottomMask(const uint16_t lm) {d.bottomMask = lm;}
 	// Return to normal mode (disable transform, vertical scrolling)
-	inline void vsNormal() {setTransform(false); setVerticalScrolling(topEdge());}
+	static inline void vsNormal() {setTransform(false); setVerticalScrolling(topEdge());}
 #endif
 
 	void line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, \
@@ -100,13 +97,6 @@ namespace tfthw
 FILE *tftout();
 
 // Defined as inline to execute faster
-
-#ifdef TFT_VERTICAL_SCROLLING
-inline uint16_t tft_t::vsMaximum() const
-{
-	return TFT_SIZE_HEIGHT;
-}
-#endif
 
 static inline void tft::putChar(const char c)
 {
@@ -161,8 +151,8 @@ inline void tft::next()
 {
 #ifdef TFT_VERTICAL_SCROLLING
 	if (transform() && !portrait()) {
-		uint16_t xt = vsTransformBack(x());
-		setX(vsTransform(xt + FONT_WIDTH * zoom()));
+		uint16_t xt = vsTransformBack(x);
+		x = vsTransform(xt + FONT_WIDTH * zoom);
 	} else {
 #endif
 		x += FONT_WIDTH * zoom;

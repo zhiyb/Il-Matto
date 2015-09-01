@@ -56,9 +56,32 @@ namespace tfthw
 	static inline void write(const uint8_t d) {data(d);}
 	static inline void write16(const uint16_t c) {write(c >> 8); write(c & 0xff);}
 	static inline uint8_t read();
+
+#ifdef TFT_VERTICAL_SCROLLING
+	static inline void setVSStart(const uint16_t addr);
+	static inline void setVSDefinition(const uint16_t tfa, \
+			const uint16_t vsa, const uint16_t bfa);
+#endif
 }
 
 // Defined as inline to excute faster
+
+#ifdef TFT_VERTICAL_SCROLLING
+static inline void tfthw::setVSStart(uint16_t addr)
+{
+	cmd(0x37);	// Vertical Scrolling Start Address
+	write16(addr);
+}
+
+static inline void tfthw::setVSDefinition(const uint16_t tfa, \
+		const uint16_t vsa, const uint16_t bfa)
+{
+	cmd(0x33);	// Vertical Scrolling Definition
+	write16(tfa);	// Top Fixed Area
+	write16(vsa);	// Vertical Scrolling Area
+	write16(bfa);	// Bottom Fixed Area
+}
+#endif
 
 static inline void tfthw::setColumn(const uint16_t start, const uint16_t end)
 {

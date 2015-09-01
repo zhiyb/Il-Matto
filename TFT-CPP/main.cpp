@@ -70,12 +70,12 @@ start:
 	line(260, 200, 260, 0, 0x001F);
 	puts("Draw lines test");
 
-#ifdef TFT_VERTICALSCROLLING
-	tft.setVerticalScrollingArea(64, 32);
+#ifdef TFT_VERTICAL_SCROLLING
+	tft::setVerticalScrollingArea(64, 32);
 	uint16_t max = 320 - 32;
 	uint16_t v = 64;
 loop:
-	tft.setVerticalScrolling(v);
+	tft::setVerticalScrolling(v);
 	if (max == ++v)
 		v = 64;
 	_delay_ms(10);
