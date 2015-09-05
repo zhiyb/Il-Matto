@@ -12,7 +12,7 @@
 #define TFT_PORT	D
 
 // Using USART1 on PORTD as SPI
-#define TFT_LED		(1U << 0)
+#define TFT_LED		(1U << 2)
 //#define TFT_MISO	(1U << 2)	// Not connected
 #define TFT_MOSI	(1U << 3)
 #define TFT_SCK		(1U << 4)

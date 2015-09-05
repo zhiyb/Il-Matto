@@ -22,8 +22,8 @@
 
 namespace tfthw
 {
-	static inline void cmd(uint8_t d);
-	static inline void data(uint8_t d);
+	static inline void data(uint8_t d, bool cmd = false);
+	static inline void cmd(uint8_t d) {data(d, true);}
 	
 	static inline void idle(bool e) {cmd(0x38 + e);}
 	static inline void sleep(bool e) {cmd(0x10 + e);}
@@ -115,20 +115,15 @@ static inline void tfthw::setOrient(uint8_t o)
 	data(orient);
 }
 
-static inline void tfthw::cmd(uint8_t d)
+static inline void tfthw::data(uint8_t d, bool cmd)
 {
-	TFT_WRITE &= ~TFT_DCX;
-	data(d);
-	TFT_WRITE |= TFT_DCX;
-}
-
-static inline void tfthw::data(uint8_t d)
-{
-	TFT_WRITE &= ~TFT_CS;
-	UDR1 = d;
 	while (!(UCSR1A & _BV(TXC1)));
+	if (cmd)
+		TFT_WRITE &= ~TFT_DCX;
+	else
+		TFT_WRITE |= TFT_DCX;
+	UDR1 = d;
 	UCSR1A = _BV(TXC1);
-	TFT_WRITE |= TFT_CS;
 }
 
 static inline void tfthw::setBGLight(bool ctrl)
@@ -158,9 +153,10 @@ static inline void tfthw::init()
 	UCSR1C = _BV(UMSEL11) | _BV(UMSEL10);
 	UBRR1 = 0;
 	UCSR1A = 0xff;	// Clear flags
+	UDR1 = 0xff;	// TXE flag need to be set before use
 
+	TFT_WRITE &= ~TFT_CS;
 	TFT_WRITE &= ~TFT_RST;	// Hardware reset
-	TFT_WRITE |= TFT_CS;
 	_delay_us(10);		// Min: 10us
 	TFT_WRITE |= TFT_RST;
 	_delay_ms(120);

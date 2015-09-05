@@ -47,7 +47,7 @@ start:
 	uint16_t max = tft::vsMaximum() - 32;
 	uint16_t v = 64;
 loop:
-	tft::setVerticalScrolling(v);
+	setVerticalScrolling(v);
 	if (max == ++v)
 		v = 64;
 	_delay_ms(50);
