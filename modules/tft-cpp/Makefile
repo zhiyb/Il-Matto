@@ -17,6 +17,11 @@ ifeq ($(TFT_HARDWARE), ili9341_parallel)
 	TFT_PORT_DATA	?= C
 	CONFS	+= TFT_PORT_CTRL TFT_PORT_DATA
 	TFT_READ_AVAILABLE = y
+else ifeq ($(TFT_HARDWARE), ili9341_serial4_wo)
+	# TFT port connection
+	TFT_PORT	= B
+	CONFS	+= TFT_PORT
+	TFT_READ_AVAILABLE = n
 else ifeq ($(TFT_HARDWARE), st7735s_serial4_wo)
 	# TFT port connection
 	TFT_PORT	= D
