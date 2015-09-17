@@ -61,7 +61,7 @@ public:
 		int16_t x, y;
 	};
 
-	rTouch(tft_t *tft, adcRequest_t *req);
+	rTouch(adcRequest_t *req);
 	void init(void);
 	const coord_t position(void);
 	const coord_t waitForPress(void);
@@ -83,8 +83,6 @@ private:
 	bool calibrated;
 	int32_t cal[7];
 	static int32_t EEMEM NVcal[7];
-
-	tft_t *tft;
 };
 
 #endif

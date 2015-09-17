@@ -4,6 +4,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 #include <eemem.h>
 #include <pcint.h>
 #include "rtouch.h"
@@ -40,9 +41,8 @@ static struct averager_t {
 static inline void rTouchMode(Functions func);
 static void rTouchADCISR(uint8_t channel, uint16_t result);
 
-rTouch::rTouch(tft_t *tft, adcRequest_t *req)
+rTouch::rTouch(adcRequest_t *req)
 {
-	this->tft = tft;
 	adcReq = req;
 	calibrated = false;
 	stat.prev.x = 0;
@@ -74,22 +74,22 @@ const rTouch::coord_t rTouch::coordTranslate(coord_t pos) const
 	pos.y = (cal[3] * (int32_t)pos.y + \
 		cal[4] * (int32_t)pos.y + cal[5]) / cal[6];
 #ifndef RTOUCH_SWAPXY
-	if (tft->portrait()) {
+	if (tft::portrait()) {
 #else
-	if (!tft->portrait()) {
+	if (!tft::portrait()) {
 #endif
 		int16_t tmp = pos.x;
 #ifndef RTOUCH_SWAPXY
-		pos.x = tft->width() - pos.y;
+		pos.x = tft::width - pos.y;
 		pos.y = tmp;
 #else
 		pos.x = pos.y;
-		pos.y = tft->height() - tmp;
+		pos.y = tft::height - tmp;
 #endif
 	}
-	if (tft->flipped()) {
-		pos.x = (int16_t)tft->width() - pos.x;
-		pos.y = (int16_t)tft->height() - pos.y;
+	if (tft::flipped()) {
+		pos.x = (int16_t)tft::width - pos.x;
+		pos.y = (int16_t)tft::height - pos.y;
 	}
 	return pos;
 }
@@ -107,25 +107,25 @@ const rTouch::coord_t rTouch::position(void)
 
 void rTouch::drawCross(const coord_t pos, uint16_t c)
 {
-	tft->rectangle(pos.x - CALIB_SIZE, pos.y, CALIB_SIZE * 2, 1, c);
-	tft->rectangle(pos.x, pos.y - CALIB_SIZE, 1, CALIB_SIZE * 2, c);
+	tft::rectangle(pos.x - CALIB_SIZE, pos.y, CALIB_SIZE * 2, 1, c);
+	tft::rectangle(pos.x, pos.y - CALIB_SIZE, 1, CALIB_SIZE * 2, c);
 }
 
 const rTouch::coord_t rTouch::calibrationPoint(const uint8_t index)
 {
 	coord_t pos;
 	if (index == 0 || index == 2)
-		pos.x = tft->width() * 0.2;
+		pos.x = tft::width * 0.2;
 	else if (index == 1 || index == 3)
-		pos.x = tft->width() * 0.8;
+		pos.x = tft::width * 0.8;
 	else
-		pos.x = tft->width() / 2;
+		pos.x = tft::width / 2;
 	if (index == 0 || index == 1)
-		pos.y = tft->height() * 0.2;
+		pos.y = tft::height * 0.2;
 	else if (index == 2 || index == 3)
-		pos.y = tft->height() * 0.8;
+		pos.y = tft::height * 0.8;
 	else
-		pos.y = tft->height() / 2;
+		pos.y = tft::height / 2;
 	return pos;
 }
 
@@ -169,18 +169,18 @@ void rTouch::calibrate(bool reset)
 		calibrated = true;
 		return;
 	}
-	tft->setBackground(0x0000);
-	tft->setForeground(0x667F);
-	tft->clean();
-	tft->setZoom(2);
-	uint8_t orient = tft->orient();
-	tft->setXY((tft->width() - FONT_WIDTH * tft->zoom() * 11) / 2, \
-		   (tft->height() - FONT_HEIGHT * tft->zoom() ) / 3);
-	(*tft) << "Calibration";
+	tft::background = 0x0000;
+	tft::foreground = 0x667F;
+	tft::clean();
+	tft::zoom = 2;
+	uint8_t orient = tft::orient;
+	tft::x = (tft::width - FONT_WIDTH * tft::zoom * 11) / 2;
+	tft::y = (tft::height - FONT_HEIGHT * tft::zoom ) / 3;
+	tft::putString("Calibration");
 #ifndef RTOUCH_SWAPXY
-	tft->setOrient(tft_t::Landscape);
+	tft::setOrient(tft::Landscape);
 #else
-	tft->setOrient(tft_t::Portrait);
+	tft::setOrient(tft::Portrait);
 #endif
 
 	calibration caldata;
@@ -201,7 +201,7 @@ recalibrate:
 	if (!perform_calibration(&caldata))
 		goto recalibrate;
 
-	tft->setOrient(orient);
+	tft::setOrient(orient);
 
 	cal[0] = caldata.a[1];	// xscale
 	cal[1] = caldata.a[2];	// xymix
