@@ -12,7 +12,7 @@
 class PortraitList
 {
 public:
-	PortraitList(tft_t *tft) : curItem(0), pressed(false) {this->tft = tft;}
+	PortraitList() : curItem(0), pressed(false) {}
 
 	const listItem *currentItem(void) const {return curItem;}
 	void setRootItem(listItem *item);
@@ -42,7 +42,6 @@ private:
 	void displayItem(const listItem *item, const uint16_t index = -1) const;
 	void displayItems(const listItem **items, uint16_t index = 0, uint16_t last = 0) const;
 
-	tft_t *tft;
 	const listItem *curItem;
 	const listItem *stack[LIST_STACK_SIZE];
 	rTouch::coord_t prev;

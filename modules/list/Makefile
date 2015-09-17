@@ -9,7 +9,7 @@ LIST_STACK_SIZE		?= 5
 CONFS	+= LIST_ITEM_IMAGE_SIZE LIST_TOP_RESERVED LIST_BOTTOM_RESERVED LIST_STACK_SIZE
 
 # TFT vertical scrolling need to be enabled
-TFT_VERTICALSCROLLING	= y
+TFT_VERTICAL_SCROLLING	= y
 
 # File rules
 NSRC	:= portraitlist.cpp

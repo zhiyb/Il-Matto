@@ -7,8 +7,6 @@
 namespace menu
 {
 
-void setTFT(tft_t *t);
-
 namespace root
 {
 	extern listItem item;

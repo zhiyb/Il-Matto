@@ -12,7 +12,7 @@
 class LandscapeList
 {
 public:
-	LandscapeList(tft_t *tft) : curItem(0), pressed(false) {this->tft = tft;}
+	LandscapeList() : curItem(0), pressed(false) {}
 
 	listItem *currentItem(void) const {return curItem;}
 	void setCurrentItem(listItem *item) {curItem = item;}
@@ -38,7 +38,6 @@ private:
 	void displayItem(const listItem *item, const uint16_t index = -1) const;
 	void displayItems(const listItem **items, uint16_t index = 0, uint16_t last = 0) const;
 
-	tft_t *tft;
 	listItem *curItem;
 	bool pressed;
 	rTouch::coord_t prev;

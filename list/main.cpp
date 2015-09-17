@@ -17,13 +17,12 @@
 
 //#define LANDSCAPE
 
-tft_t tft;
 adcRequest_t adcReq;
-rTouch touch(&tft, &adcReq);
+rTouch touch(&adcReq);
 #ifdef LANDSCAPE
-LandscapeList l(&tft);
+LandscapeList l;
 #else
-PortraitList l(&tft);
+PortraitList l;
 #endif
 
 ISR(ADC_vect, ISR_NOBLOCK)
@@ -36,22 +35,21 @@ void init(void)
 	DDRB |= _BV(7);			// LED
 	PORTB |= _BV(7);
 
-	tft.init();
+	tft::init();
 #ifdef LANDSCAPE
-	tft.setOrient(tft.FlipLandscape);
+	tft::setOrient(tft::FlipLandscape);
 #else
-	tft.setOrient(tft.Portrait);
+	tft::setOrient(tft::Portrait);
 #endif
-	tft.setBackground(0x0000);
-	tft.setForeground(0x667F);
-	tft.clean();
+	tft::background = 0x0000;
+	tft::foreground = 0x667F;
+	tft::clean();
 
-	stdout = tftout(&tft);
-	menu::setTFT(&tft);
+	stdout = tftout();
 	touch.init();
 	sei();
 
-	tft.setBGLight(true);
+	tft::setBGLight(true);
 	touch.calibrate();
 	eepromFirstDone();
 }
@@ -60,8 +58,8 @@ int main(void)
 {
 	init();
 
-	tft.clean();
-	tft.setForeground(0x0000);
+	tft::clean();
+	tft::foreground = 0x0000;
 
 	l.refresh();
 	l.setRootItem(&menu::root::item);
