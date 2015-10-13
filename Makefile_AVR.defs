@@ -6,16 +6,11 @@ CROSS_COMPILE	= avr-
 SUFFIX	= .elf
 
 # Flags
-ifndef LIBTRG
 ifndef MCU_TARGET
-$(warning "$$(MCU_TARGET) not found")
+$(error "$$(MCU_TARGET) not found")
 endif
 ifdef MCU_FREQ
 DEFS	+= -DF_CPU=$(MCU_FREQ)
-else
-$(warning "$$(MCU_FREQ) not found")
-endif
-LOG	?= ~/.make_avr.log
 endif
 #DEFS	+= -fpack-struct -fshort-enums
 #DEFS	+= -funsigned-bitfields -funsigned-char
@@ -36,7 +31,7 @@ endif
 TOPDIR	?= $(dir $(lastword $(MAKEFILE_LIST)))
 include $(TOPDIR)/Makefile_generic.defs
 
-# Put here so not override FLAGS ?= -g -Wall
+# Put here so not override FLAGS default value
 FLAGS	+= -mmcu=$(MCU_TARGET)
 
 # Following are not needed when building libraries
@@ -84,27 +79,24 @@ $(EEPTRGS): e%: $(TRG)_eeprom.%
 
 # For program MCU with avrdude.
 AVROPS	= flash readflash eep readeep fuse flashall
-.PHONY: $(AVROPS) $(AVROPS:%=avr-%) knock
+.PHONY: $(AVROPS) knock
 
-$(AVROPS): %: avr-%
-	echo $(shell date '+%Y-%m-%d %H:%M:%S'), $(PRGER), $(MCU_TARGET), $@, $(PWD), $(TRG).hex >> $(LOG)
-
-avr-flash: hex
+flash: hex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(TRG).hex
 
-avr-flashall: hex ehex
+flashall: hex ehex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:w:$(TRG).hex -U eeprom:w:$(EEPFILE)
 
-avr-readflash:
+readflash:
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U flash:r:$(TRG).hex:i
 
-avr-eep: ehex
+eep: ehex
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:w:$(EEPFILE)
 
-avr-readeep:
+readeep:
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U eeprom:r:$(EEPFILE):i
 
-avr-fuse:
+fuse:
 	$(AVRDUDE) -c $(PRGER) -p $(MCU_TARGET) -U efuse:w:$(EFUSE):m -U hfuse:w:$(HFUSE):m -U lfuse:w:$(LFUSE):m
 
 knock:
