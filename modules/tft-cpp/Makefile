@@ -1,18 +1,18 @@
 TFT_HARDWARE	?= ili9341_parallel
 CONFS	+= TFT_HARDWARE
 
-# Use shifting up instead of clean screen after screen full
+# Use shifting up (slow!) instead of clean screen after screen full
 CONFS_D	+= TFT_SCROLL
 # Vertical scrolling functionality enable
 CONFS_D	+= TFT_VERTICAL_SCROLLING
-# Enable (generally unnecessary) draw in range checking
+# Enable draw in range checking
 CONFS_D	+= TFT_CHECKING
-# Ability to read pixels (for screen shift up operation)
-CONFS_D	+= TFT_READ_AVAILABLE
 # (Experimental) Multiple font support, zooming not supported yet
 CONFS_D += TFT_FONTS
 
 # Module specific settings
+# Ability to read pixels (for screen shift up operation)
+CONFS_D	+= TFT_READ_AVAILABLE
 ifeq ($(TFT_HARDWARE), ili9341_parallel)
 	# TFT port connection
 	TFT_PORT_CTRL	?= A
