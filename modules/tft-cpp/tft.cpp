@@ -608,7 +608,7 @@ static int tftputchar(const char c, FILE *stream)
 	return 0;
 }
 
-FILE *tftout()
+FILE *tft::devout()
 {
 	static FILE *out = NULL;
 	if (out == NULL)

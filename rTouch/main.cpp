@@ -30,7 +30,7 @@ void init(void)
 	tft::setOrient(tft::Portrait);
 	tft::background = 0x0000;
 	tft::foreground = 0x667F;
-	stdout = tftout();
+	stdout = tft::devout();
 	touch.init();
 	sei();
 

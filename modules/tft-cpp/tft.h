@@ -21,6 +21,7 @@ namespace tft
 	static inline void setBGLight(bool e) {tfthw::setBGLight(e);}
 	static inline void putChar(const char c);
 	void putString(const char *str, bool progMem = false);
+	FILE *devout();
 
 	// Vertical scrolling related functions
 #ifdef TFT_VERTICAL_SCROLLING
@@ -76,8 +77,6 @@ namespace tfthw
 	static inline void area(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 	static inline void all() {area(0, 0, tft::width, tft::height);}
 }
-
-FILE *tftout();
 
 // Defined as inline to execute faster
 

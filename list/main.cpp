@@ -45,7 +45,7 @@ void init(void)
 	tft::foreground = 0x667F;
 	tft::clean();
 
-	stdout = tftout();
+	stdout = tft::devout();
 	touch.init();
 	sei();
 

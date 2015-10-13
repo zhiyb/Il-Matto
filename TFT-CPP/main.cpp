@@ -23,7 +23,7 @@ void init()
 	capture::init();
 	capture::enable();
 #endif
-	stdout = tftout();
+	stdout = tft::devout();
 	sei();
 }
 
