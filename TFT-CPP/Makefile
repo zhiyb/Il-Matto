@@ -2,11 +2,14 @@
 
 TRG	= TFT-CPP
 SRC	= main.cpp
-SUBDIRS	= tft-cpp tft-capture common
+SUBDIRS	= tft-cpp tft-capture common FreeRTOS
+INCDIRS	= .
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
 MCU_FREQ	= 12000000
+
+RTOSPORT	= ATMega644P
 
 TFT_HARDWARE	= ili9341_parallel
 #TFT_HARDWARE	= ili9341_serial4_wo

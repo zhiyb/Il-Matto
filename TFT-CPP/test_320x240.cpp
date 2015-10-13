@@ -1,10 +1,10 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <tft.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
-extern void test(void);
-
-void test(void)
+extern void test(void)
 {
 	using namespace tft;
 	setOrient(Flipped | Landscape);
@@ -71,7 +71,7 @@ loop:
 	tft::setVerticalScrolling(v);
 	if (max == ++v)
 		v = 64;
-	_delay_ms(10);
+	vTaskDelay(10);
 #else
 loop:
 #endif
