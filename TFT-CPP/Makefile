@@ -32,7 +32,7 @@ endif
 # Vertical scrolling enable
 TFT_VERTICAL_SCROLLING	= y
 # (Experimental) Multiple font support
-#TFT_FONTS	= y
+TFT_FONTS	= y
 
 LIBS	+= -lm
 
