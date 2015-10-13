@@ -9,17 +9,18 @@
 extern "C" {
 #endif
 
-#define FONT_WIDTH 6
-#define FONT_HEIGHT 8
-
 #include <avr/pgmspace.h>
 
-#define ASCII_SIZE	99
+//#define ASCII_STRIPPED
 
-extern const unsigned char ascii[ASCII_SIZE][8] PROGMEM;
-#ifdef ASCII_STRIPPED
-extern const unsigned char ascii_stripped[96][6] PROGMEM;
-#endif
+struct font_t {
+	const unsigned char width, height, size, offset;
+	const unsigned char *ptr;
+	const struct font_t *next;
+};
+
+// Better not use PROGMEM?
+extern const struct font_t fonts;
 
 #ifdef __cplusplus
 }

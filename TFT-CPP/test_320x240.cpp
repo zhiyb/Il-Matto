@@ -23,6 +23,7 @@ start:
 	x = 300;
 	y = 38;
 	puts("Change text position & word warp test");
+	setFont(10, 16);
 	frame(115, 56, 200, 10, 2, 0xF800);
 	puts("Draw frame test");
 	rectangle(118, 68, 180, 6, 0x07E0);
@@ -54,6 +55,13 @@ start:
 	line(250, 0, 250, 200, 0xF800);
 	line(260, 200, 260, 0, 0x001F);
 	puts("Draw lines test");
+
+	setFont(6, 8);
+	puts("0123456789");
+	setFont(10, 16);
+	puts("0123456789");
+	setFont(11, 16);
+	puts("0123456789");
 
 #ifdef TFT_VERTICAL_SCROLLING
 	tft::setVerticalScrollingArea(64, 32);

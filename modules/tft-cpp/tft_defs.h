@@ -6,6 +6,7 @@
 #define TFT_DEFS_H
 
 #include <stdint.h>
+#include "ascii.h"
 
 namespace tft
 {
@@ -18,6 +19,7 @@ namespace tft
 	// Width & height should only be manipulated by setOrient()
 	extern uint16_t x, y, width, height;
 	extern uint16_t foreground, background;	// Colours
+	extern const struct font_t *font;
 
 #ifdef TFT_VERTICAL_SCROLLING
 	extern struct tft_vs_t {
@@ -25,11 +27,15 @@ namespace tft
 		bool tf;
 	} d;
 #endif
-	
+
 	static inline uint8_t orientation() {return orient & ~BMPMode;}
 	static inline bool flipped() {return orient & Flipped;}
 	static inline bool portrait() {return orient & Portrait;}
 	static inline bool landscape() {return !portrait();}
+	bool setFont(uint8_t w, uint8_t h);
 }
+
+#define FONT_WIDTH	(tft::font->width)
+#define FONT_HEIGHT	(tft::font->height)
 
 #endif

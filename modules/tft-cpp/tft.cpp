@@ -21,6 +21,7 @@ namespace tft
 	uint8_t zoom, orient, tabSize;
 	uint16_t x, y, width, height;
 	uint16_t foreground, background;
+	const struct font_t *font = &fonts;
 
 #ifdef TFT_VERTICAL_SCROLLING
 	struct tft_vs_t d;
@@ -33,6 +34,20 @@ inline void tft::swap(Type &a, Type &b)
 	Type tmp = a;
 	a = b;
 	b = tmp;
+}
+
+bool tft::setFont(uint8_t w, uint8_t h)
+{
+	if (font->width == w && font->height == h)
+		return true;
+	const struct font_t *ptr = &fonts;
+	while (ptr != 0)
+		if (ptr->width == w && ptr->height == h) {
+			font = ptr;
+			return true;
+		} else
+			ptr = ptr->next;
+	return false;
 }
 
 #ifdef TFT_READ_AVAILABLE
@@ -333,6 +348,13 @@ void tft::newline()
 
 void tft::drawChar(char ch)
 {
+#ifdef TFT_FONTS
+#ifdef ASCII_STRIPPED
+	drawImage2(font->ptr + ((uint8_t)ch - font->offset) * font->size, x, y, FONT_WIDTH, FONT_HEIGHT, true);
+#else
+	drawImage2Aligned(font->ptr + ((uint8_t)ch - font->offset) * font->size, x, y, FONT_WIDTH, FONT_HEIGHT, true);
+#endif
+#else
 	using namespace tfthw;
 #ifdef TFT_CHECKING
 	if ((int16_t)x() >= (int16_t)width() || (int16_t)y() >= (int16_t)height())
@@ -415,10 +437,10 @@ draw:
 #endif
 		unsigned char c;
 #ifdef TFT_VERTICAL_SCROLLING
-		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom])) << (xStart / zoom);
+		c = pgm_read_byte(font->ptr + ((uint8_t)ch - font->offset) * font->size + yi / zoom) << (xStart / zoom);
 		for (uint8_t xi = xStart; xi < xEnd; xi++) {
 #else
-		c = pgm_read_byte(&(ascii[(uint8_t)ch - ' '][yi / zoom]));
+		c = pgm_read_byte(font->ptr + ((uint8_t)ch - font->offset) * font->size + yi / zoom);
 		for (uint8_t xi = 0; xi < w; xi++) {
 #endif
 			if (c & 0x80)
@@ -437,6 +459,7 @@ draw:
 		xTransform = false;
 		goto draw;
 	}
+#endif
 #endif
 }
 
@@ -538,6 +561,32 @@ disp:
 				c <<= i;
 		}
 #endif
+		for (uint8_t xx = 0; xx < w; xx++) {
+			if (i++ == 0)
+				c = progMem ? pgm_read_byte(ptr++) : *ptr++;
+			if (c & 0x80)
+				write16(foreground);
+			else
+				write16(background);
+			if (i == 8)
+				i = 0;
+			else
+				c <<= 1;
+		}
+	}
+}
+
+void tft::drawImage2Aligned(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem)
+{
+	using namespace tfthw;
+	uint8_t i, c = 0;
+	// TODO: zooming support
+	// TODO: vertical scrolling support
+
+	area(x, y, w, h);
+	memWrite();
+	for (uint8_t yy = 0; yy < h; yy++) {
+		i = 0;
 		for (uint8_t xx = 0; xx < w; xx++) {
 			if (i++ == 0)
 				c = progMem ? pgm_read_byte(ptr++) : *ptr++;

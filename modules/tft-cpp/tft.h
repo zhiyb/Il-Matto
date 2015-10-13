@@ -59,6 +59,7 @@ namespace tft
 	void drawChar(char ch);
 	void rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c);
 	void drawImage2(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
+	void drawImage2Aligned(const uint8_t *ptr, uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool progMem = false);
 	static inline void point(uint16_t x, uint16_t y, uint16_t c);
 #ifdef TFT_READ_AVAILABLE
 	void shiftUp(const uint16_t l);

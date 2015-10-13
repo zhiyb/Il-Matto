@@ -9,6 +9,8 @@ CONFS_D	+= TFT_VERTICAL_SCROLLING
 CONFS_D	+= TFT_CHECKING
 # Ability to read pixels (for screen shift up operation)
 CONFS_D	+= TFT_READ_AVAILABLE
+# (Experimental) Multiple font support, zooming not supported yet
+CONFS_D += TFT_FONTS
 
 # Module specific settings
 ifeq ($(TFT_HARDWARE), ili9341_parallel)
