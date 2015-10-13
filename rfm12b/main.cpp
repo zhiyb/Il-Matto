@@ -8,7 +8,7 @@
 
 //#define RFM12B_TX
 
-void init(void)
+void init()
 {
 	tft::init();
 	stdout = tftout();
@@ -18,7 +18,7 @@ void init(void)
 	sei();
 }
 
-int main(void)
+int main()
 {
 	init();
 	tft::setBGLight(true);
