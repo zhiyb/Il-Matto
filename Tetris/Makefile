@@ -2,7 +2,7 @@
 
 TRG	= Tetris
 SRC	= ascii.c display.c ili9341.c main.c rand.c rgbconv.c rotary.c sound.c tetris.c tft.c timer.c
-SUBDIRS	= common
+SUBDIRS	= common misc
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

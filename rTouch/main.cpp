@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include <tft.h>
-#include <rgbconv.h>
 #include <rtouch.h>
 #include <eemem.h>
 #include <capture.h>
