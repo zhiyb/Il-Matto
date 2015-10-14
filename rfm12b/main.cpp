@@ -6,12 +6,12 @@
 #include <rfm12_config.h>
 #include <rfm12.h>
 
-//#define RFM12B_TX
+#define RFM12B_TX
 
 void init()
 {
 	tft::init();
-	stdout = tftout();
+	stdout = tft::devout();
 	_delay_ms(1000);
 	rfm12_init();
 	_delay_ms(1000);
