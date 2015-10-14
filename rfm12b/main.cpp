@@ -6,7 +6,7 @@
 #include <rfm12_config.h>
 #include <rfm12.h>
 
-#define RFM12B_TX
+//#define RFM12B_TX
 
 void init()
 {

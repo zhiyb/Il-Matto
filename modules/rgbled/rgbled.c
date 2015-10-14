@@ -66,8 +66,8 @@ void rgbLED_refresh()
 	reset();
 	do {
 		uint32_t clr = *p++;
-		send(GREEN888(clr));
-		send(RED888(clr));
-		send(BLUE888(clr));
+		send(GREEN_888(clr));
+		send(RED_888(clr));
+		send(BLUE_888(clr));
 	} while (--cnt);
 }

@@ -2,7 +2,7 @@
 
 TRG	= MPU6050
 SRC	= main.cpp
-SUBDIRS	= tft-cpp MPU6050-cpp common
+SUBDIRS	= tft-cpp MPU6050-cpp common misc
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

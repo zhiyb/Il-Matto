@@ -46,24 +46,24 @@ loop:
 	cnt = RGBLED_NUM;
 	do {
 		cnt--;
-		switch (j) {
+		switch (cnt % 2 ? j : 5 - j) {
 		case 0:
-			rgbLED[cnt] = COLOUR888(i, 0, 0);
+			rgbLED[cnt] = COLOUR_888(i, 0, 0);
 			break;
 		case 1:
-			rgbLED[cnt] = COLOUR888(i, i, 0);
+			rgbLED[cnt] = COLOUR_888(i, i, 0);
 			break;
 		case 2:
-			rgbLED[cnt] = COLOUR888(0, i, 0);
+			rgbLED[cnt] = COLOUR_888(0, i, 0);
 			break;
 		case 3:
-			rgbLED[cnt] = COLOUR888(0, i, i);
+			rgbLED[cnt] = COLOUR_888(0, i, i);
 			break;
 		case 4:
-			rgbLED[cnt] = COLOUR888(0, 0, i);
+			rgbLED[cnt] = COLOUR_888(0, 0, i);
 			break;
 		case 5:
-			rgbLED[cnt] = COLOUR888(i, 0, i);
+			rgbLED[cnt] = COLOUR_888(i, 0, i);
 			break;
 		}
 	} while (cnt);
