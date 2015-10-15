@@ -39,7 +39,7 @@ void init(void)
 	capture::enable();
 	touch.calibrate();
 	tft::clean();
-	eepromFirstDone();
+	eeprom_done();
 }
 
 int main(void)

@@ -164,7 +164,7 @@ rTouch::Status rTouch::status(void)
 void rTouch::calibrate(bool reset)
 {
 	_delay_ms(10);
-	if (!reset && !eepromFirst() && !pressed()) {
+	if (!reset && !eeprom_first() && !pressed()) {
 		eeprom_read_block(cal, NVcal, sizeof(NVcal));
 		calibrated = true;
 		return;

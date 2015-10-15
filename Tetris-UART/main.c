@@ -1,13 +1,13 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <eemem.h>
 #include "tft.h"
 #include "sound.h"
 #include "display.h"
 #include "tetris.h"
 #include "timer.h"
-#include "rand.h"
 #include "uart.h"
 
 void init(void)
@@ -21,12 +21,13 @@ void init(void)
 	Uart_init();
 	puts("Tetris: UART control interface");
 	TFT_init();
-	Rand_init();
 	Timer_init();
-	Print_frame();
 	Tetris_mem_init();
+	eeprom_counter_increment();
+	srand(eeprom_counter());
+	eeprom_done();
+	Print_frame();
 	Tetris_init();
-	eepromFirstDone();
 /*	#define BAUD 115200
 	#include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;

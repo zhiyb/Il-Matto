@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <eemem.h>
 #include "rotary.h"
 #include "tft.h"
@@ -8,7 +9,6 @@
 #include "display.h"
 #include "tetris.h"
 #include "timer.h"
-#include "rand.h"
 
 void init(void)
 {
@@ -19,12 +19,13 @@ void init(void)
 	Sound_init();
 	ROE_init();
 	TFT_init();
-	Rand_init();
 	Timer_init();
-	Print_frame();
 	Tetris_mem_init();
+	eeprom_counter_increment();
+	srand(eeprom_counter());
+	eeprom_done();
+	Print_frame();
 	Tetris_init();
-	eepromFirstDone();
 }
 
 int main(void)

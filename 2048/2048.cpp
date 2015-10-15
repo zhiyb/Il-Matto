@@ -40,7 +40,6 @@ game2048::game2048()
 	pressed = false;
 	moved = false;
 	restart();
-	srand(0);
 }
 
 void game2048::refresh()

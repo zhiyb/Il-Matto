@@ -2,6 +2,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <tft.h>
 #include <rtouch.h>
 #include <adcrequest.h>
@@ -30,7 +31,9 @@ void init()
 	sei();
 
 	touch.calibrate();
-	eepromFirstDone();
+	eeprom_counter_increment();
+	srand(eeprom_counter());
+	eeprom_done();
 }
 
 int main()

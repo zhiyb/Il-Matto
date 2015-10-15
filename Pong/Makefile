@@ -2,7 +2,7 @@
 
 TRG	= Pong
 SRC	= game.c main.c rotary.c sound.c
-SUBDIRS	= tft common
+SUBDIRS	= tft eemem
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

@@ -8,7 +8,6 @@
 #include "tft.h"
 #include "display.h"
 #include "colour.h"
-#include "rand.h"
 #include "timer.h"
 #include "uart.h"
 
@@ -122,7 +121,7 @@ load:	// Load
 
 void Tetris_mem_init(void)
 {
-	if (eepromFirst()) {
+	if (eeprom_first()) {
 		eeprom_update_word(&NVhighScore, 0);
 		eeprom_update_word(&NVsaveValid, 0);
 	}

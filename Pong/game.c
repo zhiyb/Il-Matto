@@ -317,7 +317,7 @@ void game_connFailed(void)
 static inline void game_record(uint8_t i)
 {
 	static uint8_t first = 1;
-	if ((first && eepromFirst()) || i == 2) {
+	if ((first && eeprom_first()) || i == 2) {
 		first = 0;
 		eeprom_update_word(&NVScore[0], game.score[0]);
 		eeprom_update_word(&NVScore[1], game.score[1]);
@@ -331,7 +331,7 @@ static inline void game_record(uint8_t i)
 			eeprom_update_word(&NVOverCnt[0], 0);
 			eeprom_update_word(&NVOverCnt[1], 0);
 		}
-		eepromFirstDone();
+		eeprom_done();
 	} else {
 		if (eeprom_read_word(&NVScore[0]) < game.score[0])
 			eeprom_update_word(&NVScore[0], game.score[0]);

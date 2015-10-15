@@ -1,8 +1,8 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= Tetris_UART
-SRC	= ascii.c display.c ili9341.c main.c rand.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
-SUBDIRS	= common
+SRC	= ascii.c display.c ili9341.c main.c rgbconv.c sound.c tetris.c tft.c timer.c uart.c
+SUBDIRS	= eemem
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

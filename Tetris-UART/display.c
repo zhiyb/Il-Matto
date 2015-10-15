@@ -6,7 +6,6 @@
 #include "tetris.h"
 #include "rgbconv.h"
 #include "timer.h"
-#include "rand.h"
 #include "eemem.h"
 
 // Board area: 150x300, start from 10x10
@@ -173,7 +172,7 @@ void Print_frame(void)
 	// Text: startup counter
 	TFT_puts(XT, YT_START, "* Startup *", \
 			Colour_Text_Start, Colour_Text_Start_BG);
-	TFT_putint16(XT, YT_STARTNUM, eeprom_read_dword(&NVrandSeed), \
+	TFT_putint16(XT, YT_STARTNUM, eeprom_counter(), \
 			Colour_Text_StartNum, Colour_Text_StartNum_BG);
 }
 
