@@ -15,22 +15,6 @@ uint32_t rgbLED[RGBLED_NUM] = {
 #define PORT	CONCAT_E(PORT, RGBLED_PORT)
 #define DIN	_BV(RGBLED_DIN)
 
-void rgbLED_init()
-{
-	DDR |= DIN;
-	PORT &= ~DIN;
-
-	// Use timer 2 for transmission timing
-	TCCR2A = _BV(WGM21);
-	TCCR2B = 0;
-	TCNT2 = 0;
-	OCR2A = F_CPU * 4UL / 10000000UL;	// 0.4us
-	ASSR = 0;
-	TIMSK2 = 0;
-	TIFR2 = 0;
-	TCCR2B = _BV(CS20);			// Start timer
-}
-
 static inline void reset()
 {
 	PORT &= ~DIN;
@@ -59,11 +43,28 @@ static void send(uint8_t data)
 	} while (--cnt);
 }
 
+void rgbLED_init()
+{
+	DDR |= DIN;
+	PORT &= ~DIN;
+
+	// Use timer 2 for transmission timing
+	TCCR2A = _BV(WGM21);
+	TCCR2B = 0;
+	TCNT2 = 0;
+	OCR2A = F_CPU * 4UL / 10000000UL;	// 0.4us
+	ASSR = 0;
+	TIMSK2 = 0;
+	TIFR2 = 0;
+	TCCR2B = _BV(CS20);			// Start timer
+
+	reset();
+}
+
 void rgbLED_refresh()
 {
 	uint8_t cnt = 8;
 	uint32_t *p = &rgbLED[0];
-	reset();
 	do {
 		uint32_t clr = *p++;
 		send(GREEN_888(clr));

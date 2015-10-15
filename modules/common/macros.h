@@ -19,9 +19,9 @@
 #define COLOUR_888(r, g, b)	((((uint32_t)(r) & 0xff) << 16) | \
 				(((uint32_t)(g) & 0xff) << 8) | \
 				(((uint32_t)(b) & 0xff) << 0))
-#define COLOUR_565(r, g, b)	((((uint16_t)(c) & 0xf8) << 8) | \
-				(((uint16_t)(c) & 0xfc) << 3) | \
-				(((uint16_t)(c) & 0xf8) >> 3))
+#define COLOUR_565(r, g, b)	((((uint16_t)(r) & 0xf8) << 8) | \
+				(((uint16_t)(g) & 0xfc) << 3) | \
+				(((uint16_t)(b) & 0xf8) >> 3))
 // Convert between RGB-888 and RGB-565
 #define COLOUR_565_888(c)	((((uint32_t)(c) & 0x00f80000) >> 8) | \
 				(((uint32_t)(c) & 0x0000fc00) >> 5) | \
