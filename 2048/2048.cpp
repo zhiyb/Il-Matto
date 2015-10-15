@@ -46,11 +46,11 @@ game2048::game2048()
 void game2048::refresh()
 {
 	uint8_t rsize = width / ROW, csize = width / COLUMN;
-	for (uint8_t y = 0; y < ROW; y++)
-		for (uint8_t x = 0; x < COLUMN; x++) {
-			uint16_t xx = csize * x;
-			uint16_t yy = height - width + rsize * y;
-			drawCell(xx, yy, data[y][x]);
+	for (uint8_t r = 0; r < ROW; r++)
+		for (uint8_t c = 0; c < COLUMN; c++) {
+			uint16_t x = csize * c;
+			uint16_t y = height - width + rsize * r;
+			drawCell(x, y, data[r][c]);
 		}
 }
 
@@ -136,7 +136,7 @@ void game2048::move(int8_t dx, int8_t dy)
 	// Move cells
 	bool moved = false;
 	for (uint8_t ri = 0; ri < ROW; ri++)
-		for (uint8_t ci = 0; ci < ROW; ci++) {
+		for (uint8_t ci = 0; ci < COLUMN; ci++) {
 			// Actual row & column
 			uint8_t r = dy == 1 ? ROW - 1 - ri : ri;
 			uint8_t c = dx == 1 ? COLUMN - 1 - ci : ci;
