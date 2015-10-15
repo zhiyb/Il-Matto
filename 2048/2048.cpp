@@ -38,6 +38,7 @@ const uint16_t game2048::colours[13][2] = {
 game2048::game2048()
 {
 	pressed = false;
+	moved = false;
 	restart();
 	srand(0);
 }
@@ -201,14 +202,17 @@ void game2048::pool()
 	tft::y = font->height;
 	switch(touch.status()) {
 	case rTouch::Pressed:
-	case rTouch::Moved:
-		pos[1] = touch.position();
 		if (!pressed)
-			pos[0] = pos[1];
+			pos[0] = touch.position();
 		pressed = true;
 		break;
+	case rTouch::Moved:
+		if (!moved)
+			pos[1] = touch.position();
+		moved = true;
+		break;
 	case rTouch::Idle:
-		if (pressed) {
+		if (moved) {
 			// Normalise
 			int16_t dx = pos[1].x - pos[0].x;
 			int16_t dy = pos[1].y - pos[0].y;
@@ -223,6 +227,7 @@ void game2048::pool()
 			move(dx, dy);
 		}
 		pressed = false;
+		moved = false;
 		break;
 	}
 }

@@ -2,7 +2,7 @@
 
 TRG	= 2048
 SRC	= main.cpp 2048.cpp
-SUBDIRS	= rTouch tft-cpp common misc
+SUBDIRS	= rTouch tft-cpp common misc request eemem
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

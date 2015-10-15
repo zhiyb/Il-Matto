@@ -10,6 +10,6 @@ I2C_PORT_SDA	?= 1
 CONFS	+= I2C_PORT I2C_PORT_SCL I2C_PORT_SDA
 
 # File rules
-NSRC	:= eemem.c request.cpp i2c_pin.cpp
+NSRC	:= i2c_pin.cpp
 SRC	+= $(NSRC:%=$(DIR)/%)
 INCDIRS	+= $(DIR)

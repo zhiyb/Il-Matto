@@ -2,7 +2,7 @@
 
 TRG	= list
 SRC	= main.cpp menu.cpp menufunc.cpp
-SUBDIRS	= tft-cpp list rTouch common misc
+SUBDIRS	= tft-cpp list rTouch common misc eemem request
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

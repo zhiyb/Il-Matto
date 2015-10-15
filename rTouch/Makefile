@@ -2,7 +2,7 @@
 
 TRG	= rTouch
 SRC	= main.cpp
-SUBDIRS	= tft-cpp rTouch common tft-capture misc
+SUBDIRS	= tft-cpp rTouch common tft-capture misc eemem request
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p

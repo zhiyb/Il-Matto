@@ -25,7 +25,7 @@ private:
 	uint8_t find(uint8_t source, int8_t dr, int8_t dc);
 	void moveCell(uint8_t source, uint8_t target);
 
-	bool pressed;
+	bool pressed, moved;
 	rTouch::coord_t pos[2];
 	uint16_t data[GAME_2048_ROW][GAME_2048_COLUMN];
 	bool merged[GAME_2048_ROW][GAME_2048_COLUMN];
