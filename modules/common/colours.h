@@ -18,8 +18,8 @@ namespace colours
 	namespace b16
 	{
 		enum Colours {
-			Red = 0xF800, Green = 0x07E0, Blue = 0x001F,
-			DarkRed = 0x8000, DarkGreen = 0x0400, DarkBlue = 0x0010,
+			Red = 0xf800, Green = 0x07e0, Blue = 0x001f,
+			DarkRed = 0x7800, DarkGreen = 0x03e0, DarkBlue = 0x000f,
 			Yellow = Red | Green, Cyan = Green | Blue, Magenta = Red | Blue,
 			DarkYellow = DarkRed | DarkGreen, DarkCyan = DarkGreen | DarkBlue, DarkMagenta = DarkRed | DarkBlue,
 			White = Red | Green | Blue, Grey = DarkRed | DarkGreen | DarkBlue, Black = 0,
@@ -28,8 +28,8 @@ namespace colours
 	namespace b32
 	{
 		enum Colours {
-			Red = 0xFF0000, Green = 0x00FF00, Blue = 0x0000FF,
-			DarkRed = 0x800000, DarkGreen = 0x008000, DarkBlue = 0x000080,
+			Red = 0xff0000, Green = 0x00ff00, Blue = 0x0000ff,
+			DarkRed = 0x7f0000, DarkGreen = 0x007f00, DarkBlue = 0x00007f,
 			Yellow = Red | Green, Cyan = Green | Blue, Magenta = Red | Blue,
 			DarkYellow = DarkRed | DarkGreen, DarkCyan = DarkGreen | DarkBlue, DarkMagenta = DarkRed | DarkBlue,
 			White = Red | Green | Blue, Grey = DarkRed | DarkGreen | DarkBlue, Black = 0
