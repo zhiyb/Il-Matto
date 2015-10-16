@@ -40,6 +40,14 @@
 #include <avr/pgmspace.h>
 #endif
 
+// FreeRTOS support
+#ifdef RTOSPORT
+#include <FreeRTOSConfig.h>
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+#endif
+
 #include <string.h>
 
 #include "rfm12_config.h"
@@ -130,8 +138,47 @@ rfm12_control_t ctrl;
 *
 * \see rfm12_control_t, rf_rx_buffer_t and rf_tx_buffer_t
 */
+#if (!RFM12_USE_POLLING) && defined(RTOSPORT)
+void rfm12_poll(void);
+static QueueHandle_t rfm12_int_queue = 0;
+#if !(RFM12_TRANSMIT_ONLY)
+QueueHandle_t rfm12_rx_queue = 0;
+#endif
+
+// Interrupt task for RTOS
+void rfm12_int_task(void *param)
+{
+	taskENTER_CRITICAL();
+	{
+		rfm12_int_queue = xQueueCreate(1, 1);
+#if !(RFM12_TRANSMIT_ONLY)
+		rfm12_rx_queue = xQueueCreate(1, 1);
+#endif
+	}
+	taskEXIT_CRITICAL();
+	if (rfm12_int_queue == 0)
+		for (;;);	// Failed
+	uint8_t recv;
+loop:
+	while (xQueueReceive(rfm12_int_queue, &recv, portMAX_DELAY) != pdTRUE);
+	rfm12_poll();
+	goto loop;
+}
+
+ISR(RFM12_INT_VECT)
+{
+	if (rfm12_int_queue == 0)
+		return;
+	static uint8_t send = 0;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	xQueueSendFromISR(rfm12_int_queue, &send, &xHigherPriorityTaskWoken);
+	if (xHigherPriorityTaskWoken != pdFALSE)
+		taskYIELD();
+}
+#endif
+
 //if polling is used, do not define an interrupt handler, but a polling function
-#if (RFM12_USE_POLLING)
+#if (RFM12_USE_POLLING) || defined(RTOSPORT)
 void rfm12_poll(void)
 #else
 ISR(RFM12_INT_VECT, ISR_NOBLOCK)
@@ -294,6 +341,10 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 
 						//indicate that the buffer is ready to be used
 						rf_rx_buffers[ctrl.buffer_in_num].status = STATUS_COMPLETE;
+						#ifdef RTOSPORT
+							uint8_t status = STATUS_COMPLETE;
+							xQueueSendToBack(rfm12_rx_queue, &status, 1);
+						#endif
 
 						#if RFM12_USE_RX_CALLBACK
 							if (rfm12_rx_callback_func != 0x0000) {

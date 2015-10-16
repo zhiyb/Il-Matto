@@ -81,6 +81,20 @@ extern "C" {
  * function protoypes
 */
 
+#ifdef RTOSPORT
+#include <FreeRTOSConfig.h>
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+
+#if !(RFM12_TRANSMIT_ONLY)
+// Queue for receive rx complete events
+extern QueueHandle_t rfm12_rx_queue;
+#endif
+// RTOS interrupt task
+void rfm12_int_task(void *param);
+#endif
+
 //see rfm12.c for more documentation
 void rfm12_init(void);
 void rfm12_tick(void);
