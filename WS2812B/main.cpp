@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <macros.h>
+#include <colours.h>
 #include "FreeRTOSConfig.h"
 #include <FreeRTOS.h>
 #include <task.h>
@@ -14,14 +15,7 @@
 #define DELAY_TFT	(0)
 #define MIDDLE		64
 
-const static uint8_t colours[][3] = {
-	{0xff, 0x00, 0x00,},
-	{0xff, 0xff, 0x00,},
-	{0x00, 0xff, 0x00,},
-	{0x00, 0xff, 0xff,},
-	{0x00, 0x00, 0xff,},
-	{0xff, 0x00, 0xff,},
-};
+using namespace colours::b32;
 
 void RefreshTask(void *param)
 {
@@ -33,6 +27,21 @@ void RefreshTask(void *param)
 
 void LEDTask(void *param)
 {
+	const static uint32_t colours[] = {
+#if 0
+		Black,
+		DarkRed, DarkGreen, DarkBlue,
+		LightRed, LightGreen, LightBlue,
+		DarkYellow, DarkCyan, DarkMagenta,
+		LightYellow, LightCyan, LightMagenta,
+		White, Grey, Black,
+#endif
+		Red, Orange, Yellow, Chartreuse,
+		Green, SpringGreen, Cyan, Azure,
+		Blue, Violet, Magenta, Pink,
+	};
+	const static uint8_t clrs = sizeof(colours) / sizeof(colours[0]);
+
 	uint8_t n = (uint8_t)(uint16_t)param;
 	uint8_t step = 255 * (n % (RGBLED_NUM / 2)) * 2 / RGBLED_NUM;
 	uint8_t dir = n >= RGBLED_NUM / 2;
@@ -46,15 +55,16 @@ loop:
 				i = i * MIDDLE / 128;
 			else
 				i = MIDDLE + (i - 128) * (255 - MIDDLE) / 127;
-			uint8_t r = (uint16_t)colours[clr][0] * i / 255;
-			uint8_t g = (uint16_t)colours[clr][1] * i / 255;
-			uint8_t b = (uint16_t)colours[clr][2] * i / 255;
+			uint32_t colour = *(colours + clr);
+			uint8_t r = RED_888(colour) * i / 255;
+			uint8_t g = GREEN_888(colour) * i / 255;
+			uint8_t b = BLUE_888(colour) * i / 255;
 			rgbLED[n] = COLOUR_888(r, g, b);
 			vTaskDelayUntil(&xLastWakeTime, DELAY_ANI);
 		} while (++step);
 	} while (++dir != 2);
 	dir = 0;
-	clr = clr == sizeof(colours) / 3 - 1 ? 0 : clr + 1;
+	clr = clr == clrs - 1 ? 0 : clr + 1;
 	goto loop;
 }
 
