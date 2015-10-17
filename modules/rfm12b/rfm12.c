@@ -142,7 +142,7 @@ rfm12_control_t ctrl;
 void rfm12_poll(void);
 static QueueHandle_t rfm12_int_queue = 0;
 #if !(RFM12_TRANSMIT_ONLY)
-QueueHandle_t rfm12_rx_queue = 0;
+QueueHandle_t rfm12_queue = 0;
 #endif
 
 // Interrupt task for RTOS
@@ -151,9 +151,7 @@ void rfm12_int_task(void *param)
 	taskENTER_CRITICAL();
 	{
 		rfm12_int_queue = xQueueCreate(1, 1);
-#if !(RFM12_TRANSMIT_ONLY)
-		rfm12_rx_queue = xQueueCreate(1, 1);
-#endif
+		rfm12_queue = xQueueCreate(4, 1);
 	}
 	taskEXIT_CRITICAL();
 	if (rfm12_int_queue == 0)
@@ -342,8 +340,8 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 						//indicate that the buffer is ready to be used
 						rf_rx_buffers[ctrl.buffer_in_num].status = STATUS_COMPLETE;
 						#ifdef RTOSPORT
-							uint8_t status = STATUS_COMPLETE;
-							xQueueSendToBack(rfm12_rx_queue, &status, 1);
+							uint8_t status = RFM12_QUEUE_RX;
+							xQueueSendToBack(rfm12_queue, &status, 1);
 						#endif
 
 						#if RFM12_USE_RX_CALLBACK
@@ -385,6 +383,13 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 
 					//flag the buffer as free again
 					ctrl.txstate = STATUS_FREE;
+					
+					#ifdef RTOSPORT
+					{
+						uint8_t status = RFM12_QUEUE_TX;
+						xQueueSendToBack(rfm12_queue, &status, 1);
+					}
+					#endif
 
 					//turn off the transmitter and enable receiver
 					//the receiver is not enabled in transmit only mode (by PWRMGT_RECEIVE makro)

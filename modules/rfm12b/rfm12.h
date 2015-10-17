@@ -87,10 +87,12 @@ extern "C" {
 #include <task.h>
 #include <queue.h>
 
+#define RFM12_QUEUE_TX	0x01
 #if !(RFM12_TRANSMIT_ONLY)
-// Queue for receive rx complete events
-extern QueueHandle_t rfm12_rx_queue;
+#define RFM12_QUEUE_RX	0x02
 #endif
+// Queue for receive rfm12 events, 4 entries (2 for customised)
+extern QueueHandle_t rfm12_queue;
 // RTOS interrupt task
 void rfm12_int_task(void *param);
 #endif

@@ -76,7 +76,7 @@
 #define RFM12_BASEBAND RFM12_BAND_433
 
 //center frequency to use (+- FSK frequency shift)
-#define RFM12_FREQUENCY       (433170000UL + FSK_SHIFT * 2)
+#define RFM12_FREQUENCY       (433170000UL + FSK_SHIFT * 4)
 //#define RFM12_FREQUENCY       (433170000UL)
 
 //Transmit FSK frequency shift in kHz
@@ -92,7 +92,7 @@
 #define RFM12_POWER           RFM12_TXCONF_POWER_0
 
 //Receive LNA gain
-#define RFM12_LNA_GAIN        RFM12_RXCTRL_LNA_6
+#define RFM12_LNA_GAIN        RFM12_RXCTRL_LNA_0
 
 //crystal load capacitance - the frequency can be verified by measuring the
 //clock output of RFM12 and comparing to 1MHz.
@@ -100,16 +100,16 @@
 #define RFM12_XTAL_LOAD       RFM12_XTAL_11_5PF
 
 //use this for datarates >= 2700 Baud
-#define DATARATE_VALUE        RFM12_DATARATE_CALC_HIGH(9600.0)
+#define DATARATE_VALUE        RFM12_DATARATE_CALC_HIGH(34483.0)
 
 //use this for 340 Baud < datarate < 2700 Baud
 //#define DATARATE_VALUE      RFM12_DATARATE_CALC_LOW(1200.0)
 
 //TX BUFFER SIZE
-#define RFM12_TX_BUFFER_SIZE  30
+#define RFM12_TX_BUFFER_SIZE  128
 
 //RX BUFFER SIZE (there are going to be 2 Buffers of this size for double_buffering)
-#define RFM12_RX_BUFFER_SIZE  30
+#define RFM12_RX_BUFFER_SIZE  128
 
 
 /************************
@@ -144,8 +144,8 @@
 #define RFM12_LIVECTRL_CLIENT 0
 #define RFM12_LIVECTRL_HOST 1
 #define RFM12_LIVECTRL_LOAD_SAVE_SETTINGS 0
-#define RFM12_NORETURNS 0
-#define RFM12_NOCOLLISIONDETECTION 1
+#define RFM12_NORETURNS 1
+#define RFM12_NOCOLLISIONDETECTION 0
 #define RFM12_TRANSMIT_ONLY 0
 #define RFM12_SPI_SOFTWARE 0
 #define RFM12_USE_POLLING 0
