@@ -92,6 +92,8 @@ static inline void tft::putChar(const char c)
 	default:
 		if ((unsigned)c < ' ')
 			break;
+		if (x + FONT_WIDTH * zoom > width)
+			newline();
 		drawChar(c);
 		next();
 	}
@@ -123,8 +125,8 @@ inline void tft::next()
 	} else {
 #endif
 		x += FONT_WIDTH * zoom;
-		if (x + FONT_WIDTH * zoom > width)
-			newline();
+		//if (x + FONT_WIDTH * zoom > width)
+		//	newline();
 #ifdef TFT_VERTICAL_SCROLLING
 	}
 #endif
