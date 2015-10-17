@@ -1,19 +1,36 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <tft.h>
+#include <colours.h>
 #include <FreeRTOS.h>
 #include <task.h>
 
 extern void test(void)
 {
 	using namespace tft;
+	using namespace colours::b16;
 	setOrient(Flipped | Landscape);
-	background = 0x667f;
-	foreground = 0x0000;
+	background = 0x0000;
+	foreground = 0x667f;
 	setBGLight(true);
+	const static uint16_t colours[] = {
+		Red, Orange, Yellow, Chartreuse,
+		Green, SpringGreen, Cyan, Azure,
+		Blue, Violet, Magenta, Pink,
+		DarkRed, DarkGreen, DarkBlue,
+		DarkYellow, DarkCyan, DarkMagenta,
+		Black, Grey, White,
+	};
+	const static uint8_t clrs = sizeof(colours) / sizeof(colours[0]);
 
 start:
-	clean();
+	uint16_t h = height / clrs, yy = 0;
+	const uint16_t *clr = colours;
+	for (uint8_t i = clrs; i != 0; i--) {
+		rectangle(0, yy, width, h, *clr++);
+		yy += h;
+	}
+
 	zoom = 1;
 	puts("*** TFT library testing ***");
 	puts("STDOUT output, orientation, FG/BG colour, BG light");
