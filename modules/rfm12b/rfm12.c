@@ -383,7 +383,6 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 
 					//flag the buffer as free again
 					ctrl.txstate = STATUS_FREE;
-					
 					#ifdef RTOSPORT
 					{
 						uint8_t status = RFM12_QUEUE_TX;

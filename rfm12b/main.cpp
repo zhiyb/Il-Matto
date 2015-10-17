@@ -20,12 +20,8 @@ static char rxBuffer[RFM12_RX_BUFFER_SIZE];
 void rfm12_tick_task(void *param)
 {
 loop:
-	taskENTER_CRITICAL();
-	{
-		rfm12_tick();
-	}
-	taskEXIT_CRITICAL();
-	vTaskDelay(configTICK_RATE_HZ * 100 / 1000);
+	rfm12_tick_critical();
+	vTaskDelay(configTICK_RATE_HZ * 5 / 1000);
 	goto loop;
 }
 
@@ -39,6 +35,8 @@ void rfm12_layer(void *param)
 loop:
 	static uint8_t teststr[] = "Hello, world!\r\nFrom Norman Zhi, normanzyb@gmail.com\r\nElectronic Engineering 3rd year.\r\n";
 	rfm12_tx(sizeof(teststr), 0xaa, teststr);
+	// Trigger transmission now for higher throughput
+	rfm12_tick_critical();
 	packages.tx++;
 	bytes.tx += sizeof(teststr);
 receive:

@@ -315,6 +315,18 @@ extern rfm12_control_t ctrl;
 #include "include/rfm12_extra.h"
 #include "include/rfm12_livectrl.h"
 
+#ifdef RTOSPORT
+// RTOS critical rfm12 tick
+static inline void rfm12_tick_critical()
+{
+	taskENTER_CRITICAL();
+	{
+		rfm12_tick();
+	}
+	taskEXIT_CRITICAL();
+}
+#endif
+
 #ifdef __cplusplus
 }
 #endif

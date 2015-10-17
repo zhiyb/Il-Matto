@@ -100,7 +100,7 @@
 #define RFM12_XTAL_LOAD       RFM12_XTAL_11_5PF
 
 //use this for datarates >= 2700 Baud
-#define DATARATE_VALUE        RFM12_DATARATE_CALC_HIGH(34483.0)
+#define DATARATE_VALUE        RFM12_DATARATE_CALC_HIGH(38314.0)
 
 //use this for 340 Baud < datarate < 2700 Baud
 //#define DATARATE_VALUE      RFM12_DATARATE_CALC_LOW(1200.0)
