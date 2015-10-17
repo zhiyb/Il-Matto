@@ -10,16 +10,18 @@ extern void test(void)
 	using namespace tft;
 	using namespace colours::b16;
 	setOrient(Flipped | Landscape);
-	background = 0x0000;
+	background = Black;
 	foreground = 0x667f;
 	setBGLight(true);
 	const static uint16_t colours[] = {
+		DarkRed, DarkGreen, DarkBlue,
+		LightRed, LightGreen, LightBlue,
+		DarkYellow, DarkCyan, DarkMagenta,
+		LightYellow, LightCyan, LightMagenta,
+		Black, Grey, White,
 		Red, Orange, Yellow, Chartreuse,
 		Green, SpringGreen, Cyan, Azure,
 		Blue, Violet, Magenta, Pink,
-		DarkRed, DarkGreen, DarkBlue,
-		DarkYellow, DarkCyan, DarkMagenta,
-		Black, Grey, White,
 	};
 	const static uint8_t clrs = sizeof(colours) / sizeof(colours[0]);
 
@@ -41,36 +43,36 @@ start:
 	y = 38;
 	puts("Change text position & word warp test");
 	setFont(10, 16);
-	frame(115, 56, 200, 10, 2, 0xF800);
+	frame(115, 56, 200, 10, 2, Red);
 	puts("Draw frame test");
-	rectangle(118, 68, 180, 6, 0x07E0);
+	rectangle(118, 68, 180, 6, Green);
 	puts("Draw rectangle test");
-	point(120, 76, 0x001F);
-	point(122, 76, 0x001F);
-	point(124, 76, 0x001F);
-	point(126, 76, 0x001F);
-	point(128, 76, 0x001F);
-	point(130, 76, 0x001F);
+	point(120, 76, White);
+	point(122, 76, White);
+	point(124, 76, White);
+	point(126, 76, White);
+	point(128, 76, White);
+	point(130, 76, White);
 	puts("Draw points test");
-	line(200, 100, 300, 200, 0xF800);
-	line(300, 210, 200, 110, 0x001F);
-	line(200, 200, 300, 100, 0xF800);
-	line(300, 110, 200, 210, 0x001F);
+	line(200, 100, 300, 200, Red);
+	line(300, 210, 200, 110, Blue);
+	line(200, 200, 300, 100, Red);
+	line(300, 110, 200, 210, Blue);
 
-	line(100, 100, 300, 200, 0xF800);
-	line(300, 210, 100, 110, 0x001F);
-	line(100, 200, 300, 100, 0xF800);
-	line(300, 110, 100, 210, 0x001F);
+	line(100, 100, 300, 200, Red);
+	line(300, 210, 100, 110, Blue);
+	line(100, 200, 300, 100, Red);
+	line(300, 110, 100, 210, Blue);
 
-	line(200, 0, 300, 200, 0xF800);
-	line(300, 210, 200, 10, 0x001F);
-	line(200, 200, 300, 0, 0xF800);
-	line(300, 10, 200, 210, 0x001F);
+	line(200, 0, 300, 200, Red);
+	line(300, 210, 200, 10, Blue);
+	line(200, 200, 300, 0, Red);
+	line(300, 10, 200, 210, Blue);
 
-	line(100, 150, 300, 150, 0xF800);
-	line(300, 160, 100, 160, 0x001F);
-	line(250, 0, 250, 200, 0xF800);
-	line(260, 200, 260, 0, 0x001F);
+	line(100, 150, 300, 150, Red);
+	line(300, 160, 100, 160, Blue);
+	line(250, 0, 250, 200, Red);
+	line(260, 200, 260, 0, Blue);
 	puts("Draw lines test");
 
 	setFont(6, 8);
