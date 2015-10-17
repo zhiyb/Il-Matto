@@ -21,7 +21,7 @@ void rfm12_tick_task(void *param)
 {
 loop:
 	rfm12_tick_critical();
-	vTaskDelay(configTICK_RATE_HZ * 5 / 1000);
+	vTaskDelay(configTICK_RATE_HZ * 50 / 1000);
 	goto loop;
 }
 
@@ -92,11 +92,11 @@ loop:
 	y = yy;
 	setFont(10, 16);
 	foreground = Orange;
-	printf_P(PSTR("TX:  %8lu / %8lu\n"), packages.tx, bytes.tx);
-	printf_P(PSTR("Avg. %8lu / %8lu\n"), pPkgs.tx, pBytes.tx);
+	printf_P(PSTR("TX: %8lu / %8lu\n"), packages.tx, bytes.tx);
+	printf_P(PSTR("5s: %8lu / %8lu\n"), pPkgs.tx, pBytes.tx);
 	foreground = Yellow;
-	printf_P(PSTR("RX:  %8lu / %8lu\n"), packages.rx, bytes.rx);
-	printf_P(PSTR("Avg. %8lu / %8lu\n"), pPkgs.rx, pBytes.rx);
+	printf_P(PSTR("RX: %8lu / %8lu\n"), packages.rx, bytes.rx);
+	printf_P(PSTR("5s: %8lu / %8lu\n"), pPkgs.rx, pBytes.rx);
 	if (packages.rx != 0) {
 		foreground = Green;
 		printf_P(PSTR("RX buffer (0x02x):\n"), rxType);
