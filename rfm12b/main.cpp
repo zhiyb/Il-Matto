@@ -33,7 +33,7 @@ void rfm12_layer(void *param)
 	bytes.rx = 0;
 	rxLength = 0;
 loop:
-	static uint8_t teststr[] = "Hello, world!\r\nFrom Norman Zhi, normanzyb@gmail.com\r\nElectronic Engineering 3rd year.\r\n";
+	static uint8_t teststr[] = "Hello, world!\nFrom Norman Zhi, normanzyb@gmail.com\nElectronic Engineering 3rd year.\nyz39g13 @ University of Southampton\n";
 	rfm12_tx(sizeof(teststr), 0xaa, teststr);
 	// Trigger transmission now for higher throughput
 	rfm12_tick_critical();
