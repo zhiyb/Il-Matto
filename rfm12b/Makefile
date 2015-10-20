@@ -2,7 +2,7 @@
 
 TRG	= rfm12b
 SRC	= main.cpp
-SUBDIRS	= rfm12b tft-cpp common
+SUBDIRS	= rfm12b tft-cpp common uart
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
@@ -14,6 +14,7 @@ TFT_PORT_DATA	= C
 
 TFT_FONTS	= y
 
+DEFS	+= -DBAUD=9600
 LIBS	+= -lm
 
 SRCDIR	?= .

@@ -13,6 +13,13 @@ void uart_init()
 	UCSR0C = (1 << UCSZ00) | (1 << UCSZ01);
 }
 
+int uart_read_unblocked()
+{
+	if (!uart_rx_available())
+		return -1;
+	return UDR0;
+}
+
 static int putch(char ch, FILE *stream)
 {
 	if (ch == '\n')
@@ -24,7 +31,7 @@ static int putch(char ch, FILE *stream)
 
 static int getch(FILE *stream)
 {
-	while (!(UCSR0A & (1<<RXC0)));
+	while (uart_rx_available());
 	return UDR0;
 }
 
