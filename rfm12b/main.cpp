@@ -8,6 +8,7 @@
 #include <rfm12_config.h>
 #include <rfm12.h>
 #include <uart.h>
+#include "mac_layer.h"
 
 FILE *tftout;
 
@@ -35,7 +36,7 @@ int main()
 	fputs("Initialised.\n", tftout);
 	tft::setBGLight(true);
 
-	static char buffer[200] = "\e[91mG\e[92mr\e[93mo\e[94mu\e[95mp \e[96m7, yz39g13 with jm15g13: \e[0m";
+	static char buffer[200] = "\e[96mGroup 7, yz39g13 with jm15g13: \e[0m";
 	const uint8_t len = strlen(buffer);
 	char *ptr = buffer + len;
 	int c;
@@ -43,7 +44,7 @@ int main()
 	bool sent = true;
 poll:
 	if (sent == false) {
-		sent = rfm12_tx(strlen(buffer) + 1, 0xaa, (uint8_t *)buffer) == RFM12_TX_ENQUEUED;
+		sent = rfm12_tx(strlen(buffer) + 1, MAC_CSMA, (uint8_t *)buffer) == RFM12_TX_ENQUEUED;
 		if (sent) {
 			printf("Sent: %u\n", txCount);
 			fprintf(tftout, "Sent: %u\n", txCount);
@@ -83,8 +84,9 @@ poll:
 		rfm12_rx_clear();
 	}
 
-	rfm12_tick();
-	_delay_us(1);
+	//rfm12_tick();
+	mac_tick(MAC_CSMA);
+	_delay_us(100);
 	goto poll;
 
 	return 1;
