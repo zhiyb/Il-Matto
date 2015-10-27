@@ -1,7 +1,7 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= rfm12b
-SRC	= main.cpp phy_layer.c
+SRC	= main.cpp phy_layer.c tcp_layer.c
 SRC	+= csma_0.c csma_1.c csma_p.c
 SUBDIRS	= rfm12b tft-cpp common uart
 
