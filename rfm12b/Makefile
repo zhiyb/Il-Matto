@@ -1,9 +1,11 @@
 # Modified by zhiyb (Yubo Zhi)
 
 TRG	= rfm12b
-SRC	= main.cpp phy_layer.c tcp_layer.c
+SRC	= main.cpp phy_layer.c tcp_layer.c sampler.c pwm2.c
 SRC	+= csma_0.c csma_1.c csma_p.c
-SUBDIRS	= rfm12b tft-cpp common uart
+SUBDIRS	= rfm12b uart
+#SUBDIRS	+= tft-cpp common 
+OPTLEVEL	= 3
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
