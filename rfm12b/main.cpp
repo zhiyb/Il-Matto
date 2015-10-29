@@ -10,7 +10,7 @@
 //#include <colours.h>
 #include <rfm12_config.h>
 #include <rfm12.h>
-#include <uart.h>
+#include <uart0.h>
 #include "mac_layer.h"
 #include "tcp_layer.h"
 #include "sampler.h"
@@ -27,9 +27,9 @@ void init()
 	tftout = tft::devout();
 #endif
 #if 1
-	uart_init();
-	stdout = uart_io();
-	stdin = uart_io();
+	uart0_init();
+	stdout = uart0_fd();
+	stdin = uart0_fd();
 #endif
 	_delay_ms(1000);
 	rfm12_init();
@@ -111,7 +111,7 @@ poll:
 	}
 
 	// If something is received through UART
-	if ((c = uart_read_unblocked()) != -1) {
+	if ((c = uart0_read_unblocked()) != -1) {
 		if (!uartReady) {
 			putchar(c);
 			*ptr++ = c;

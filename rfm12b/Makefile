@@ -3,7 +3,7 @@
 TRG	= rfm12b
 SRC	= main.cpp phy_layer.c tcp_layer.c sampler.c pwm2.c
 SRC	+= csma_0.c csma_1.c csma_p.c
-SUBDIRS	= rfm12b uart
+SUBDIRS	= rfm12b uart0
 #SUBDIRS	+= tft-cpp common 
 OPTLEVEL	= 3
 
@@ -17,7 +17,7 @@ TFT_PORT_DATA	= C
 
 TFT_FONTS	= y
 
-DEFS	+= -DBAUD=9600
+DEFS	+= -DUART0_BAUD=9600
 LIBS	+= -lm
 
 SRCDIR	?= .

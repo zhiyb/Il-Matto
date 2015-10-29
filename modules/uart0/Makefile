@@ -1,3 +1,3 @@
 # File rules
-SRC	+= $(DIR)/uart.c
+SRC	+= $(DIR)/uart0.c
 INCDIRS	+= $(DIR)
