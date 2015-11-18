@@ -5,7 +5,6 @@
 #include <string.h>
 #include <math.h>
 #include <tft.h>
-#include <rgbconv.h>
 #include "conv.h"
 #include "sd.h"
 #include "mbr.h"
@@ -19,7 +18,6 @@
 #define PI	3.1415927
 
 class sdhw_t sd;
-class tft_t tft;
 
 void init(void)
 {
@@ -27,13 +25,13 @@ void init(void)
 	PORTB |= 0x80;
 	init_dac();
 	sei();
-	tft.init();
-	tft.setOrient(tft.FlipLandscape);
-	tft.setForeground(conv::c32to16(0x00FF00));
-	tft.setBackground(0);
-	tft.clean();
-	stdout = tftout(&tft);
-	tft.setBGLight(true);
+	tft::init();
+	tft::setOrient(tft::Landscape | tft::Flipped);
+	tft::foreground = COLOUR_565_888(0x00FF00);
+	tft::background = 0;
+	tft::clean();
+	stdout = tft::devout();
+	tft::setBGLight(true);
 }
 
 int main(void)
@@ -45,8 +43,8 @@ fin:
 	puts("Test finished, remove SDCard to run again...");
 	while (sd.detect());
 start:
-	tft.clean();
-	tft.setZoom(1);
+	tft::clean();
+	tft::zoom = 1;
 	puts("*** SDCard library test ***");
 	puts("Please insert SDCard...");
 	while (!sd.detect());
@@ -84,17 +82,17 @@ start:
 		printf("opendir failed: %u\n", errno);
 		goto fin;
 	}
-	uint16_t bgc = tft.foreground();
+	uint16_t bgc = tft::foreground();
 	struct dirent *ent;
 	while ((ent = op::readdir(dir)) != NULL) {
 		if (ent->d_type & IS_DIR)
-			tft.setForeground(conv::c32to16(0x0000FF));
+			tft::setForeground(conv::c32to16(0x0000FF));
 		else
-			tft.setForeground(conv::c32to16(0xFFFFFF));
+			tft::setForeground(conv::c32to16(0xFFFFFF));
 		printf("%-25s\t|\t\%#02x\t|\t%lukB\n", ent->d_name, ent->d_type, ent->d_size / 1024);
 	}
 	op::closedir(dir);
-	tft.setForeground(bgc);
+	tft::setForeground(bgc);
 
 	puts("\nReading '/Il Matto/Testing/Fin.bmp' file...");
 	FILE *fp = op::fopen("/Il Matto/Testing/Fin.bmp", "r");
@@ -108,18 +106,18 @@ start:
 	for (uint8_t i = 10 + 4; i < offset; i++)
 		fgetc(fp);
 	uint16_t x, y;
-	tft.bmp(true);
-	tft.all();
-	tft.start();
+	tft::bmp(true);
+	tft::all();
+	tft::start();
 	for (y = 240; y > 0; y--)
 		for (x = 0; x < 320; x++)
-			tft.write16(conv::c32to16(conv::uint24(fp)));
-	tft.bmp(false);
+			tft::write16(conv::c32to16(conv::uint24(fp)));
+	tft::bmp(false);
 	op::fclose(fp);
 #endif
 	pwm::init();
 	timer1::init();
-	apps::wav("/Il Matto/Testing/nyan.wav");
+	apps::wav("/Il Matto/Testing/river.wav");
 
 	goto fin;
 
