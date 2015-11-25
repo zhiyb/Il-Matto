@@ -4,18 +4,16 @@
 #include <tft.h>
 #include <ov7670.h>
 
-tft_t tft;
-
 void init(void)
 {
 	OV7670::init();
-	tft.init();
-	tft.setOrient(tft.Portrait);
-	tft.setForeground(0x667F);
-	tft.setBackground(0x0000);
-	tft.clean();
-	stdout = tftout(&tft);
-	tft.setBGLight(true);
+	tft::init();
+	tft::setOrient(tft::Portrait);
+	tft::foreground = 0x667f;
+	tft::background = 0x0000;
+	tft::clean();
+	stdout = tft::devout();
+	tft::setBGLight(true);
 }
 
 #if 0
@@ -65,31 +63,32 @@ int main(void)
 	init();
 
 start:
-	tft.clean();
-	tft.setZoom(1);
+	tft::clean();
+	tft::zoom = 1;
 	puts("*** OV7670 ***");
 	//settings();
 	//OV7670::startCapture();
 	for (uint8_t i = 0; i < 0x80; i++)
 		printf("%02X/%02X\t", i, OV7670::read(i));
-	tft.setOrient(tft.FlipLandscape);
+	tft::setOrient(tft::Flipped | tft::Landscape);
 
 	while (1) {
-		tft.all();
-		tft.start();
+		tfthw::all();
+		tfthw::memWrite();
 		OV7670::enableFIFO(true);
 		for (uint8_t y = 0; y < 240; y++)
 			for (uint16_t x = 0; x < 320; x++) {
 				uint16_t c = (uint16_t)OV7670::readFIFO() << 8;
 				c |= OV7670::readFIFO();
-				tft.write16(c);
+				tfthw::write16(c);
 			}
 		OV7670::enableFIFO(false);
 		//_delay_ms(1000);
 	}
 
-	tft.setOrient(tft.Portrait);
-	tft.setXY(0, 0);
+	tft::setOrient(tft::Portrait);
+	tft::x = 0;
+	tft::y = 0;
 	while (1);
 	goto start;
 

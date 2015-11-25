@@ -2,7 +2,7 @@
 
 TRG	= OV7670
 SRC	= main.cpp
-SUBDIRS	= tft-cpp OV7670-cpp common
+SUBDIRS	= tft-cpp OV7670-cpp common misc
 
 PRGER		= usbasp
 MCU_TARGET	= atmega644p
