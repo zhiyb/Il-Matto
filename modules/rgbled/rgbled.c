@@ -1,6 +1,7 @@
 // Author: Yubo Zhi (normanzyb@gmail.com)
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <macros.h>
 #include "rgbled.h"
 
@@ -65,10 +66,13 @@ void rgbLED_refresh()
 {
 	uint8_t cnt = 8;
 	uint32_t *p = &rgbLED[0];
+	// Time sensitive
+	cli();
 	do {
 		uint32_t clr = *p++;
 		send(GREEN_888(clr));
 		send(RED_888(clr));
 		send(BLUE_888(clr));
 	} while (--cnt);
+	sei();
 }
