@@ -29,12 +29,24 @@ int uart0_read_unblocked();
 // Read 1 character, blocking
 char uart0_read();
 
+// Read data
+void uart0_read_data(char *ptr, unsigned long length);
+
+// Read a string (for user interface)
+unsigned long uart0_readline(char *buffer, unsigned long length);
+
 // Write 1 character, unblocking
 // Return -1 for not ready
 int uart0_write_unblocked(const char data);
 
 // Write 1 character, blocking
 void uart0_write(const char data);
+
+// Write data
+void uart0_write_data(const char *ptr, unsigned long length);
+
+// Write string
+void uart0_write_string(const char *str);
 
 #ifdef __cplusplus
 }

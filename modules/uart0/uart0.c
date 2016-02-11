@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <avr/io.h>
 #include "uart0.h"
 
@@ -31,6 +32,12 @@ char uart0_read()
 	return UDR0;
 }
 
+void uart0_read_data(char *ptr, unsigned long length)
+{
+	while (length--)
+		*ptr++ = uart0_read();
+}
+
 int uart0_write_unblocked(const char data)
 {
 	if (!uart0_ready())
@@ -43,6 +50,54 @@ void uart0_write(const char data)
 {
 	while (!uart0_ready());
 	UDR0 = data;
+}
+
+void uart0_write_data(const char *ptr, unsigned long length)
+{
+	while (length--)
+		uart0_write(*ptr++);
+}
+
+void uart0_write_string(const char *str)
+{
+	while (*str != '\0') {
+		if (*str == '\n')
+			uart0_write('\r');
+		uart0_write(*str++);
+	}
+}
+
+unsigned long uart0_readline(char *buffer, unsigned long length)
+{
+	unsigned long cnt = 0;
+	long c;
+	length--;
+
+loop:
+	switch (c = uart0_read()) {
+	case '\n':
+	case '\r':
+		uart0_write('\r');
+		uart0_write('\n');
+		*buffer = '\0';
+		return cnt;
+	case '\x7f':	// Backspace
+		if (cnt) {
+			uart0_write(c);
+			buffer--;
+			cnt--;
+		}
+		break;
+	default:
+		if (!isprint(c) || cnt == length)
+			break;
+		uart0_write(c);
+		*buffer = c;
+		buffer++;
+		cnt++;
+	}
+
+	goto loop;
 }
 
 // For fdevopen

@@ -5,6 +5,7 @@
 #ifndef COLOURS_H
 #define COLOURS_H
 
+#ifdef __cplusplus
 namespace colours
 {
 namespace b4
@@ -82,5 +83,6 @@ namespace b32
 	};
 }
 }
+#endif
 
 #endif
