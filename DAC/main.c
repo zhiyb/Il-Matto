@@ -2,20 +2,22 @@
 #include <util/delay.h>
 #include "dac.h"
 
+#define DAC_CHANNEL	0
+
 int main(void)
 {
 	DDRB |= _BV(7);
-	init_dac();
+	initDAC();
 	sei();
 
 	uint8_t dac = 0;
 inc:
-	set_dac(dac);
+	setDAC(DAC_CHANNEL, dac);
 	_delay_ms(10);
 	if (++dac != 255)
 		goto inc;
 dec:
-	set_dac(dac);
+	setDAC(DAC_CHANNEL, dac);
 	_delay_ms(10);
 	if (--dac != 0)
 		goto dec;
