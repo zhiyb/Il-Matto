@@ -42,4 +42,6 @@
 #define GREEN_565(c)	(((uint16_t)(c) >> 3) & 0xff)
 #define BLUE_565(c)	(((uint16_t)(c) << 3) & 0xff)
 
+#define MIX(x, y, a, b)	(((x) - (y)) * (a) / (b) + (x))
+
 #endif
