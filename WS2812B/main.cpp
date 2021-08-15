@@ -10,62 +10,68 @@
 #include <rgbled.h>
 #include <tft.h>
 
-#define DELAY_REFRESH	(configTICK_RATE_HZ / 32)
-#define DELAY_ANI	(configTICK_RATE_HZ / 256)
+#define DELAY_ANI	(configTICK_RATE_HZ / 64)
 #define DELAY_TFT	(0)
-#define MIDDLE		64
 
 using namespace colours::b32;
 
-void RefreshTask(void *param)
+static const uint32_t pilots[] = {
+#if 0
+	Black,
+	DarkRed, DarkGreen, DarkBlue,
+	LightRed, LightGreen, LightBlue,
+	DarkYellow, DarkCyan, DarkMagenta,
+	LightYellow, LightCyan, LightMagenta,
+	White, Grey, Black,
+#elif 1
+	Red, Orange, Yellow, Chartreuse,
+	Green, SpringGreen, Cyan, Azure,
+	Blue, Violet, Magenta, Pink,
+#endif
+};
+static const uint8_t num_pilots = sizeof(pilots) / sizeof(pilots[0]);
+static const uint16_t total_steps = num_pilots * RGBLED_NUM * 2;
+
+uint32_t ani(uint16_t s)
 {
-	for (;;) {
-		vTaskDelay(DELAY_REFRESH);
-		rgbLED_refresh();
-	}
+	static const uint8_t itvl = RGBLED_NUM;
+	uint8_t step = s / itvl;
+	uint8_t i = s - itvl * step;
+	uint8_t d = step & 1;
+	uint8_t c = step / 2;
+
+	uint32_t clr = pilots[c];
+	uint16_t ci = 0;
+
+	ci = 256 * i / itvl;
+	if (d)
+		ci = 256 - ci;
+
+	uint8_t r = (uint16_t)RED_888(clr) * ci / 256;
+	uint8_t g = (uint16_t)GREEN_888(clr) * ci / 256;
+	uint8_t b = (uint16_t)BLUE_888(clr) * ci / 256;
+
+	return COLOUR_888(r, g, b);
 }
 
 void LEDTask(void *param)
 {
-	const static uint32_t colours[] = {
-#if 0
-		Black,
-		DarkRed, DarkGreen, DarkBlue,
-		LightRed, LightGreen, LightBlue,
-		DarkYellow, DarkCyan, DarkMagenta,
-		LightYellow, LightCyan, LightMagenta,
-		White, Grey, Black,
-#endif
-		Red, Orange, Yellow, Chartreuse,
-		Green, SpringGreen, Cyan, Azure,
-		Blue, Violet, Magenta, Pink,
-	};
-	const static uint8_t clrs = sizeof(colours) / sizeof(colours[0]);
+	uint16_t s = 0;
+	uint8_t n = RGBLED_NUM;
+	uint8_t i;
+	for (i = 0; i < n; i++)
+		rgbLED[i] = ani(s++);
 
-	uint8_t n = (uint8_t)(uint16_t)param;
-	uint8_t step = 255 * (n % (RGBLED_NUM / 2)) * 2 / RGBLED_NUM;
-	uint8_t dir = n >= RGBLED_NUM / 2;
-	uint8_t clr = 0;
 	TickType_t xLastWakeTime = 0;	// Same starting tick reference
-loop:
-	do {
-		do {
-			uint16_t i = dir ? 255 - step : step;
-			if (i < 128)
-				i = i * MIDDLE / 128;
-			else
-				i = MIDDLE + (i - 128) * (255 - MIDDLE) / 127;
-			uint32_t colour = *(colours + clr);
-			uint8_t r = RED_888(colour) * i / 255;
-			uint8_t g = GREEN_888(colour) * i / 255;
-			uint8_t b = BLUE_888(colour) * i / 255;
-			rgbLED[n] = COLOUR_888(r, g, b);
-			vTaskDelayUntil(&xLastWakeTime, DELAY_ANI);
-		} while (++step);
-	} while (++dir != 2);
-	dir = 0;
-	clr = clr == clrs - 1 ? 0 : clr + 1;
-	goto loop;
+	for (;;) {
+		rgbLED_refresh();
+		vTaskDelayUntil(&xLastWakeTime, DELAY_ANI);
+
+		for (i = 0; i < n - 1; i++)
+			rgbLED[i] = rgbLED[i + 1];
+		rgbLED[i] = ani(s++);
+		s = s % total_steps;
+	}
 }
 
 void TFTTask(void *param)
@@ -103,14 +109,10 @@ int main()
 	init();
 
 	puts("Creating tasks...");
-	xTaskCreate(RefreshTask, "Refresh", configMINIMAL_STACK_SIZE, NULL, \
-			configMAX_PRIORITIES, NULL);
 	xTaskCreate(TFTTask, "TFT", configMINIMAL_STACK_SIZE * 2, NULL, \
 			tskIDLE_PRIORITY, NULL);
-	uint16_t i;
-	for (i = 0; i != 8; i++)
-		xTaskCreate(LEDTask, "LEDTask", configMINIMAL_STACK_SIZE, \
-				(void *)i, tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(LEDTask, "LEDTask", configMINIMAL_STACK_SIZE, NULL, \
+			tskIDLE_PRIORITY + 1, NULL);
 	vTaskStartScheduler();
 
 	return 1;

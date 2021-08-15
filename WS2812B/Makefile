@@ -13,7 +13,7 @@ RTOSPORT	= ATMega644P
 
 RGBLED_PORT	= B
 RGBLED_DIN	= 7
-RGBLED_NUM	= 8
+RGBLED_NUM	= 24
 
 SRCDIR	?= .
 include $(SRCDIR)/../Makefile_AVR.defs

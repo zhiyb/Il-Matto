@@ -64,7 +64,7 @@ void rgbLED_init()
 
 void rgbLED_refresh()
 {
-	uint8_t cnt = 8;
+	uint8_t cnt = RGBLED_NUM;
 	uint32_t *p = &rgbLED[0];
 	// Time sensitive
 	cli();
