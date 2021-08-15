@@ -90,7 +90,7 @@ endif
 
 # Verbose
 define verbose
-	@if [ 'x$(VERBOSE)' = x ]; then	\
+	@if [ 'x$(V)' = x ]; then	\
 		echo "  "$1;		\
 	else				\
 		echo $2;		\
